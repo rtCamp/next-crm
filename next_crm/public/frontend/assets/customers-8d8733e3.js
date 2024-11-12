@@ -1,0 +1,2 @@
+import{N as c,y as u,x as a}from"./index-8ca2d158.js";const m=c("customers",()=>{let r=u({});const o=a({url:"crm.api.session.get_customers",cache:"customers",initialData:[],auto:!0,transform(e){for(let t of e)customerByName[t.name]=t;return e},onError(e){e&&e.exc_type==="AuthenticationError"&&router.push("/login")}});function s(e){return r[e]}return{customers:o,getCustomer:s}});export{m as c};
+//# sourceMappingURL=customers-8d8733e3.js.map
