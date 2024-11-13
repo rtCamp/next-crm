@@ -1,2 +1,0 @@
-import{l as e,x as s,j as l}from"./index-8ca2d158.js";const t=e(!1),o=e(!1);s({url:"crm.api.whatsapp.is_whatsapp_enabled",cache:"Is Whatsapp Enabled",auto:!0,onSuccess:a=>{t.value=!!a}});s({url:"crm.api.whatsapp.is_whatsapp_installed",cache:"Is Whatsapp Installed",auto:!0,onSuccess:a=>{o.value=!!a}});const n=e(!1);s({url:"crm.integrations.twilio.api.is_enabled",cache:"Is Twilio Enabled",auto:!0,onSuccess:a=>{n.value=!!a}});const i=e(!1),p=l(()=>window.innerWidth<768);export{o as a,n as c,p as i,i as m,t as w};
-//# sourceMappingURL=settings-9f3d7d3a.js.map
