@@ -6,7 +6,7 @@ app_email = "erp@rtcamp.com"
 app_license = "GNU AFFERO GENERAL PUBLIC LICENSE (v3)"
 app_icon_url = "/assets/next_crm/images/logo.svg"
 app_icon_title = "Next CRM"
-app_icon_route = "/next_crm"
+app_icon_route = "/next-crm"
 
 # Apps
 # ------------------
@@ -17,7 +17,7 @@ add_to_apps_screen = [
 		"name": "next_crm",
 		"logo": "/assets/next_crm/images/logo.svg",
 		"title": "Next CRM",
-		"route": "/next_crm",
+		"route": "/next-crm",
 		"has_permission": "next_crm.api.check_app_permission",
 	}
 ]
@@ -64,7 +64,7 @@ doctype_js = {
 # }
 
 website_route_rules = [
-	{"from_route": "/next_crm/<path:app_path>", "to_route": "next_crm"},
+	{"from_route": "/next-crm/<path:app_path>", "to_route": "next-crm"},
 ]
 
 # Generators

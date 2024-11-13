@@ -7,7 +7,7 @@ from frappe.auth import LoginManager
 def login():
 	if not frappe.conf.demo_username or not frappe.conf.demo_password:
 		return
-	frappe.local.response["redirect_to"] = "/next_crm"
+	frappe.local.response["redirect_to"] = "/next-crm"
 	login_manager = LoginManager()
 	login_manager.authenticate(frappe.conf.demo_username, frappe.conf.demo_password)
 	login_manager.post_login()

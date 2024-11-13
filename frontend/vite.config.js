@@ -24,7 +24,7 @@ export default defineConfig({
         display: 'standalone',
         name: 'Next CRM',
         short_name: 'Next CRM',
-        start_url: '/next_crm',
+        start_url: '/next-crm',
         description:
           'Modern & 100% Open-source CRM tool to supercharge your sales operations',
         icons: [

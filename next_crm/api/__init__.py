@@ -86,7 +86,7 @@ def accept_invitation(key: str = None):
 	if invitation.status == "Accepted":
 		frappe.local.login_manager.login_as(invitation.email)
 		frappe.local.response["type"] = "redirect"
-		frappe.local.response["location"] = "/next_crm"
+		frappe.local.response["location"] = "/next-crm"
 
 
 @frappe.whitelist()

@@ -46,7 +46,7 @@
    "doc_view": "List",
    "label": "CRM Portal Page",
    "type": "URL",
-   "url": "/next_crm"
+   "url": "/next-crm"
   },
   {
    "color": "Grey",
