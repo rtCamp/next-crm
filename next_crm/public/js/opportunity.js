@@ -3,6 +3,6 @@
 
 frappe.ui.form.on("Opportunity", {
 	refresh(frm) {
-		frm.add_web_link(`/crm/opportunities/${frm.doc.name}`, __("Open in Portal"));
+		frm.add_web_link(`/next-crm/opportunities/${frm.doc.name}`, __("Open in Portal"));
 	},
 });
