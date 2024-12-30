@@ -67,7 +67,7 @@
               size="sm"
             />
           </div>
-          <div v-else-if="column.key === 'organization'">
+          <div v-else-if="column.key === 'customer'">
             <Avatar
               v-if="item"
               class="flex items-center"
@@ -201,7 +201,7 @@
     }"
     @loadMore="emit('loadMore')"
   />
-  <ListBulkActions ref="listBulkActionsRef" v-model="list" doctype="CRM Lead" />
+  <ListBulkActions ref="listBulkActionsRef" v-model="list" doctype="Lead" />
 </template>
 
 <script setup>

@@ -20,7 +20,7 @@
             type="select"
             class="w-1/4"
             v-model="_doctype"
-            :options="['CRM Lead', 'CRM Deal', 'Contact', 'CRM Organization']"
+            :options="['Lead', 'Opportunity', 'Contact', 'Customer']"
             @change="reload"
           />
           <Switch
@@ -85,7 +85,7 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 const props = defineProps({
   doctype: {
     type: String,
-    default: 'CRM Lead',
+    default: 'Lead',
   },
 })
 
@@ -103,7 +103,7 @@ function getParams() {
 }
 
 const sections = createResource({
-  url: 'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
+  url: 'next_crm.ncrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
   cache: ['sidebar-sections', _doctype.value],
   params: getParams(),
   onSuccess(data) {
@@ -139,7 +139,7 @@ function saveChanges() {
   })
   loading.value = true
   call(
-    'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.save_fields_layout',
+    'next_crm.ncrm.doctype.crm_fields_layout.crm_fields_layout.save_fields_layout',
     {
       doctype: _doctype.value,
       type: 'Side Panel',

@@ -21,11 +21,7 @@
           v-if="_note?.reference_docname"
           variant="outline"
           size="sm"
-          :label="
-            _note.reference_doctype == 'CRM Deal'
-              ? __('Open Deal')
-              : __('Open Lead')
-          "
+          :label="_note.reference_doctype == 'Opportunity' ? __('Open Opportunity') : __('Open Lead')"
           @click="redirect()"
         >
           <template #suffix>
@@ -38,12 +34,7 @@
       <div class="flex flex-col gap-4">
         <div>
           <div class="mb-1.5 text-sm text-gray-600">{{ __('Title') }}</div>
-          <TextInput
-            ref="title"
-            variant="outline"
-            v-model="_note.title"
-            :placeholder="__('Call with John Doe')"
-          />
+          <TextInput ref="title" variant="outline" v-model="_note.title" :placeholder="__('Call with John Doe')" />
         </div>
         <div>
           <div class="mb-1.5 text-sm text-gray-600">{{ __('Content') }}</div>
@@ -54,9 +45,7 @@
             :bubbleMenu="true"
             :content="_note.content"
             @change="(val) => (_note.content = val)"
-            :placeholder="
-              __('Took a call with John Doe and discussed the new project.')
-            "
+            :placeholder="__('Took a call with John Doe and discussed the new project.')"
           />
         </div>
       </div>
@@ -78,7 +67,7 @@ const props = defineProps({
   },
   doctype: {
     type: String,
-    default: 'CRM Lead',
+    default: 'Lead',
   },
   doc: {
     type: String,
@@ -98,15 +87,11 @@ const editMode = ref(false)
 let _note = ref({})
 
 async function updateNote() {
-  if (
-    props.note.title === _note.value.title &&
-    props.note.content === _note.value.content
-  )
-    return
+  if (props.note.title === _note.value.title && props.note.content === _note.value.content) return
 
   if (_note.value.name) {
     let d = await call('frappe.client.set_value', {
-      doctype: 'FCRM Note',
+      doctype: 'NCRM Note',
       name: _note.value.name,
       fieldname: _note.value,
     })
@@ -117,7 +102,7 @@ async function updateNote() {
   } else {
     let d = await call('frappe.client.insert', {
       doc: {
-        doctype: 'FCRM Note',
+        doctype: 'NCRM Note',
         title: _note.value.title,
         content: _note.value.content,
         reference_doctype: props.doctype,
@@ -135,10 +120,10 @@ async function updateNote() {
 
 function redirect() {
   if (!props.note?.reference_docname) return
-  let name = props.note.reference_doctype == 'CRM Deal' ? 'Deal' : 'Lead'
+  let name = props.note.reference_doctype == 'Opportunity' ? 'Opportunity' : 'Lead'
   let params = { leadId: props.note.reference_docname }
-  if (name == 'Deal') {
-    params = { dealId: props.note.reference_docname }
+  if (name == 'Opportunity') {
+    params = { opportunityId: props.note.reference_docname }
   }
   router.push({ name: name, params: params })
 }
@@ -155,6 +140,6 @@ watch(
         editMode.value = true
       }
     })
-  }
+  },
 )
 </script>

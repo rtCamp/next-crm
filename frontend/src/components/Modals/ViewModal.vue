@@ -2,18 +2,10 @@
   <Dialog
     v-model="show"
     :options="{
-      title: editMode
-        ? __('Edit View')
-        : duplicateMode
-        ? __('Duplicate View')
-        : __('Create View'),
+      title: editMode ? __('Edit View') : duplicateMode ? __('Duplicate View') : __('Create View'),
       actions: [
         {
-          label: editMode
-            ? __('Save Changes')
-            : duplicateMode
-            ? __('Duplicate')
-            : __('Create'),
+          label: editMode ? __('Save Changes') : duplicateMode ? __('Duplicate') : __('Create'),
           variant: 'solid',
           onClick: () => (editMode ? update() : create()),
         },
@@ -39,7 +31,7 @@
           variant="outline"
           size="md"
           type="text"
-          :placeholder="__('My Open Deals')"
+          :placeholder="__('My Open Opportunities')"
           v-model="view.label"
         />
       </div>
@@ -85,17 +77,14 @@ const _view = ref({
 
 async function create() {
   view.value.doctype = props.doctype
-  let v = await call(
-    'crm.fcrm.doctype.crm_view_settings.crm_view_settings.create',
-    { view: view.value }
-  )
+  let v = await call('next_crm.ncrm.doctype.crm_view_settings.crm_view_settings.create', { view: view.value })
   show.value = false
   props.options.afterCreate?.(v)
 }
 
 async function update() {
   view.value.doctype = props.doctype
-  await call('crm.fcrm.doctype.crm_view_settings.crm_view_settings.update', {
+  await call('next_crm.ncrm.doctype.crm_view_settings.crm_view_settings.update', {
     view: view.value,
   })
   show.value = false

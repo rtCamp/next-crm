@@ -27,16 +27,16 @@ const routes = [
     props: true,
   },
   {
-    alias: '/deals',
-    path: '/deals/view/:viewType?',
-    name: 'Deals',
-    component: () => import('@/pages/Deals.vue'),
+    alias: '/opportunities',
+    path: '/opportunities/view/:viewType?',
+    name: 'Opportunities',
+    component: () => import('@/pages/Opportunities.vue'),
     meta: { scrollPos: { top: 0, left: 0 } },
   },
   {
-    path: '/deals/:dealId',
-    name: 'Deal',
-    component: () => import(`@/pages/${handleMobileView('Deal')}.vue`),
+    path: '/opportunities/:opportunityId',
+    name: 'Opportunity',
+    component: () => import(`@/pages/${handleMobileView('Opportunity')}.vue`),
     props: true,
   },
   {
@@ -46,10 +46,10 @@ const routes = [
     component: () => import('@/pages/Notes.vue'),
   },
   {
-    alias: '/tasks',
-    path: '/tasks/view/:viewType?',
-    name: 'Tasks',
-    component: () => import('@/pages/Tasks.vue'),
+    alias: '/todos',
+    path: '/todos/view/:viewType?',
+    name: 'ToDos',
+    component: () => import('@/pages/ToDos.vue'),
   },
   {
     alias: '/contacts',
@@ -65,16 +65,16 @@ const routes = [
     props: true,
   },
   {
-    alias: '/organizations',
-    path: '/organizations/view/:viewType?',
-    name: 'Organizations',
-    component: () => import('@/pages/Organizations.vue'),
+    alias: '/customers',
+    path: '/customers/view/:viewType?',
+    name: 'Customers',
+    component: () => import('@/pages/Customers.vue'),
     meta: { scrollPos: { top: 0, left: 0 } },
   },
   {
-    path: '/organizations/:organizationId',
-    name: 'Organization',
-    component: () => import(`@/pages/${handleMobileView('Organization')}.vue`),
+    path: '/customers/:customerId',
+    name: 'Customer',
+    component: () => import(`@/pages/${handleMobileView('Customer')}.vue`),
     props: true,
   },
   {
@@ -128,7 +128,7 @@ const scrollBehavior = (to, from, savedPosition) => {
 }
 
 let router = createRouter({
-  history: createWebHistory('/crm'),
+  history: createWebHistory('/next-crm'),
   routes,
   scrollBehavior,
 })
@@ -145,11 +145,11 @@ router.beforeEach(async (to, from, next) => {
   if (to.name === 'Home' && isLoggedIn) {
     next({ name: 'Leads' })
   } else if (!isLoggedIn) {
-    window.location.href = '/login?redirect-to=/crm'
+    window.location.href = '/login?redirect-to=/next-crm'
   } else if (to.matched.length === 0) {
     next({ name: 'Invalid Page' })
-  } else if (['Deal', 'Lead'].includes(to.name) && !to.hash) {
-    let storageKey = to.name === 'Deal' ? 'lastDealTab' : 'lastLeadTab'
+  } else if (['Opportunity', 'Lead'].includes(to.name) && !to.hash) {
+    let storageKey = to.name === 'Opportunity' ? 'lastOpportunityTab' : 'lastLeadTab'
     const activeTab = localStorage.getItem(storageKey) || 'activity'
     const hash = '#' + activeTab
     next({ ...to, hash })

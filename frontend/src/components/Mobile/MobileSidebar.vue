@@ -92,11 +92,11 @@ import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import PinIcon from '@/components/Icons/PinIcon.vue'
 import UserDropdown from '@/components/UserDropdown.vue'
 import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
+import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
-import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
+import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import ToDoIcon from '@/components/Icons/ToDoIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import SidebarLink from '@/components/SidebarLink.vue'
@@ -114,9 +114,9 @@ const links = [
     to: 'Leads',
   },
   {
-    label: 'Deals',
-    icon: DealsIcon,
-    to: 'Deals',
+    label: 'Opportunities',
+    icon: OpportunitiesIcon,
+    to: 'Opportunities',
   },
   {
     label: 'Contacts',
@@ -124,9 +124,9 @@ const links = [
     to: 'Contacts',
   },
   {
-    label: 'Organizations',
-    icon: OrganizationsIcon,
-    to: 'Organizations',
+    label: 'Customers',
+    icon: CustomersIcon,
+    to: 'Customers',
   },
   {
     label: 'Notes',
@@ -134,9 +134,9 @@ const links = [
     to: 'Notes',
   },
   {
-    label: 'Tasks',
-    icon: TaskIcon,
-    to: 'Tasks',
+    label: 'ToDos',
+    icon: ToDoIcon,
+    to: 'ToDos',
   },
   {
     label: 'Call Logs',
@@ -197,12 +197,12 @@ function getIcon(routeName, icon) {
   switch (routeName) {
     case 'Leads':
       return LeadsIcon
-    case 'Deals':
-      return DealsIcon
+    case 'Opportunities':
+      return OpportunitiesIcon
     case 'Contacts':
       return ContactsIcon
-    case 'Organizations':
-      return OrganizationsIcon
+    case 'Customers':
+      return CustomersIcon
     case 'Notes':
       return NoteIcon
     case 'Call Logs':

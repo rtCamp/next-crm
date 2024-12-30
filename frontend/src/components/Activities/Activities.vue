@@ -63,8 +63,8 @@
           </div>
         </div>
       </div>
-      <div v-else-if="title == 'Tasks'" class="px-3 pb-3 sm:px-10 sm:pb-5">
-        <TaskArea :modalRef="modalRef" :tasks="activities" :doctype="doctype" />
+      <div v-else-if="title == 'ToDos'" class="px-3 pb-3 sm:px-10 sm:pb-5">
+        <ToDoArea :modalRef="modalRef" :todos="activities" :doctype="doctype" />
       </div>
       <div v-else-if="title == 'Calls'" class="activity">
         <div v-for="(call, i) in activities">
@@ -393,9 +393,9 @@
         @click="emailBox.showComment = true"
       />
       <Button
-        v-else-if="title == 'Tasks'"
-        :label="__('Create Task')"
-        @click="modalRef.showTask()"
+        v-else-if="title == 'ToDos'"
+        :label="__('Create ToDo')"
+        @click="modalRef.showToDo()"
       />
       <Button
         v-else-if="title == 'Attachments'"
@@ -454,21 +454,21 @@ import EmailArea from '@/components/Activities/EmailArea.vue'
 import CommentArea from '@/components/Activities/CommentArea.vue'
 import CallArea from '@/components/Activities/CallArea.vue'
 import NoteArea from '@/components/Activities/NoteArea.vue'
-import TaskArea from '@/components/Activities/TaskArea.vue'
+import ToDoArea from '@/components/Activities/ToDoArea.vue'
 import AttachmentArea from '@/components/Activities/AttachmentArea.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import ToDoIcon from '@/components/Icons/ToDoIcon.vue'
 import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import WhatsAppArea from '@/components/Activities/WhatsAppArea.vue'
 import WhatsAppBox from '@/components/Activities/WhatsAppBox.vue'
 import LoadingIndicator from '@/components/Icons/LoadingIndicator.vue'
 import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
+import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import DotIcon from '@/components/Icons/DotIcon.vue'
 import CommentIcon from '@/components/Icons/CommentIcon.vue'
 import SelectIcon from '@/components/Icons/SelectIcon.vue'
@@ -514,7 +514,7 @@ const { getContact, getLeadContact } = contactsStore()
 const props = defineProps({
   doctype: {
     type: String,
-    default: 'CRM Lead',
+    default: 'Lead',
   },
   tabs: {
     type: Array,
@@ -542,11 +542,11 @@ const changeTabTo = (tabName) => {
 }
 
 const all_activities = createResource({
-  url: 'crm.api.activities.get_activities',
+  url: 'next_crm.api.activities.get_activities',
   params: { name: doc.value.data.name },
   cache: ['activity', doc.value.data.name],
   auto: true,
-  transform: ([versions, calls, notes, tasks, attachments]) => {
+  transform: ([versions, calls, notes, todos, attachments]) => {
     if (calls?.length) {
       calls.forEach((doc) => {
         doc.show_recording = false
@@ -581,14 +581,14 @@ const all_activities = createResource({
         }
       })
     }
-    return { versions, calls, notes, tasks, attachments }
+    return { versions, calls, notes, todos, attachments }
   },
 })
 
 const showWhatsappTemplates = ref(false)
 
 const whatsappMessages = createResource({
-  url: 'crm.api.whatsapp.get_whatsapp_messages',
+  url: 'next_crm.api.whatsapp.get_whatsapp_messages',
   cache: ['whatsapp_messages', doc.value.data.name],
   params: {
     reference_doctype: props.doctype,
@@ -626,7 +626,7 @@ function sendTemplate(template) {
   showWhatsappTemplates.value = false
   capture('send_whatsapp_template', { doctype: props.doctype })
   createResource({
-    url: 'crm.api.whatsapp.send_whatsapp_template',
+    url: 'next_crm.api.whatsapp.send_whatsapp_template',
     params: {
       reference_doctype: props.doctype,
       reference_name: doc.value.data.name,
@@ -663,9 +663,9 @@ const activities = computed(() => {
   } else if (title.value == 'Calls') {
     if (!all_activities.data?.calls) return []
     return sortByCreation(all_activities.data.calls)
-  } else if (title.value == 'Tasks') {
-    if (!all_activities.data?.tasks) return []
-    return sortByCreation(all_activities.data.tasks)
+  } else if (title.value == 'ToDos') {
+    if (!all_activities.data?.todos) return []
+    return sortByCreation(all_activities.data.todos)
   } else if (title.value == 'Notes') {
     if (!all_activities.data?.notes) return []
     return sortByCreation(all_activities.data.notes)
@@ -731,8 +731,8 @@ const emptyText = computed(() => {
     text = 'No Call Logs'
   } else if (title.value == 'Notes') {
     text = 'No Notes'
-  } else if (title.value == 'Tasks') {
-    text = 'No Tasks'
+  } else if (title.value == 'ToDos') {
+    text = 'No ToDos'
   } else if (title.value == 'Attachments') {
     text = 'No Attachments'
   } else if (title.value == 'WhatsApp') {
@@ -751,8 +751,8 @@ const emptyTextIcon = computed(() => {
     icon = PhoneIcon
   } else if (title.value == 'Notes') {
     icon = NoteIcon
-  } else if (title.value == 'Tasks') {
-    icon = TaskIcon
+  } else if (title.value == 'ToDos') {
+    icon = ToDoIcon
   } else if (title.value == 'Attachments') {
     icon = AttachmentIcon
   } else if (title.value == 'WhatsApp') {
@@ -765,10 +765,10 @@ function timelineIcon(activity_type, is_lead) {
   let icon
   switch (activity_type) {
     case 'creation':
-      icon = is_lead ? LeadsIcon : DealsIcon
+      icon = is_lead ? LeadsIcon : OpportunitiesIcon
       break
-    case 'deal':
-      icon = DealsIcon
+    case 'opportunity':
+      icon = OpportunitiesIcon
       break
     case 'comment':
       icon = CommentIcon
@@ -801,7 +801,7 @@ watch([reload, reload_email], ([reload_value, reload_email_value]) => {
 })
 
 function scroll(hash) {
-  if (['tasks', 'notes'].includes(route.hash?.slice(1))) return
+  if (['todos', 'notes'].includes(route.hash?.slice(1))) return
   setTimeout(() => {
     let el
     if (!hash) {

@@ -88,7 +88,7 @@ import ContactIcon from '@/components/Icons/ContactIcon.vue'
 import GenderIcon from '@/components/Icons/GenderIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
-import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
+import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
 import AddressIcon from '@/components/Icons/AddressIcon.vue'
 import CertificateIcon from '@/components/Icons/CertificateIcon.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
@@ -226,7 +226,7 @@ const detailFields = computed(() => {
       value: _contact.value.actual_mobile_no,
     },
     {
-      icon: OrganizationsIcon,
+      icon: CustomersIcon,
       name: 'company_name',
       value: _contact.value.company_name,
     },
@@ -246,7 +246,7 @@ const detailFields = computed(() => {
 })
 
 const sections = createResource({
-  url: 'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
+  url: 'next_crm.ncrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
   cache: ['quickEntryFields', 'Contact'],
   params: { doctype: 'Contact', type: 'Quick Entry' },
   auto: true,

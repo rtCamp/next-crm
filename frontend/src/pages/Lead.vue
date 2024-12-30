@@ -34,9 +34,9 @@
         </template>
       </Dropdown>
       <Button
-        :label="__('Convert to Deal')"
+        :label="__('Convert to Opportunity')"
         variant="solid"
-        @click="showConvertToDealModal = true"
+        @click="showConvertToOpportunityModal = true"
       />
     </template>
   </LayoutHeader>
@@ -44,7 +44,7 @@
     <Tabs v-model="tabIndex" v-slot="{ tab }" :tabs="tabs">
       <Activities
         ref="activities"
-        doctype="CRM Lead"
+        doctype="Lead"
         :tabs="tabs"
         v-model:reload="reload"
         v-model:tabIndex="tabIndex"
@@ -204,45 +204,45 @@
     v-model="showAssignmentModal"
     v-model:assignees="lead.data._assignedTo"
     :doc="lead.data"
-    doctype="CRM Lead"
+    doctype="Lead"
   />
   <Dialog
-    v-model="showConvertToDealModal"
+    v-model="showConvertToOpportunityModal"
     :options="{
-      title: __('Convert to Deal'),
+      title: __('Convert to Opportunity'),
       size: 'xl',
       actions: [
         {
           label: __('Convert'),
           variant: 'solid',
-          onClick: convertToDeal,
+          onClick: convertToOpportunity,
         },
       ],
     }"
   >
     <template #body-content>
       <div class="mb-4 flex items-center gap-2 text-gray-600">
-        <OrganizationsIcon class="h-4 w-4" />
-        <label class="block text-base">{{ __('Organization') }}</label>
+        <CustomersIcon class="h-4 w-4" />
+        <label class="block text-base">{{ __('Customer') }}</label>
       </div>
       <div class="ml-6">
         <div class="flex items-center justify-between text-base">
           <div>{{ __('Choose Existing') }}</div>
-          <Switch v-model="existingOrganizationChecked" />
+          <Switch v-model="existingCustomerChecked" />
         </div>
         <Link
-          v-if="existingOrganizationChecked"
+          v-if="existingCustomerChecked"
           class="form-control mt-2.5"
           variant="outline"
           size="md"
-          :value="existingOrganization"
-          doctype="CRM Organization"
-          @change="(data) => (existingOrganization = data)"
+          :value="existingCustomer"
+          doctype="Customer"
+          @change="(data) => (existingCustomer = data)"
         />
         <div v-else class="mt-2.5 text-base">
           {{
             __(
-              'New organization will be created based on the data in details section',
+              'New customer will be created based on the data in details section',
             )
           }}
         </div>
@@ -280,7 +280,7 @@
   <FilesUploader
     v-if="lead.data?.name"
     v-model="showFilesUploader"
-    doctype="CRM Lead"
+    doctype="Lead"
     :docname="lead.data.name"
     @after="
       () => {
@@ -299,13 +299,13 @@ import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import CommentIcon from '@/components/Icons/CommentIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import ToDoIcon from '@/components/Icons/ToDoIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
 import LinkIcon from '@/components/Icons/LinkIcon.vue'
-import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
+import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
@@ -368,7 +368,7 @@ const customActions = ref([])
 const customStatuses = ref([])
 
 const lead = createResource({
-  url: 'crm.fcrm.doctype.crm_lead.api.get_lead',
+  url: '/api/method/next_crm.api.lead.get_lead',
   params: { name: props.leadId },
   cache: ['lead', props.leadId],
   onSuccess: async (data) => {
@@ -411,7 +411,7 @@ function updateLead(fieldname, value, callback) {
   createResource({
     url: 'frappe.client.set_value',
     params: {
-      doctype: 'CRM Lead',
+      doctype: 'Lead',
       name: props.leadId,
       fieldname,
       value,
@@ -456,7 +456,7 @@ const breadcrumbs = computed(() => {
   let items = [{ label: __('Leads'), route: { name: 'Leads' } }]
 
   if (route.query.view || route.query.viewType) {
-    let view = getView(route.query.view, route.query.viewType, 'CRM Lead')
+    let view = getView(route.query.view, route.query.viewType, 'Lead')
     if (view) {
       items.push({
         label: __(view.label),
@@ -507,9 +507,9 @@ const tabs = computed(() => {
       condition: () => callEnabled.value,
     },
     {
-      name: 'Tasks',
-      label: __('Tasks'),
-      icon: TaskIcon,
+      name: 'ToDos',
+      label: __('ToDos'),
+      icon: ToDoIcon,
     },
     {
       name: 'Notes',
@@ -552,9 +552,9 @@ function validateFile(file) {
 }
 
 const fieldsLayout = createResource({
-  url: 'crm.api.doc.get_sidebar_fields',
+  url: 'next_crm.api.doc.get_sidebar_fields',
   cache: ['fieldsLayout', props.leadId],
-  params: { doctype: 'CRM Lead', name: props.leadId },
+  params: { doctype: 'Lead', name: props.leadId },
   auto: true,
 })
 
@@ -567,21 +567,21 @@ function updateField(name, value, callback) {
 
 async function deleteLead(name) {
   await call('frappe.client.delete', {
-    doctype: 'CRM Lead',
+    doctype: 'Lead',
     name,
   })
   router.push({ name: 'Leads' })
 }
 
-// Convert to Deal
-const showConvertToDealModal = ref(false)
+// Convert to Opportunity
+const showConvertToOpportunityModal = ref(false)
 const existingContactChecked = ref(false)
-const existingOrganizationChecked = ref(false)
+const existingCustomerChecked = ref(false)
 
 const existingContact = ref('')
-const existingOrganization = ref('')
+const existingCustomer = ref('')
 
-async function convertToDeal(updated) {
+async function convertToOpportunity(updated) {
   let valueUpdated = false
 
   if (existingContactChecked.value && !existingContact.value) {
@@ -594,10 +594,10 @@ async function convertToDeal(updated) {
     return
   }
 
-  if (existingOrganizationChecked.value && !existingOrganization.value) {
+  if (existingCustomerChecked.value && !existingCustomer.value) {
     createToast({
       title: __('Error'),
-      text: __('Please select an existing organization'),
+      text: __('Please select an existing customer'),
       icon: 'x',
       iconClasses: 'text-red-600',
     })
@@ -614,9 +614,9 @@ async function convertToDeal(updated) {
     valueUpdated = true
   }
 
-  if (existingOrganizationChecked.value && existingOrganization.value) {
-    lead.data.organization = existingOrganization.value
-    existingOrganizationChecked.value = false
+  if (existingCustomerChecked.value && existingCustomer.value) {
+    lead.data.customer = existingCustomer.value
+    existingCustomerChecked.value = false
     valueUpdated = true
   }
 
@@ -628,25 +628,25 @@ async function convertToDeal(updated) {
         last_name: lead.data.last_name,
         email_id: lead.data.email_id,
         mobile_no: lead.data.mobile_no,
-        organization: lead.data.organization,
+        customer: lead.data.customer,
       },
       '',
-      () => convertToDeal(true),
+      () => convertToOpportunity(true),
     )
-    showConvertToDealModal.value = false
+    showConvertToOpportunityModal.value = false
   } else {
-    let deal = await call(
-      'crm.fcrm.doctype.crm_lead.crm_lead.convert_to_deal',
+    let opportunity = await call(
+      'next_crm.overrides.lead.convert_to_opportunity',
       {
         lead: lead.data.name,
       },
     )
-    if (deal) {
-      capture('convert_lead_to_deal')
+    if (opportunity) {
+      capture('convert_lead_to_opportunity')
       if (updated) {
         await contacts.reload()
       }
-      router.push({ name: 'Deal', params: { dealId: deal } })
+      router.push({ name: 'Opportunity', params: { opportunityId: opportunity } })
     }
   }
 }

@@ -23,7 +23,7 @@
     v-model:loadMore="loadMore"
     v-model:resizeColumn="triggerResize"
     v-model:updatedPageCount="updatedPageCount"
-    doctype="CRM Lead"
+    doctype="Lead"
     :filters="{ converted: 0 }"
     :options="{
       allowedViews: ['list', 'group_by', 'kanban'],
@@ -50,7 +50,7 @@
         </div>
         <div
           v-else-if="
-            titleField === 'organization' && getRow(itemName, titleField).label
+            titleField === 'customer' && getRow(itemName, titleField).label
           "
         >
           <Avatar
@@ -132,7 +132,7 @@
         </div>
         <div
           v-else-if="
-            fieldName === 'organization' && getRow(itemName, fieldName).label
+            fieldName === 'customer' && getRow(itemName, fieldName).label
           "
         >
           <Avatar
@@ -209,9 +209,9 @@
             {{ getRow(itemName, '_note_count').label }}
           </span>
           <span class="text-3xl leading-[0]"> &middot; </span>
-          <TaskIcon class="h-4 w-4" />
-          <span v-if="getRow(itemName, '_task_count').label">
-            {{ getRow(itemName, '_task_count').label }}
+          <ToDoIcon class="h-4 w-4" />
+          <span v-if="getRow(itemName, '_todo_count').label">
+            {{ getRow(itemName, '_todo_count').label }}
           </span>
           <span class="text-3xl leading-[0]"> &middot; </span>
           <CommentIcon class="h-4 w-4" />
@@ -271,14 +271,14 @@
     v-if="showNoteModal"
     v-model="showNoteModal"
     :note="note"
-    doctype="CRM Lead"
+    doctype="Lead"
     :doc="docname"
   />
-  <TaskModal
-    v-if="showTaskModal"
-    v-model="showTaskModal"
-    :task="task"
-    doctype="CRM Lead"
+  <ToDoModal
+    v-if="showToDoModal"
+    v-model="showToDoModal"
+    :todo="todo"
+    doctype="Lead"
     :doc="docname"
   />
   <QuickEntryModal v-if="showQuickEntryModal" v-model="showQuickEntryModal" />
@@ -291,7 +291,7 @@ import CustomActions from '@/components/CustomActions.vue'
 import EmailAtIcon from '@/components/Icons/EmailAtIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import ToDoIcon from '@/components/Icons/ToDoIcon.vue'
 import CommentIcon from '@/components/Icons/CommentIcon.vue'
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
@@ -300,7 +300,7 @@ import LeadsListView from '@/components/ListViews/LeadsListView.vue'
 import KanbanView from '@/components/Kanban/KanbanView.vue'
 import LeadModal from '@/components/Modals/LeadModal.vue'
 import NoteModal from '@/components/Modals/NoteModal.vue'
-import TaskModal from '@/components/Modals/TaskModal.vue'
+import ToDoModal from '@/components/Modals/ToDoModal.vue'
 import QuickEntryModal from '@/components/Modals/QuickEntryModal.vue'
 import ViewControls from '@/components/ViewControls.vue'
 import { globalStore } from '@/stores/global'
@@ -415,8 +415,8 @@ function parseRows(rows) {
           image: lead.image,
           image_label: lead.first_name,
         }
-      } else if (row == 'organization') {
-        _rows[row] = lead.organization
+      } else if (row == 'customer') {
+        _rows[row] = lead.customer
       } else if (row === 'website') {
         _rows[row] = website(lead.website)
       } else if (row == 'status') {
@@ -483,7 +483,7 @@ function parseRows(rows) {
     })
     _rows['_email_count'] = lead._email_count
     _rows['_note_count'] = lead._note_count
-    _rows['_task_count'] = lead._task_count
+    _rows['_todo_count'] = lead._todo_count
     _rows['_comment_count'] = lead._comment_count
     return _rows
   })
@@ -514,9 +514,9 @@ function actions(itemName) {
       onClick: () => showNote(itemName),
     },
     {
-      icon: h(TaskIcon, { class: 'h-4 w-4' }),
-      label: __('New Task'),
-      onClick: () => showTask(itemName),
+      icon: h(ToDoIcon, { class: 'h-4 w-4' }),
+      label: __('New ToDo'),
+      onClick: () => showToDo(itemName),
     },
   ]
   return actions.filter((action) =>
@@ -536,18 +536,18 @@ function showNote(name) {
   showNoteModal.value = true
 }
 
-const showTaskModal = ref(false)
-const task = ref({
+const showToDoModal = ref(false)
+const todo = ref({
   title: '',
   description: '',
-  assigned_to: '',
-  due_date: '',
+  allocated_to: '',
+  date: '',
   priority: 'Low',
   status: 'Backlog',
 })
 
-function showTask(name) {
+function showToDo(name) {
   docname.value = name
-  showTaskModal.value = true
+  showToDoModal.value = true
 }
 </script>

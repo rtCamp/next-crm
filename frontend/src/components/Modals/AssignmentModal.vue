@@ -117,8 +117,8 @@ const removeValue = (value) => {
 
 const owner = computed(() => {
   if (!props.doc) return ''
-  if (props.doctype == 'CRM Lead') return props.doc.lead_owner
-  return props.doc.deal_owner
+  if (props.doctype == 'Lead') return props.doc.lead_owner
+  return props.doc.opportunity_owner
 })
 
 const addValue = (value) => {

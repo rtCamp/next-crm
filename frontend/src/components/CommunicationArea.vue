@@ -54,9 +54,7 @@
       v-model:attachments="attachments"
       :doctype="doctype"
       :subject="subject"
-      :placeholder="
-        __('Hi John, \n\nCan you please provide more details on this...')
-      "
+      :placeholder="__('Hi John, \n\nCan you please provide more details on this...')"
     />
   </div>
   <div v-show="showCommentBox">
@@ -97,7 +95,7 @@ import { ref, watch, computed } from 'vue'
 const props = defineProps({
   doctype: {
     type: String,
-    default: 'CRM Lead',
+    default: 'Lead',
   },
 })
 
@@ -121,14 +119,14 @@ const subject = computed(() => {
   let prefix = ''
   if (doc.value.data?.lead_name) {
     prefix = doc.value.data.lead_name
-  } else if (doc.value.data?.organization) {
-    prefix = doc.value.data.organization
+  } else if (doc.value.data?.customer) {
+    prefix = doc.value.data.customer
   }
   return `${prefix} (#${doc.value.data.name})`
 })
 
 const signature = createResource({
-  url: 'crm.api.get_user_signature',
+  url: 'next_crm.api.get_user_signature',
   cache: 'user-email-signature',
   auto: true,
 })
@@ -137,9 +135,7 @@ function setSignature(editor) {
   if (!signature.data) return
   signature.data = signature.data.replace(/\n/g, '<br>')
   let emailContent = editor.getHTML()
-  emailContent = emailContent.startsWith('<p></p>')
-    ? emailContent.slice(7)
-    : emailContent
+  emailContent = emailContent.startsWith('<p></p>') ? emailContent.slice(7) : emailContent
   editor.commands.setContent(signature.data + emailContent)
   editor.commands.focus('start')
 }
@@ -152,7 +148,7 @@ watch(
       editor.commands.focus()
       setSignature(editor)
     }
-  }
+  },
 )
 
 watch(
@@ -161,7 +157,7 @@ watch(
     if (value) {
       newCommentEditor.value.editor.commands.focus()
     }
-  }
+  },
 )
 
 const commentEmpty = computed(() => {
@@ -206,7 +202,7 @@ async function sendComment() {
   })
   if (comment && attachments.value.length) {
     capture('comment_attachments_added')
-    await call('crm.api.comment.add_attachments', {
+    await call('next_crm.api.comment.add_attachments', {
       name: comment.name,
       attachments: attachments.value.map((x) => x.name),
     })

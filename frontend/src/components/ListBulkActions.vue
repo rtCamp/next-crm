@@ -57,12 +57,10 @@ function editValues(selections, unselectAll) {
   unselectAllAction.value = unselectAll
 }
 
-function convertToDeal(selections, unselectAll) {
+function convertToOpportunity(selections, unselectAll) {
   $dialog({
-    title: __('Convert to Deal'),
-    message: __('Are you sure you want to convert {0} Lead(s) to Deal(s)?', [
-      selections.size,
-    ]),
+    title: __('Convert to Opportunity'),
+    message: __('Are you sure you want to convert {0} Lead(s) to Opportunity(s)?', [selections.size]),
     variant: 'solid',
     theme: 'blue',
     actions: [
@@ -70,9 +68,9 @@ function convertToDeal(selections, unselectAll) {
         label: __('Convert'),
         variant: 'solid',
         onClick: (close) => {
-          capture('bulk_convert_to_deal')
+          capture('bulk_convert_to_opportunity')
           Array.from(selections).forEach((name) => {
-            call('crm.fcrm.doctype.crm_lead.crm_lead.convert_to_deal', {
+            call('next_crm.overrides.lead.convert_to_opportunity', {
               lead: name,
             }).then(() => {
               createToast({
@@ -94,9 +92,7 @@ function convertToDeal(selections, unselectAll) {
 function deleteValues(selections, unselectAll) {
   $dialog({
     title: __('Delete'),
-    message: __('Are you sure you want to delete {0} item(s)?', [
-      selections.size,
-    ]),
+    message: __('Are you sure you want to delete {0} item(s)?', [selections.size]),
     variant: 'solid',
     theme: 'red',
     actions: [
@@ -137,9 +133,7 @@ function assignValues(selections, unselectAll) {
 function clearAssignemnts(selections, unselectAll) {
   $dialog({
     title: __('Clear Assignment'),
-    message: __('Are you sure you want to clear assignment for {0} item(s)?', [
-      selections.size,
-    ]),
+    message: __('Are you sure you want to clear assignment for {0} item(s)?', [selections.size]),
     variant: 'solid',
     theme: 'red',
     actions: [
@@ -199,10 +193,10 @@ function bulkActions(selections, unselectAll) {
     })
   }
 
-  if (props.doctype === 'CRM Lead') {
+  if (props.doctype === 'Lead') {
     actions.push({
-      label: __('Convert to Deal'),
-      onClick: () => convertToDeal(selections, unselectAll),
+      label: __('Convert to Opportunity'),
+      onClick: () => convertToOpportunity(selections, unselectAll),
     })
   }
 
@@ -240,10 +234,8 @@ onMounted(async () => {
     $socket,
     router,
   })
-  customBulkActions.value =
-    customization?.bulkActions || list.value?.data?.bulkActions || []
-  customListActions.value =
-    customization?.actions || list.value?.data?.listActions || []
+  customBulkActions.value = customization?.bulkActions || list.value?.data?.bulkActions || []
+  customListActions.value = customization?.actions || list.value?.data?.listActions || []
 })
 
 defineExpose({

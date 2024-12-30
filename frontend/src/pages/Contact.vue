@@ -79,8 +79,8 @@
                       size="xs"
                       :label="contact.data.company_name"
                       :image="
-                        getOrganization(contact.data.company_name)
-                          ?.organization_logo
+                        getCustomer(contact.data.company_name)
+                          ?.image
                       "
                     />
                     <span class="">{{ contact.data.company_name }}</span>
@@ -170,8 +170,8 @@
         </button>
       </template>
       <template #default="{ tab }">
-        <DealsListView
-          v-if="tab.label === 'Deals' && rows.length"
+        <OpportunitiesListView
+          v-if="tab.label === 'Opportunities' && rows.length"
           class="mt-4"
           :rows="rows"
           :columns="columns"
@@ -207,8 +207,8 @@ import LayoutHeader from '@/components/LayoutHeader.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
-import DealsListView from '@/components/ListViews/DealsListView.vue'
+import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
+import OpportunitiesListView from '@/components/ListViews/OpportunitiesListView.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import AddressModal from '@/components/Modals/AddressModal.vue'
 import {
@@ -221,7 +221,7 @@ import {
 import { getView } from '@/utils/view'
 import { globalStore } from '@/stores/global.js'
 import { usersStore } from '@/stores/users.js'
-import { organizationsStore } from '@/stores/organizations.js'
+import { customersStore } from '@/stores/customers.js'
 import { statusesStore } from '@/stores/statuses'
 import { callEnabled } from '@/composables/settings'
 import {
@@ -240,7 +240,7 @@ import { useRoute, useRouter } from 'vue-router'
 const { $dialog, makeCall } = globalStore()
 
 const { getUser, isManager } = usersStore()
-const { getOrganization } = organizationsStore()
+const { getCustomer } = customersStore()
 const { getDealStatus } = statusesStore()
 
 const props = defineProps({
@@ -259,7 +259,7 @@ const _contact = ref({})
 const _address = ref({})
 
 const contact = createResource({
-  url: 'crm.api.contact.get_contact',
+  url: 'next_crm.api.contact.get_contact',
   cache: ['contact', props.contactId],
   params: {
     name: props.contactId,
@@ -332,12 +332,25 @@ async function deleteContact() {
         theme: 'red',
         variant: 'solid',
         async onClick(close) {
-          await call('frappe.client.delete', {
-            doctype: 'Contact',
-            name: props.contactId,
-          })
-          close()
-          router.push({ name: 'Contacts' })
+          try {
+            await call('frappe.client.delete', {
+              doctype: 'Contact',
+              name: props.contactId,
+            })
+            close()
+            router.push({ name: 'Contacts' })
+          } catch (error) {
+            const errorMessage = 
+              error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
+                ? __('Cannot delete this contact because it is linked to other records.')
+                : __('Failed to delete the contact. Please try again later.');
+            createToast({
+              title: __('Error'),
+              text: errorMessage,
+              icon: 'x',
+              iconClasses: 'text-red-600',
+            });
+          }
         },
       },
     ],
@@ -347,15 +360,15 @@ async function deleteContact() {
 const tabIndex = ref(0)
 const tabs = [
   {
-    label: 'Deals',
-    icon: h(DealsIcon, { class: 'h-4 w-4' }),
-    count: computed(() => deals.data?.length),
+    label: 'Opportunities',
+    icon: h(OpportunitiesIcon, { class: 'h-4 w-4' }),
+    count: computed(() => opportunities.data?.length),
   },
 ]
 
-const deals = createResource({
-  url: 'crm.api.contact.get_linked_deals',
-  cache: ['deals', props.contactId],
+const opportunities = createResource({
+  url: 'next_crm.api.contact.get_linked_opportunities',
+  cache: ['opportunities', props.contactId],
   params: {
     contact: props.contactId,
   },
@@ -363,13 +376,13 @@ const deals = createResource({
 })
 
 const rows = computed(() => {
-  if (!deals.data || deals.data == []) return []
+  if (!opportunities.data || opportunities.data == []) return []
 
-  return deals.data.map((row) => getDealRowObject(row))
+  return opportunities.data.map((row) => getOpportunityRowObject(row))
 })
 
 const fieldsLayout = createResource({
-  url: 'crm.api.doc.get_sidebar_fields',
+  url: 'next_crm.api.doc.get_sidebar_fields',
   cache: ['fieldsLayout', props.contactId],
   params: { doctype: 'Contact', name: props.contactId },
   auto: true,
@@ -524,7 +537,7 @@ function getParsedFields(data) {
 }
 
 async function setAsPrimary(field, value) {
-  let d = await call('crm.api.contact.set_as_primary', {
+  let d = await call('next_crm.api.contact.set_as_primary', {
     contact: contact.data.name,
     field,
     value,
@@ -541,7 +554,7 @@ async function setAsPrimary(field, value) {
 
 async function createNew(field, value) {
   if (!value) return
-  let d = await call('crm.api.contact.create_new', {
+  let d = await call('next_crm.api.contact.create_new', {
     contact: contact.data.name,
     field,
     value,
@@ -602,45 +615,45 @@ async function updateField(fieldname, value) {
   contact.reload()
 }
 
-const columns = computed(() => dealColumns)
+const columns = computed(() => opportunityColumns)
 
-function getDealRowObject(deal) {
+function getOpportunityRowObject(opportunity) {
   return {
-    name: deal.name,
-    organization: {
-      label: deal.organization,
-      logo: getOrganization(deal.organization)?.organization_logo,
+    name: opportunity.name,
+    customer: {
+      label: opportunity.customer,
+      logo: getCustomer(opportunity.customer)?.image,
     },
-    annual_revenue: formatNumberIntoCurrency(
-      deal.annual_revenue,
-      deal.currency,
+    opportunity_amount: formatNumberIntoCurrency(
+      opportunity.opportunity_amount,
+      opportunity.currency,
     ),
     status: {
-      label: deal.status,
-      color: getDealStatus(deal.status)?.iconColorClass,
+      label: opportunity.status,
+      color: getDealStatus(opportunity.status)?.iconColorClass,
     },
-    email: deal.email,
-    mobile_no: deal.mobile_no,
-    deal_owner: {
-      label: deal.deal_owner && getUser(deal.deal_owner).full_name,
-      ...(deal.deal_owner && getUser(deal.deal_owner)),
+    email: opportunity.contact_email,
+    mobile_no: opportunity.contact_mobile,
+    opportunity_owner: {
+      label: opportunity.opportunity_owner && getUser(opportunity.opportunity_owner).full_name,
+      ...(opportunity.opportunity_owner && getUser(opportunity.opportunity_owner)),
     },
     modified: {
-      label: dateFormat(deal.modified, dateTooltipFormat),
-      timeAgo: __(timeAgo(deal.modified)),
+      label: dateFormat(opportunity.modified, dateTooltipFormat),
+      timeAgo: __(timeAgo(opportunity.modified)),
     },
   }
 }
 
-const dealColumns = [
+const opportunityColumns = [
   {
-    label: __('Organization'),
-    key: 'organization',
+    label: __('Customer'),
+    key: 'customer',
     width: '11rem',
   },
   {
     label: __('Amount'),
-    key: 'annual_revenue',
+    key: 'opportunity_amount',
     width: '9rem',
   },
   {
@@ -650,17 +663,17 @@ const dealColumns = [
   },
   {
     label: __('Email'),
-    key: 'email',
+    key: 'contact_email',
     width: '12rem',
   },
   {
     label: __('Mobile no'),
-    key: 'mobile_no',
+    key: 'contact_mobile',
     width: '11rem',
   },
   {
-    label: __('Deal owner'),
-    key: 'deal_owner',
+    label: __('Opportunity owner'),
+    key: 'opportunity_owner',
     width: '10rem',
   },
   {
