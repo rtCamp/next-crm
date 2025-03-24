@@ -1,7 +1,11 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import frappe
-from erpnext.crm.doctype.prospect.prospect import Prospect
+from erpnext.crm.doctype.prospect.prospect import (
+    Prospect,
+    make_customer,
+    make_opportunity,
+)
 from frappe import _
 
 
@@ -61,24 +65,31 @@ class Prospect(Prospect):
             "kanban_fields": '["annual_revenue", "_assign", "modified"]',
         }
 
-    def create_opportunity(self):
-        from erpnext.crm.doctype.prospect.prospect import make_opportunity
-
-        opportunity = make_opportunity(self.name)
-
-        opportunity.insert(ignore_permissions=True)
-        return opportunity.name
-
 
 @frappe.whitelist()
-def convert_to_opportunity(prospect, doc=None):
-    if not (doc and doc.flags.get("ignore_permissions")) and not frappe.has_permission(
-        "Prospect", "write", prospect
-    ):
+def create_opportunity(prospect, doc=None):
+    if (
+        not (doc and doc.flags.get("ignore_permissions"))
+        and not frappe.has_permission("Prospect", "write", prospect)
+    ) or not frappe.has_permission("Opportunity", "create"):
         frappe.throw(
-            _("Not allowed to convert Prospect to Opportunity"), frappe.PermissionError
+            _("Not allowed to create Opportunity from Prospect"), frappe.PermissionError
         )
 
     prospect = frappe.get_cached_doc("Prospect", prospect)
-    opportunity = prospect.create_opportunity()
-    return opportunity
+    opportunity = make_opportunity(prospect.name)
+    opportunity.insert()
+    return opportunity.name
+
+
+@frappe.whitelist()
+def create_customer(prospect):
+    if not frappe.has_permission("Customer", "create"):
+        frappe.throw(
+            _("Not allowed to create Customer from Prospect"), frappe.PermissionError
+        )
+
+    prospect = frappe.get_cached_doc("Prospect", prospect)
+    customer = make_customer(prospect.name)
+    customer.insert()
+    return customer.name

@@ -8,11 +8,48 @@
       </Breadcrumbs>
     </template>
     <template #right-header>
-      <Button
-        :label="__('Convert to Opportunity')"
-        variant="solid"
-        @click=convertToOpportunity
-      />
+      <Dropdown
+        v-slot="{ open }"
+        :button= "__('Add')"
+        :options="[
+          {
+            label: __('Address'),
+            onClick: addAddressButtonCB
+          },
+          {
+            label: __('Contact'),
+            onClick: addContactButtonCB
+          },
+        ]"
+        @click.stop
+      >
+        <Button :label="'Add'">
+            <template #suffix>
+              <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4" />
+            </template>
+          </Button>
+      </Dropdown>
+      <Dropdown
+        v-slot="{ open }"
+        :button= "__('Create')"
+        :options="[
+          {
+            label: __('Opportunity'),
+            onClick: createOpportunity
+          },
+          {
+            label: __('Customer'),
+            onClick: createCustomer
+          },
+        ]"
+        @click.stop
+      >
+        <Button :label="'Create'">
+          <template #suffix>
+            <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4" />
+          </template>
+        </Button>
+      </Dropdown>
     </template>
   </LayoutHeader>
   <div ref="parentRef" class="flex h-full">
@@ -146,45 +183,6 @@
       </template>
     </Tabs>
   </div>
-  <Dialog
-    v-model="showConvertToOpportunityModal"
-    :options="{
-      title: __('Convert to Opportunity'),
-      size: 'xl',
-      actions: [
-        {
-          label: __('Convert'),
-          variant: 'solid',
-          onClick: convertToOpportunity,
-        },
-      ],
-    }"
-  >
-    <template #body-content>
-      <div class="mb-4 mt-6 flex items-center gap-2 text-ink-gray-5">
-        <ContactsIcon class="h-4 w-4" />
-        <label class="block text-base">{{ __('Contact') }}</label>
-      </div>
-      <div class="ml-6">
-        <div class="flex items-center justify-between text-base">
-          <div>{{ __('Choose Existing') }}</div>
-          <Switch v-model="existingContactChecked" />
-        </div>
-        <Link
-          v-if="existingContactChecked"
-          class="form-control mt-2.5"
-          variant="outline"
-          size="md"
-          :value="existingContact"
-          doctype="Contact"
-          @change="(data) => (existingContact = data)"
-        />
-        <div v-else class="mt-2.5 text-base">
-          {{ __("New contact will be created based on the person's details") }}
-        </div>
-      </div>
-    </template>
-  </Dialog>
   <SidePanelModal
     v-if="showSidePanelModal"
     v-model="showSidePanelModal"
@@ -197,13 +195,31 @@
     doctype="Prospect"
   />
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <LinkAddressModal
+    v-model="showAddAddressModal"
+    doctype="Prospect",
+    :docname="prospect.doc.name"
+    :options="{
+      afterAddAddress: afterAddAddress
+    }"
+  />
+  <LinkContactModal
+    v-model="showAddContactModal"
+    doctype="Prospect",
+    :docname="prospect.doc.name"
+    :options="{
+      afterAddContact: afterAddContact
+    }"
+  />
 </template>
   
-  <script setup>
+<script setup>
   import Resizer from '@/components/Resizer.vue'
   import Section from '@/components/Section.vue'
   import SectionFields from '@/components/SectionFields.vue'
   import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
+  import LinkAddressModal from '@/components/Modals/LinkAddressModal.vue'
+  import LinkContactModal from '@/components/Modals/LinkContactModal.vue'
   import Icon from '@/components/Icon.vue'
   import LayoutHeader from '@/components/LayoutHeader.vue'
   import QuickEntryModal from '@/components/Modals/QuickEntryModal.vue'
@@ -216,7 +232,6 @@
   import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
   import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
   import AddressIcon from '@/components/Icons/AddressIcon.vue'
-  import Link from '@/components/Controls/Link.vue'
   import { globalStore } from '@/stores/global'
   import { usersStore } from '@/stores/users'
   import { statusesStore } from '@/stores/statuses'
@@ -231,8 +246,8 @@
   import {
     Tooltip,
     Breadcrumbs,
+    Dropdown,
     Tabs,
-    Switch,
     call,
     createListResource,
     createDocumentResource,
@@ -255,6 +270,8 @@
   const { getDealStatus } = statusesStore()
   const showSidePanelModal = ref(false)
   const showQuickEntryModal = ref(false)
+  const showAddContactModal = ref(false)
+  const showAddAddressModal = ref(false)
   
   const route = useRoute()
   const router = useRouter()
@@ -419,12 +436,12 @@
     {
       label: 'Contacts',
       icon: h(ContactsIcon, { class: 'h-4 w-4' }),
-      count: computed(() => contacts.data?.length),
+      count: computed(() => contacts.value.data?.length),
     },
     {
       label: 'Addresses',
       icon: h(AddressIcon, { class: 'h-4 w-4' }),
-      count: computed(() => addresses.data?.length),
+      count: computed(() => addresses.value.data?.length),
     },
   ]
   
@@ -506,17 +523,17 @@ async function getAddressesList() {
   return list
 }
 
-const contacts = await getContactsList();
-const addresses = await getAddressesList();
+const contacts = ref(await getContactsList());
+const addresses = ref(await getAddressesList());
 
 const rows = computed(() => {
   let list = []
   if (tabIndex.value === 0)
     list = opportunities
   else if (tabIndex.value === 1)
-    list = contacts
+    list = contacts.value
   else if (tabIndex.value === 2)
-    list = addresses
+    list = addresses.value
 
   if (!list.data) return []
 
@@ -563,7 +580,7 @@ const columns = computed(() => {
     }
   }
 
-  function getContactRowObject(contact) {
+function getContactRowObject(contact) {
   return {
     name: contact.name,
     full_name: {
@@ -598,19 +615,75 @@ function getAddressRowObject(address) {
   }
 }
 
+async function createCustomer() {
+  $dialog({
+    title: __('Create Customer'),
+    message: __('Are you sure you want to create a new Customer from this Prospect\'s details?'),
+    actions: [
+      {
+        label: __('Create'),
+        theme: 'green',
+        variant: 'solid',
+        async onClick(close) {
+          try {
+            const customer = await call('next_crm.overrides.prospect.create_customer', {
+              prospect: prospect.name,
+            })
+            close()
+            router.push({ name: 'Customer', params: { customerId: customer } })
+          } catch (error) {
+            createToast({
+              title: __('Error'),
+              text: error,
+              icon: 'x',
+              iconClasses: 'text-ink-red-4',
+            });
+          }
+        },
+      },
+    ],
+  })
+}
+
+function addAddressButtonCB() {
+  showAddAddressModal.value = true
+}
+
+function addContactButtonCB() {
+  showAddContactModal.value = true
+}
+
+async function afterAddContact(contact) {
+  createToast({
+    title: __('Contact Linked'),
+    text: __(`Contact ${contact} linked`),
+    icon: 'check',
+    iconClasses: 'text-ink-green-3',
+  })
+  contacts.value = await getContactsList()
+}
+
+
+async function afterAddAddress(address) {
+  createToast({
+    title: __('Address Linked'),
+    text: __(`Address ${address} linked`),
+    icon: 'check',
+    iconClasses: 'text-ink-green-3',
+  })
+  addresses.value = await getAddressesList()
+}
+
   // Convert to Opportunity
-  const showConvertToOpportunityModal = ref(false)
-
-  async function convertToOpportunity() {
-
+  async function createOpportunity() {
       let opportunity = await call(
-        'next_crm.overrides.prospect.convert_to_opportunity',
+        'next_crm.overrides.prospect.create_opportunity',
         {
           prospect: prospect.name,
         },
       )
       if (opportunity) {
-        capture('convert_prospect_to_opportunity')
+        capture('create_prospect_from_opportunity')
         router.push({ name: 'Opportunity', params: { opportunityId: opportunity } })
       }
   }
@@ -693,4 +766,4 @@ const addressColumns = [
     width: '8rem',
   },
 ]
-  </script>
+</script>
