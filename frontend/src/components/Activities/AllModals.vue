@@ -50,7 +50,7 @@ const event = ref({})
 
 function showToDo(t) {
   todo.value = t || {
-    title: '',
+    custom_title: '',
     description: '',
     allocated_to: '',
     date: '',
@@ -61,6 +61,7 @@ function showToDo(t) {
 }
 
 function showEvent(t) {
+  const user_google_calendar = getUser().google_calendar;
   event.value = t || {
     subtitle: '',
     description: '',
@@ -68,8 +69,8 @@ function showEvent(t) {
     starts_on: '',
     ends_on: '',
     status: 'Open',
-    sync_with_google_calendar: 1,
-    google_calendar: getUser().google_calendar,
+    sync_with_google_calendar: (user_google_calendar ? 1 : 0),
+    google_calendar: user_google_calendar,
   }
   showEventModal.value = true
 }
