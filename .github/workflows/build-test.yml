@@ -28,7 +28,7 @@ jobs:
       - name: Get APP and Build
         run: |
           cd /home/frappe/frappe-bench
-          su frappe bash -c "bench get-app https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }}"
+          su frappe bash -c "bench get-app https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }} --resolve-deps"
 
       - name: Cleanup
         if: ${{ always() }}
