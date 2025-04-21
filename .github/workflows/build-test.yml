@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   Bench-Build-Test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: docker.io/frappe/bench:latest
       options: --user root
@@ -33,4 +33,3 @@ jobs:
       - name: Cleanup
         if: ${{ always() }}
         uses: rtCamp/action-cleanup@master
-
