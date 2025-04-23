@@ -23,7 +23,7 @@ def notify_mentions(doc):
         if doctype.startswith("CRM "):
             doctype = doctype[4:].lower()
         name = (
-            reference_doc.lead_name or None
+            reference_doc.title or reference_doc.name or None
             if doctype == "Lead"
             else reference_doc.party_name or None
         )
