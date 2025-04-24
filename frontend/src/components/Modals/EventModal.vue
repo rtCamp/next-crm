@@ -174,31 +174,26 @@ const _event = ref({
   status: 'Open',
   event_type: 'Private',
   event_category: 'Event',
-  sync_with_google_calendar: (getUser().google_calendar ? 1 : 0),
+  sync_with_google_calendar: getUser().google_calendar ? 1 : 0,
   google_calendar: getUser().google_calendar,
 })
 
-const eventMeta = ref(
-  await call('next_crm.api.doc.get_fields_meta', {
-    doctype: 'Event',
-  }),
-)
+const eventTypeOptions = ref({})
+const eventCategoryOptions = ref({})
+const eventMeta = ref({})
+updateEventMeta()
 
-let eventTypeOptions = eventMeta.value.event_type.options.split('\n')
-let eventCategoryOptions = eventMeta.value.event_category.options.split('\n')
+async function updateEventMeta() {
+  eventMeta.value = await call('next_crm.api.doc.get_fields_meta', {
+    doctype: 'Event',
+  })
+  eventTypeOptions.value = eventMeta.value.event_type.options.split('\n')
+  eventCategoryOptions.value = eventMeta.value.event_category.options.split('\n')
+}
 
 function updateEventStatus(status) {
   _event.value.status = status
 }
-
-const fields = createResource({
-  url: 'next_crm.api.doc.get_fields_meta',
-  params: { doctype: 'Event' },
-  auto: true,
-  onSuccess: (data) => {
-    data
-  },
-})
 
 async function updateEvent() {
   if (!_event.value.subject) {
