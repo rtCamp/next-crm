@@ -28,7 +28,7 @@ jobs:
       - name: Get Dependent Apps
         run: |
           cd /home/frappe/frappe-bench
-          git clone --depth=1 https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} -b --branch ${{ github.head_ref || github.ref_name }} app_repo
+          git clone https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} -b ${{ github.head_ref || github.ref_name }} app_repo
           DEPS=$(grep -A 10 'required_apps' app_repo/*/hooks.py | grep -Po "'\K[^']+(?=')")
           rm -rf app_repo
           for dep in $DEPS; do
