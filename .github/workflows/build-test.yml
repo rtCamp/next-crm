@@ -27,26 +27,18 @@ jobs:
 
       - name: Get Dependent Apps
         run: |
-          set -x
           cd /home/frappe/frappe-bench
-          git clone https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.event.pull_request.head.repo.full_name }} -b ${{ github.event.pull_request.head.ref }} app_repo \
-            || (echo "❌ Git clone failed — check if branch or repo exists" && exit 1)
-          if [ ! -d "app_repo" ]; then
-            echo "❌ The repo 'app_repo' was not cloned correctly."
-            exit 1
-          fi
+          git clone https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --b ${{ github.head_ref || github.ref_name }} --depth=1 app_repo
           DEPS=$(grep -E "required_apps\s*=\s*\[" app_repo/*/hooks.py | sed 's/.*\[\(.*\)\]/\1/g' | tr -d '"' | tr -d "'" | tr ',' '\n' | awk '{$1=$1};1')
-          echo "Found dependencies: $DEPS"
           rm -rf app_repo
           for dep in $DEPS; do
-            echo "Getting dependent app: $dep"
             su frappe bash -c "bench get-app $dep"
           done
 
       - name: Get APP and Build
         run: |
           cd /home/frappe/frappe-bench
-          su frappe bash -c "bench get-app https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }} --resolve-deps"
+          su frappe bash -c "bench get-app https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }}"
 
       - name: Cleanup
         if: ${{ always() }}
