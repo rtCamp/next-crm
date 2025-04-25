@@ -35,7 +35,8 @@ jobs:
             echo "❌ The repo 'app_repo' was not cloned correctly."
             exit 1
           fi
-          DEPS=$(grep -Po "(?<=required_apps\s*=\s*\[)[^]]+" app_repo/*/hooks.py | tr -d '"' | tr -d "'" | tr ',' '\n' | awk '{$1=$1};1')
+          DEPS=$(grep -E "required_apps\s*=\s*\[" app_repo/*/hooks.py | sed 's/.*\[\(.*\)\]/\1/g' | tr -d '"' | tr -d "'" | tr ',' '\n' | awk '{$1=$1};1')
+          echo "Found dependencies: $DEPS"
           rm -rf app_repo
           for dep in $DEPS; do
             echo "Getting dependent app: $dep"
