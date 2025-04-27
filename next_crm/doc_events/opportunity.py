@@ -9,7 +9,8 @@ def on_trash(doc, method=None):
     )
     delete_linked_event(doc.name)
     frappe.db.delete("CRM Notification", {"reference_name": doc.name})
-    unlink_gmail_thread(doc.name)
+    if "frappe_gmail_thread" in frappe.get_installed_apps():
+        unlink_gmail_thread(doc.name)
 
 
 def delete_linked_event(docname):
