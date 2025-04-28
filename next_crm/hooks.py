@@ -170,7 +170,6 @@ doc_events = {
         "before_validate": ["next_crm.doc_events.user.before_validate"],
     },
     "Opportunity": {"on_trash": ["next_crm.doc_events.opportunity.on_trash"]},
-    "Lead": {"on_trash": ["next_crm.doc_events.lead.on_trash"]},
 }
 
 # Scheduled Tasks
