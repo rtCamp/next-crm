@@ -4,7 +4,7 @@
         size: 'xl',
         actions: [
             {
-                label: __('Update Opportunity'),
+                label: __('Update'),
                 variant: 'solid',
                 disabled: selectedLostReason.length === 0,
                 onClick: async () => {
