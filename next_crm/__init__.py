@@ -1,17 +1,17 @@
 __version__ = "2.0.0-dev"
 __title__ = "Next CRM"
 
-import erpnext.crm.utils as utils
+import erpnext.crm.utils as erp_utils
 import frappe
 
 
 def monkey_patch():
-    utils.link_open_tasks = link_open_tasks
-    utils.link_open_events = link_open_events
+    erp_utils.link_open_tasks = link_open_tasks
+    erp_utils.link_open_events = link_open_events
 
 
 def link_open_tasks(ref_doctype, ref_docname, doc):
-    todos = utils.get_open_todos(ref_doctype, ref_docname)
+    todos = erp_utils.get_open_todos(ref_doctype, ref_docname)
 
     for todo in todos:
         todo_doc = frappe.get_doc("ToDo", todo.name)
@@ -21,7 +21,7 @@ def link_open_tasks(ref_doctype, ref_docname, doc):
 
 
 def link_open_events(ref_doctype, ref_docname, doc):
-    events = utils.get_open_events(ref_doctype, ref_docname)
+    events = erp_utils.get_open_events(ref_doctype, ref_docname)
     for event in events:
         event_doc = frappe.get_doc("Event", event.name)
         event_doc.add_participant(doc.doctype, doc.name)
