@@ -136,7 +136,7 @@
             :validate="validate"
             :error="(value) => !validate(value)"
             :hideMe="true"
-            :triggerKeys="['Enter', ',', 'Tab', ' ']"
+            :triggerKeys="['Enter', ',', 'Tab', ' ', 'ArrowRight']"
           ></MultiValueInput>
         </div>
       </div>
