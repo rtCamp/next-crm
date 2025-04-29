@@ -19,15 +19,50 @@ def get_address(name):
 
 @frappe.whitelist()
 def get_linked_address(link_doctype, link_name):
+    filters = [
+        ["Dynamic Link", "link_doctype", "=", link_doctype],
+        ["Dynamic Link", "link_name", "=", link_name],
+    ]
+
+    if not "Lead" == link_doctype and not "Opportunity" == link_doctype:
+        addresses = frappe.get_list(
+            "Address",
+            filters,
+            pluck="name",
+        )
+        return addresses
+
+    if "Opportunity" == link_doctype:
+        opportunity = frappe.get_cached_doc("Opportunity", link_name)
+        if opportunity.opportunity_from and opportunity.opportunity_from == "Lead":
+            filters = [
+                [
+                    "Dynamic Link",
+                    "link_doctype",
+                    "in",
+                    [link_doctype, opportunity.opportunity_from],
+                ],
+                [
+                    "Dynamic Link",
+                    "link_name",
+                    "in",
+                    [link_name, opportunity.party_name],
+                ],
+            ]
+
     addresses = frappe.get_list(
         "Address",
-        [
-            ["Dynamic Link", "link_doctype", "=", link_doctype],
-            ["Dynamic Link", "link_name", "=", link_name],
+        fields=[
+            "address_line1",
+            "phone",
+            "title",
+            "name",
+            "is_primary_address",
+            "is_shipping_address",
         ],
-        pluck="name",
+        filters=filters,
+        distinct=True,
     )
-
     return addresses
 
 
@@ -66,4 +101,15 @@ def set_billing_shipping(address_name, is_billing):
         address.is_shipping_address = True
 
     address.save()
+    return True
+
+
+@frappe.whitelist()
+def remove_address(link_doctype, link_name, address):
+    if not frappe.has_permission(link_doctype, "write", link_name):
+        frappe.throw(_("Not allowed to remove address"), frappe.PermissionError)
+
+    address_doc = frappe.get_doc("Address", address)
+    address_doc.links = [d for d in address_doc.links if d.link_name != link_name]
+    address_doc.save()
     return True
