@@ -39,54 +39,62 @@ def notify_assigned_user(doc, is_cancelled=False):
 def get_notification_text(owner, doc, reference_doc, is_cancelled=False):
     name = doc.reference_name
     doctype = doc.reference_type
+    doc_doctype = doc.doctype
 
     if doctype.startswith("CRM "):
         doctype = doctype[4:].lower()
 
-    if doctype in ["lead", "opportunity"]:
+    if doctype in ["Lead", "Opportunity"] and (
+        doc.allocated_to not in reference_doc._assign if reference_doc._assign else True
+    ):
         name = (
-            reference_doc.lead_name or name
-            if doctype == "lead"
-            else reference_doc.customer or reference_doc.lead_name or name
+            reference_doc.title or name
+            if doctype == "Lead"
+            else reference_doc.title or reference_doc.customer or name
         )
 
         if is_cancelled:
             return f"""
 				<div class="mb-2 leading-5 text-ink-gray-5">
-					<span>{ _('Your assignment on {0} {1} has been removed by {2}').format(
-						doctype,
-						f'<span class="font-medium text-ink-gray-9">{ name }</span>',
-						f'<span class="font-medium text-ink-gray-9">{ owner }</span>'
-					) }</span>
+					<span>{
+                _("Your assignment on {0} {1} has been removed by {2}").format(
+                    doctype,
+                    f'<span class="font-medium text-ink-gray-9">{name}</span>',
+                    f'<span class="font-medium text-ink-gray-9">{owner}</span>',
+                )
+            }</span>
 				</div>
 			"""
 
         return f"""
 			<div class="mb-2 leading-5 text-ink-gray-5">
-				<span class="font-medium text-ink-gray-9">{ owner }</span>
-				<span>{ _('assigned a {0} {1} to you').format(
-					doctype,
-					f'<span class="font-medium text-ink-gray-9">{ name }</span>'
-				) }</span>
+				<span class="font-medium text-ink-gray-9">{owner}</span>
+				<span>{
+            _("assigned a {0} {1} to you").format(doctype, f'<span class="font-medium text-ink-gray-9">{name}</span>')
+        }</span>
 			</div>
 		"""
 
-    if doctype == "ToDo":
+    if doc_doctype == "ToDo":
         if is_cancelled:
             return f"""
 				<div class="mb-2 leading-5 text-ink-gray-5">
-					<span>{ _('Your assignment on ToDo {0} has been removed by {1}').format(
-						f'<span class="font-medium text-ink-gray-9">{ reference_doc.title }</span>',
-						f'<span class="font-medium text-ink-gray-9">{ owner }</span>'
-					) }</span>
+					<span>{
+                _("Your assignment on ToDo {0} has been removed by {1}").format(
+                    f'<span class="font-medium text-ink-gray-9">{reference_doc.title or reference_doc.name}</span>',
+                    f'<span class="font-medium text-ink-gray-9">{owner}</span>',
+                )
+            }</span>
 				</div>
 			"""
         return f"""
 			<div class="mb-2 leading-5 text-ink-gray-5">
-				<span class="font-medium text-ink-gray-9">{ owner }</span>
-				<span>{ _('assigned a new ToDo {0} to you').format(
-					f'<span class="font-medium text-ink-gray-9">{ reference_doc.title }</span>'
-				) }</span>
+				<span class="font-medium text-ink-gray-9">{owner}</span>
+				<span>{
+            _("assigned a new ToDo in {0} {1} to you").format(
+                doctype, f'<span class="font-medium text-ink-gray-9">{reference_doc.title or reference_doc.name}</span>'
+            )
+        }</span>
 			</div>
 		"""
 

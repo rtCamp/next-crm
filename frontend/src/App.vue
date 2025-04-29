@@ -1,6 +1,6 @@
 <template>
   <Layout v-if="session().isLoggedIn">
-    <router-view />
+    <router-view :key="routeKey"/>
   </Layout>
   <Dialogs />
   <Toasts />
@@ -11,6 +11,15 @@ import { Dialogs } from '@/utils/dialogs'
 import { sessionStore as session } from '@/stores/session'
 import { Toasts, setConfig } from 'frappe-ui'
 import { computed, defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const routeKey = computed(() => {
+  if (route.name === 'Lead') return route.params.leadId
+  if (route.name === 'Opportunity') return route.params.opportunityId
+  return route.fullPath
+})
 
 const MobileLayout = defineAsyncComponent(() =>
   import('./components/Layouts/MobileLayout.vue')
