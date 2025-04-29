@@ -860,8 +860,9 @@ async function removeContact(contact) {
 }
 
 async function removeAddress(address) {
-  let d = await call('next_crm.api.opportunity.remove_address', {
-    opportunity: props.opportunityId,
+  let d = await call('next_crm.api.address.remove_address', {
+    link_doctype: "Opportunity",
+    link_name: props.opportunityId,
     address,
   })
   if (d) {
@@ -882,7 +883,7 @@ async function setBillingShippingAddress(address_name, is_billing) {
   if (d) {
     opportunityAddresses.reload()
     let changed = 'Billing'
-    if (shipping)
+    if (!is_billing)
       changed = 'Shipping'
     createToast({
       title: __(`${changed} address modified`),
@@ -925,8 +926,8 @@ const opportunityContacts = createResource({
 })
 
 const opportunityAddresses = createResource({
-  url: '/api/method/next_crm.api.opportunity.get_opportunity_addresses',
-  params: { name: props.opportunityId },
+  url: '/api/method/next_crm.api.address.get_linked_address',
+  params: { link_doctype: "Opportunity", link_name: props.opportunityId },
   cache: ['opportunity_addresses', props.opportunityId],
   auto: true,
   transform: (data) => {

@@ -863,7 +863,7 @@ async function setBillingShippingAddress(address_name, is_billing) {
   if (d) {
     leadAddresses.reload()
     let changed = 'Billing'
-    if (shipping)
+    if (!is_billing)
       changed = 'Shipping'
     createToast({
       title: __(`${changed} address modified`),
@@ -874,8 +874,9 @@ async function setBillingShippingAddress(address_name, is_billing) {
 }
 
 async function removeAddress(address) {
-  let d = await call('next_crm.api.lead.remove_address', {
-    opportunity: props.leadId,
+  let d = await call('next_crm.api.address.remove_address', {
+    link_doctype: "Lead",
+    link_name: props.leadId,
     address,
   })
   if (d) {
@@ -905,8 +906,8 @@ const leadContacts = createResource({
 })
 
 const leadAddresses = createResource({
-  url: '/api/method/next_crm.api.lead.get_lead_addresses',
-  params: { name: props.leadId },
+  url: '/api/method/next_crm.api.address.get_linked_address',
+  params: { link_doctype: "Lead", link_name: props.leadId },
   cache: ['lead_addresses', props.leadId],
   auto: true,
   transform: (data) => {
