@@ -242,7 +242,6 @@ async function updateEvent() {
       events.value.reload()
     }
   } else {
-    console.log(event_participants.value)
     let doc = {
       doctype: 'Event',
       reference_type: props.doctype,
