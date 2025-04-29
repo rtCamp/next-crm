@@ -29,34 +29,6 @@ def get_opportunity(name):
 
 
 @frappe.whitelist()
-def get_opportunity_addresses(name):
-    opportunity = frappe.get_cached_doc("Opportunity", name)
-
-    opportunity_addresses = frappe.get_list(
-        "Address",
-        fields=[
-            "address_line1",
-            "phone",
-            "title",
-            "name",
-            "is_primary_address",
-            "is_shipping_address",
-        ],
-        filters=[
-            [
-                "Dynamic Link",
-                "link_doctype",
-                "in",
-                ["Opportunity", opportunity.opportunity_from],
-            ],
-            ["Dynamic Link", "link_name", "in", [name, opportunity.party_name]],
-        ],
-        distinct=True,
-    )
-    return opportunity_addresses
-
-
-@frappe.whitelist()
 def add_address(opportunity, address):
     if not frappe.has_permission("Opportunity", "write", opportunity):
         frappe.throw(
@@ -83,17 +55,13 @@ def add_address(opportunity, address):
 
 
 @frappe.whitelist()
-def remove_address(opportunity, address):
-    if not frappe.has_permission("Opportunity", "write", opportunity):
-        frappe.throw(
-            _("Not allowed to remove address from Opportunity"), frappe.PermissionError
-        )
-
-    opportunity_doc = frappe.get_cached_doc("Opportunity", opportunity)
-    address_doc = frappe.get_doc("Address", address)
-    link_names = [opportunity]
-    if opportunity_doc.opportunity_from:
-        link_names.append(opportunity_doc.party_name)
-    address_doc.links = [d for d in address_doc.links if d.link_name not in link_names]
-    address_doc.save()
-    return True
+def declare_enquiry_lost_api(
+    name, lost_reasons_list, competitors, detailed_reason=None
+):
+    opportunity = frappe.get_doc("Opportunity", name)
+    opportunity.declare_enquiry_lost(
+        lost_reasons_list=lost_reasons_list,
+        competitors=competitors,
+        detailed_reason=detailed_reason,
+    )
+    return _("Opportunity updated successfully")

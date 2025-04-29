@@ -450,6 +450,7 @@
         afterRename: afterRename
       }"
   />
+  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"/>
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -480,6 +481,7 @@ import AddressModal from '@/components/Modals/AddressModal.vue'
 import ContactModal from '@/components/Modals/ContactModal.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import RenameModal from '@/components/Modals/RenameModal.vue'
+import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -593,6 +595,7 @@ const showSidePanelModal = ref(false)
 const showFilesUploader = ref(false)
 const showRenameModal = ref(false)
 const _customer = ref({})
+const showLostReasonModal =  ref (false)
 
 function updateOpportunity(fieldname, value, callback) {
   value = Array.isArray(fieldname) ? '' : value
@@ -857,8 +860,9 @@ async function removeContact(contact) {
 }
 
 async function removeAddress(address) {
-  let d = await call('next_crm.api.opportunity.remove_address', {
-    opportunity: props.opportunityId,
+  let d = await call('next_crm.api.address.remove_address', {
+    link_doctype: "Opportunity",
+    link_name: props.opportunityId,
     address,
   })
   if (d) {
@@ -879,7 +883,7 @@ async function setBillingShippingAddress(address_name, is_billing) {
   if (d) {
     opportunityAddresses.reload()
     let changed = 'Billing'
-    if (shipping)
+    if (!is_billing)
       changed = 'Shipping'
     createToast({
       title: __(`${changed} address modified`),
@@ -922,8 +926,8 @@ const opportunityContacts = createResource({
 })
 
 const opportunityAddresses = createResource({
-  url: '/api/method/next_crm.api.opportunity.get_opportunity_addresses',
-  params: { name: props.opportunityId },
+  url: '/api/method/next_crm.api.address.get_linked_address',
+  params: { link_doctype: "Opportunity", link_name: props.opportunityId },
   cache: ['opportunity_addresses', props.opportunityId],
   auto: true,
   transform: (data) => {
@@ -952,10 +956,14 @@ function triggerCall() {
 }
 
 function updateField(name, value, callback) {
-  updateOpportunity(name, value, () => {
-    opportunity.data[name] = value
-    callback?.()
-  })
+  if(name == "status" && value == "Lost"){
+    showLostReasonModal.value  = true
+  }else{
+    updateOpportunity(name, value, () => {
+      opportunity.data[name] = value
+      callback?.()
+    })
+  }
 }
 
 async function deleteOpportunity(name) {

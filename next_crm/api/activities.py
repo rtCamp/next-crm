@@ -511,6 +511,13 @@ def get_linked_events(name):
         ],
     )
 
+    for event in events:
+        event["event_participants"] = frappe.db.get_all(
+            "Event Participants",
+            filters={"parent": event.name},
+            fields=["reference_doctype", "reference_docname", "email"],
+        )
+
     return events or []
 
 

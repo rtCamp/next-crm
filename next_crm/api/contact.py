@@ -169,7 +169,7 @@ def get_linked_contact(link_doctype, link_name):
     link_doctypes = [link_doctype]
     if link_doctype == "Opportunity":
         opportunity = frappe.get_cached_doc("Opportunity", link_name)
-        if opportunity.opportunity_from:
+        if opportunity.opportunity_from and opportunity.opportunity_from == "Lead":
             link_doctypes.append(opportunity.opportunity_from)
             link_names.append(opportunity.party_name)
 

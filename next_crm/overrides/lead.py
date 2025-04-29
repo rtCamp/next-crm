@@ -257,6 +257,21 @@ class Lead(Lead):
     def convert_to_opportunity(self):
         return convert_to_opportunity(lead=self.name, doc=self)
 
+    def on_trash(self):
+        frappe.db.set_value("Issue", {"lead": self.name}, "lead", None)
+        frappe.db.delete("Prospect Lead", filters={"lead": self.name})
+        frappe.db.delete(
+            "Dynamic Link",
+            filters={
+                "link_name": self.name,
+                "parenttype": ["in", ["Contact", "Address"]],
+            },
+        )
+        delete_linked_event(self.name)
+        frappe.db.delete("CRM Notification", {"reference_name": self.name})
+        if "frappe_gmail_thread" in frappe.get_installed_apps():
+            unlink_gmail_thread(self.name)
+
     @staticmethod
     def get_non_filterable_fields():
         return ["converted"]
@@ -360,3 +375,47 @@ def convert_to_opportunity(lead, prospect, existing_contact=None, doc=None):
         customer_or_prospect = lead.create_prospect()
     opportunity = lead.create_opportunity(contact, customer_or_prospect)
     return opportunity
+
+
+def delete_linked_event(docname):
+    event_part = frappe.qb.DocType("Event Participants")
+    event_participants_query = (
+        frappe.qb.from_(event_part)
+        .where(event_part.reference_doctype == "Lead")
+        .where(event_part.reference_docname == docname)
+        .select(event_part.parent)
+    )
+
+    event = frappe.qb.DocType("Event")
+    event_delete_query = (
+        frappe.qb.from_(event)
+        .where(event.name.isin(event_participants_query))
+        .delete()
+        .get_sql()
+    )
+
+    event_participants_delete_query = (
+        frappe.qb.from_(event_part)
+        .where(event_part.parent.isin(event_participants_query))
+        .delete()
+        .get_sql()
+    )
+
+    frappe.db.sql(event_delete_query)
+    frappe.db.sql(event_participants_delete_query)
+
+
+def unlink_gmail_thread(docname):
+    gmail_thread = frappe.qb.DocType("Gmail Thread")
+
+    query = (
+        frappe.qb.update(gmail_thread)
+        .set(gmail_thread.reference_doctype, None)
+        .set(gmail_thread.reference_name, None)
+        .set(gmail_thread.status, "Open")
+        .where(gmail_thread.reference_doctype == "Lead")
+        .where(gmail_thread.reference_name == docname)
+        .get_sql()
+    )
+
+    frappe.db.sql(query)
