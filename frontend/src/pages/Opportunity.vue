@@ -450,6 +450,7 @@
         afterRename: afterRename
       }"
   />
+  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"/>
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -480,6 +481,7 @@ import AddressModal from '@/components/Modals/AddressModal.vue'
 import ContactModal from '@/components/Modals/ContactModal.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import RenameModal from '@/components/Modals/RenameModal.vue'
+import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -593,6 +595,7 @@ const showSidePanelModal = ref(false)
 const showFilesUploader = ref(false)
 const showRenameModal = ref(false)
 const _customer = ref({})
+const showLostReasonModal =  ref (false)
 
 function updateOpportunity(fieldname, value, callback) {
   value = Array.isArray(fieldname) ? '' : value
@@ -952,10 +955,14 @@ function triggerCall() {
 }
 
 function updateField(name, value, callback) {
-  updateOpportunity(name, value, () => {
-    opportunity.data[name] = value
-    callback?.()
-  })
+  if(name == "status" && value == "Lost"){
+    showLostReasonModal.value  = true
+  }else{
+    updateOpportunity(name, value, () => {
+      opportunity.data[name] = value
+      callback?.()
+    })
+  }
 }
 
 async function deleteOpportunity(name) {
