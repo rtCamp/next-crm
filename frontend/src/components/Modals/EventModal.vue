@@ -233,6 +233,18 @@ async function updateEvent() {
   }
   _event.value.assigned_by = getUser().name
   if (_event.value.name) {
+    _event.value.event_participants = _event.value.event_participants.filter(
+      (participant) => participant.reference_doctype !== 'User' || participant.reference_docname !== 'Guest',
+    )
+    _event.value.event_participants = [
+      ..._event.value.event_participants,
+      ...event_participants.value.map((email) => ({
+        reference_doctype: 'User',
+        reference_docname: 'Guest',
+        email: email,
+      })),
+    ]
+
     let d = await call('frappe.client.set_value', {
       doctype: 'Event',
       name: _event.value.name,
@@ -279,6 +291,12 @@ function render() {
     _event.value = { ...props.event }
     if (_event.value.subject) {
       editMode.value = true
+      // get event_participants from event, if any
+      event_participants.value = (_event.value.event_participants || [])
+        .filter((participant) => participant.reference_doctype === 'User' && participant.reference_docname === 'Guest')
+        .map((participant) => participant.email)
+    } else {
+      event_participants.value = []
     }
   })
 }
