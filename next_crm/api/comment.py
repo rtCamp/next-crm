@@ -22,11 +22,7 @@ def notify_mentions(doc):
         doctype = doc.reference_doctype
         if doctype.startswith("CRM "):
             doctype = doctype[4:].lower()
-        name = (
-            reference_doc.title or reference_doc.name or None
-            if doctype == "Lead"
-            else reference_doc.party_name or None
-        )
+        name = reference_doc.title or reference_doc.name or None
         notification_text = f"""
             <div class="mb-2 leading-5 text-ink-gray-5">
                 <span class="font-medium text-ink-gray-9">{ owner }</span>
