@@ -140,21 +140,21 @@ const links = [
     icon: CustomersIcon,
     to: 'Customers',
   },
-  {
-    label: 'ToDos',
-    icon: ToDoIcon,
-    to: 'ToDos',
-  },
-  {
-    label: 'Call Logs',
-    icon: PhoneIcon,
-    to: 'Call Logs',
-  },
-  {
-    label: 'Email Templates',
-    icon: Email2Icon,
-    to: 'Email Templates',
-  },
+  // {
+  //   label: 'ToDos',
+  //   icon: ToDoIcon,
+  //   to: 'ToDos',
+  // },
+  // {
+  //   label: 'Call Logs',
+  //   icon: PhoneIcon,
+  //   to: 'Call Logs',
+  // },
+  // {
+  //   label: 'Email Templates',
+  //   icon: Email2Icon,
+  //   to: 'Email Templates',
+  // },
 ]
 
 const allViews = computed(() => {
