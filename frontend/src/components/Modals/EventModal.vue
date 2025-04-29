@@ -126,6 +126,19 @@
           >
           </Link>
         </div>
+        <div class="flex flex-wrap items-center gap-2 w-full" v-if="_event.sync_with_google_calendar">
+          <!-- Multi input to enter email addresses for event participants. -->
+          <MultiValueInput
+            v-model="event_participants"
+            class="flex-grow"
+            :placeholder="__('Add participants')"
+            :errorMessage="(value) => __('Invalid email address: {0}', [value])"
+            :validate="validate"
+            :error="(value) => !validate(value)"
+            :hideMe="true"
+            :triggerKeys="['Enter', ',', 'Tab', ' ', 'ArrowRight']"
+          ></MultiValueInput>
+        </div>
       </div>
     </template>
   </Dialog>
@@ -135,11 +148,16 @@
 import EventStatusIcon from '@/components/Icons/EventStatusIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import Link from '@/components/Controls/Link.vue'
+import MultiValueInput from '../Controls/MultiValueInput.vue'
 import { eventStatusOptions, createToast } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
 import { TextEditor, Dropdown, FormControl, Tooltip, call, DateTimePicker, createResource } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
+
+function validate(value) {
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
+}
 
 const props = defineProps({
   event: {
@@ -178,6 +196,8 @@ const _event = ref({
   google_calendar: getUser().google_calendar,
 })
 
+const event_participants = ref([])
+
 const eventTypeOptions = ref({})
 const eventCategoryOptions = ref({})
 const eventMeta = ref({})
@@ -213,6 +233,18 @@ async function updateEvent() {
   }
   _event.value.assigned_by = getUser().name
   if (_event.value.name) {
+    _event.value.event_participants = _event.value.event_participants.filter(
+      (participant) => participant.reference_doctype !== 'User' || participant.reference_docname !== 'Guest',
+    )
+    _event.value.event_participants = [
+      ..._event.value.event_participants,
+      ...event_participants.value.map((email) => ({
+        reference_doctype: 'User',
+        reference_docname: 'Guest',
+        email: email,
+      })),
+    ]
+
     let d = await call('frappe.client.set_value', {
       doctype: 'Event',
       name: _event.value.name,
@@ -222,30 +254,31 @@ async function updateEvent() {
       events.value.reload()
     }
   } else {
-    let d = await call('frappe.client.insert', {
-      doc: {
-        doctype: 'Event',
-        reference_type: props.doctype,
-        reference_name: props.doc || null,
-        ..._event.value,
-      },
-    })
-    if (d.name) {
-      let participants = await call('frappe.client.insert', {
-        doc: {
-          doctype: 'Event Participants',
-          parent: d.name,
+    let doc = {
+      doctype: 'Event',
+      reference_type: props.doctype,
+      reference_name: props.doc || null,
+      event_participants: [
+        {
           reference_doctype: props.doctype,
           reference_docname: props.doc || null,
-          parentfield: 'event_participants',
-          parenttype: 'Event',
+          email: getUser().email,
         },
-      })
-      if (participants.name) {
-        capture('event_created')
-        events.value.reload()
-        emit('after')
-      }
+        ...event_participants.value.map((email) => ({
+          reference_doctype: 'User',
+          reference_docname: 'Guest',
+          email: email,
+        })),
+      ],
+      ..._event.value,
+    }
+    let d = await call('frappe.client.insert', {
+      doc: doc,
+    })
+    if (d.name) {
+      capture('event_created')
+      events.value.reload()
+      emit('after')
     }
   }
   show.value = false
@@ -258,6 +291,12 @@ function render() {
     _event.value = { ...props.event }
     if (_event.value.subject) {
       editMode.value = true
+      // get event_participants from event, if any
+      event_participants.value = (_event.value.event_participants || [])
+        .filter((participant) => participant.reference_doctype === 'User' && participant.reference_docname === 'Guest')
+        .map((participant) => participant.email)
+    } else {
+      event_participants.value = []
     }
   })
 }
