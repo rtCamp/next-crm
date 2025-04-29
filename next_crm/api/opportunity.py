@@ -97,3 +97,13 @@ def remove_address(opportunity, address):
     address_doc.links = [d for d in address_doc.links if d.link_name not in link_names]
     address_doc.save()
     return True
+
+@frappe.whitelist()
+def declare_enquiry_lost_api(name, lost_reasons_list, competitors, detailed_reason=None):
+    opportunity = frappe.get_doc("Opportunity", name)
+    opportunity.declare_enquiry_lost(
+        lost_reasons_list=lost_reasons_list,
+        competitors=competitors,
+        detailed_reason=detailed_reason
+    )
+    return _("Opportunity updated successfully")

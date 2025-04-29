@@ -121,20 +121,17 @@ const getCompetitors = async () => {
 
 const updateOpportunity = async () => {
     try {
-        await call(`/api/method/frappe.client.set_value`,
+        await call(
+            'next_crm.api.opportunity.declare_enquiry_lost_api',
             {
-                "doctype": "Opportunity",
-                "name": props.opportunity.data.name,
-                "fieldname": {
-                    "status": "Lost",
-                    "lost_reasons": selectedLostReason.value.map(item => ({
-                        lost_reason: item
-                    })),
-                    "competitors": selectedCompetitors.value.map(item => ({
-                        competitor: item
-                    })),
-                    "order_lost_reason": detailedReason.value,
-                }
+                name: props.opportunity.data.name,
+                lost_reasons_list: selectedLostReason.value.map(item => ({
+                    lost_reason: item
+                })),
+                competitors: selectedCompetitors.value.map(item => ({
+                    competitor: item
+                })),
+                detailed_reason: detailedReason.value
             }
         );
         props.opportunity.reload()
