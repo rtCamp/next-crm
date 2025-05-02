@@ -29,7 +29,7 @@ jobs:
         run: |
           cd /home/frappe/frappe-bench
           # Use public URL for public repos, authenticated URL for private repos
-          if [[ "${{ github.event.pull_request.head.repo.private }}" == "false" ]]; then
+          if [ "${{ github.event.pull_request.head.repo.private }}" = "false" ]; then
             # This is a public repository (could be a fork or not)
             git clone https://github.com/${{ github.event.pull_request.head.repo.full_name }} -b ${{ github.event.pull_request.head.ref }} --depth=1 app_repo
           else
@@ -39,7 +39,7 @@ jobs:
           DEPS=$(grep -E "required_apps\s*=\s*\[" app_repo/*/hooks.py | sed 's/.*\[\(.*\)\]/\1/g' | tr -d '"' | tr -d "'" | tr ',' '\n' | awk '{$1=$1};1')
           rm -rf app_repo
           for dep in $DEPS; do
-            su frappe bash -c "bench get-app $dep"
+            su frappe bash-c "bench get-app $dep"
           done
 
       - name: Get APP and Build
