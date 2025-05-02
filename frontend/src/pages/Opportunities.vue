@@ -134,8 +134,11 @@
             size="xs"
           />
         </div>
+        <div v-else-if="fieldName === 'probability'">
+          {{ getRow(itemName, fieldName).label }}%
+        </div>
         <div
-          v-if="
+          v-else-if="
             [
               'modified',
               'creation',
