@@ -37,16 +37,15 @@ export function getView(view, type, doctype) {
 
 export async function setDefaultViewCache() {
    const defaultOpenViews = await call('next_crm.api.views.get_default_open_view')
-   localStorage.setItem("defaultOpenViews", JSON.stringify(defaultOpenViews));
+   sessionStorage.setItem("defaultOpenViews", JSON.stringify(defaultOpenViews));
    return defaultOpenViews
 }
 
 export async function getDefaultView(doc, route) {
-  let defaultOpenViews = JSON.parse(localStorage.getItem("defaultOpenViews"));
+  let defaultOpenViews = JSON.parse(sessionStorage.getItem("defaultOpenViews"));
   if (!defaultOpenViews) {
     defaultOpenViews = await setDefaultViewCache()
   }
-
   if ((!route.params.viewType || route.params.viewType == "") && defaultOpenViews[doc]) {
     route.params.viewType = defaultOpenViews[doc]
   }
