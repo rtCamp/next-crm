@@ -45,7 +45,13 @@ jobs:
       - name: Get APP and Build
         run: |
           cd /home/frappe/frappe-bench
-          su frappe bash -c "bench get-app https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }}"
+          if [ "${{ github.event.pull_request.head.repo.private }}" = "false" ]; then
+            # Public repo
+            su frappe bash -c "bench get-app https://github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }}"
+          else
+            # Private repo
+            su frappe bash -c "bench get-app https://rtbot:${{ secrets.RTBOT_TOKEN }}@github.com/${{ github.repository }} --branch ${{ github.head_ref || github.ref_name }}"
+          fi
 
       - name: Cleanup
         if: ${{ always() }}
