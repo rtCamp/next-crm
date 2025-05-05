@@ -41,7 +41,13 @@
       </div>
     </template>
   </Dialog>
-  <ContactModal v-model="showNewContactModal" />
+  <ContactModal
+    v-model="showNewContactModal"
+    :options="{
+      redirect: false,
+      afterInsert: addNewContact,
+    }"
+  />
 </template>
 <script setup>
 import ContactModal from '@/components/Modals/ContactModal.vue'
@@ -90,6 +96,11 @@ async function addContact() {
       iconClasses: 'text-ink-red-4',
     })
   }
+}
+
+function addNewContact(doc) {
+  existingContact.value = doc.name
+  addContact()
 }
 
 function showContactModal() {
