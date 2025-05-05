@@ -30,18 +30,23 @@ def get_default_open_view():
         },
     )
 
+    fallback_views = frappe.get_all(
+        "CRM View Settings",
+        fields=["dt", "type"],
+        filters={
+            "user": "",
+            "default_open_view": 1,
+            "is_default": 1,
+            "dt": ["is", "set"],
+        },
+    )
+
     default_view_object = {}
     for view in views:
         default_view_object[view.dt] = view.type
 
-    if not default_view_object.get("Lead"):
-        default_view_object["Lead"] = frappe.db.get_single_value(
-            "NCRM Settings", "lead_view"
-        )
-
-    if not default_view_object.get("Opportunity"):
-        default_view_object["Opportunity"] = frappe.db.get_single_value(
-            "NCRM Settings", "opportunity_view"
-        )
+    for view in fallback_views:
+        if not default_view_object[view.dt]:
+            default_view_object[view.dt] = view.type
 
     return default_view_object
