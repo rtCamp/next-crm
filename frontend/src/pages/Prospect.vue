@@ -35,10 +35,10 @@
             label: __('Opportunity'),
             onClick: createOpportunity
           },
-          {
-            label: __('Customer'),
-            onClick: createCustomer
-          },
+          // {
+          //   label: __('Customer'),
+          //   onClick: createCustomer
+          // },
         ]"
         @click.stop
       >
@@ -638,6 +638,7 @@ async function createCustomer() {
             close()
             router.push({ name: 'Customer', params: { customerId: customer } })
           } catch (error) {
+            console.log(error)
             createToast({
               title: __('Error'),
               text: error,
