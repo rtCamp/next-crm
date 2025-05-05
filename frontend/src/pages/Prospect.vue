@@ -35,10 +35,10 @@
             label: __('Opportunity'),
             onClick: createOpportunity
           },
-          {
-            label: __('Customer'),
-            onClick: createCustomer
-          },
+          // {
+          //   label: __('Customer'),
+          //   onClick: createCustomer
+          // },
         ]"
         @click.stop
       >
