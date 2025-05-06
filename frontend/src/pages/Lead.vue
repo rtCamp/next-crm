@@ -41,6 +41,23 @@
   </LayoutHeader>
   <div v-if="lead?.data" class="flex h-full overflow-hidden">
     <Tabs as="div" v-model="tabIndex" :tabs="tabs">
+      <template #tab-item="{ tab, selected }">
+        <button
+          class="group flex items-center gap-2 border-b border-transparent py-2.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:border-gray-400 hover:text-ink-gray-9"
+          :class="{ 'text-ink-gray-9': selected }"
+        >
+          <component v-if="tab.icon" :is="tab.icon" class="h-5" />
+          {{ __(tab.label) }}
+          <Badge
+            v-if="tab.label != 'Activity'"
+            variant="subtle"
+            theme="gray"
+            size="sm"
+          >
+            {{ tab.count || 0 }}
+          </Badge>
+        </button>
+      </template>
       <template #tab-panel>
         <Activities
           ref="activities"
@@ -924,48 +941,57 @@ const tabs = computed(() => {
       name: 'Activity',
       label: __('Activity'),
       icon: ActivityIcon,
+      count: ref(0)
     },
     {
       name: 'Emails',
       label: __('Emails'),
       icon: EmailIcon,
+      count: ref(0)
     },
     {
       name: 'Comments',
       label: __('Comments'),
       icon: CommentIcon,
+      count: ref(0)
     },
     {
       name: 'Calls',
       label: __('Calls'),
       icon: PhoneIcon,
       condition: () => callEnabled.value,
+      count: ref(0)
     },
     {
       name: 'ToDos',
       label: __('ToDos'),
       icon: ToDoIcon,
+      count: ref(0)
     },
     {
       name: 'Events',
       label: __('Events'),
       icon: EventIcon,
+      count: ref(0)
     },
     {
       name: 'Notes',
       label: __('Notes'),
       icon: NoteIcon,
+      count: ref(0)
     },
     {
       name: 'Attachments',
       label: __('Attachments'),
       icon: AttachmentIcon,
+      count: ref(0)
     },
     {
       name: 'WhatsApp',
       label: __('WhatsApp'),
       icon: WhatsAppIcon,
       condition: () => whatsappEnabled.value,
+      count: ref(0)
     },
   ]
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))
