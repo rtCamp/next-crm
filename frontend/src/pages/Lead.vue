@@ -50,7 +50,7 @@
           {{ __(tab.label) }}
           <Badge
             v-if="tab.label != 'Activity'"
-            variant="subtle"
+            variant="solid"
             theme="gray"
             size="sm"
           >
