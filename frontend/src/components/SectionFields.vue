@@ -137,7 +137,7 @@
             :onCreate="field.create"
           />
           <FormControl
-            v-else
+            v-else-if="data[field.name] && /^(https?:\/\/|www\.)[^\s$.?#].[^\s]*$/.test(data[field.name])"
             class="form-control"
             type="text"
             :value="data[field.name]"
@@ -145,7 +145,7 @@
             :debounce="500"
             @change.stop="emit('update', field.name, $event.target.value)"
           >
-            <template #prefix v-if="data[field.name] && /^(https?:\/\/|www\.)[^\s$.?#].[^\s]*$/.test(data[field.name])">
+            <template #prefix>
               <a
                 :href="
                   data[field.name].startsWith('https') || data[field.name].startsWith('http')
@@ -158,6 +158,15 @@
               </a>
             </template>
           </FormControl>
+          <FormControl
+            v-else
+            class="form-control"
+            type="text"
+            :value="data[field.name]"
+            :placeholder="field.placeholder"
+            :debounce="500"
+            @change.stop="emit('update', field.name, $event.target.value)"
+          />
         </div>
         <div class="ml-1">
           <ArrowUpRightIcon
