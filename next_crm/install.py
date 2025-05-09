@@ -158,11 +158,11 @@ def add_default_fields_layout(force=False):
     sidebar_fields_layouts = {
         "Lead-Side Panel": {
             "doctype": "Lead",
-            "layout": '[{"label": "Details", "name": "details", "opened": true, "fields": ["customer", "website", "territory", "industry", "job_title", "source", "lead_owner"]}, {"label": "Person", "name": "person_tab", "opened": true, "fields": ["salutation", "first_name", "last_name", "email_id", "mobile_no"]}]',
+            "layout": '[{"label":"Addresses","name":"addresses_section","opened":true,"editable":false,"addresses":[]},{"label":"Contacts","name":"contacts_section","opened":true,"editable":false,"contacts":[]},{"label": "Details", "name": "details", "opened": true, "fields": ["customer", "website", "territory", "industry", "job_title", "source", "lead_owner"]}, {"label": "Person", "name": "person_tab", "opened": true, "fields": ["salutation", "first_name", "last_name", "email_id", "mobile_no"]}]',
         },
         "Opportunity-Side Panel": {
             "doctype": "Opportunity",
-            "layout": '[{"label":"Contacts","name":"contacts_section","opened":true,"editable":false,"contacts":[]},{"label":"Customer Details","name":"customer_tab","opened":true,"fields":["customer","website","territory","opportunity_amount","transaction_date","probability","opportunity_owner"]}]',
+            "layout": '[{"label":"Addresses","name":"addresses_section","opened":true,"editable":false,"addresses":[]},{"label":"Contacts","name":"contacts_section","opened":true,"editable":false,"contacts":[]},{"label":"Customer Details","name":"customer_tab","opened":true,"fields":["customer","website","territory","opportunity_amount","transaction_date","probability","opportunity_owner"]}]',
         },
         "Prospect-Side Panel": {
             "doctype": "Prospect",
