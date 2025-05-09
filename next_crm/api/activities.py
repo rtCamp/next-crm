@@ -203,6 +203,7 @@ def get_opportunity_activities(name):
 
     activities.sort(key=lambda x: x["creation"], reverse=True)
     activities = handle_multiple_versions(activities)
+    notes.sort(key=lambda x: x["added_on"], reverse=True)
 
     return activities, calls, notes, todos, events, attachments
 
@@ -376,6 +377,7 @@ def get_lead_activities(name, get_events=True):
 
     activities.sort(key=lambda x: x["creation"], reverse=True)
     activities = handle_multiple_versions(activities)
+    notes.sort(key=lambda x: x["added_on"], reverse=True)
 
     return activities, calls, notes, todos, events, attachments
 
@@ -468,7 +470,7 @@ def get_linked_notes(name):
     notes = frappe.db.get_all(
         "CRM Note",
         filters={"parent": name},
-        fields=["name", "custom_title", "note", "owner", "modified"],
+        fields=["name", "custom_title", "note", "owner", "added_on"],
     )
     return notes or []
 
