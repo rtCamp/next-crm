@@ -546,7 +546,7 @@ const props = defineProps({
 
 const customActions = ref([])
 const customStatuses = ref([])
-
+const _address = ref([])
 const opportunity = createResource({
   url: '/api/method/next_crm.api.opportunity.get_opportunity',
   params: { name: props.opportunityId },

@@ -3,11 +3,13 @@ __title__ = "Next CRM"
 
 import erpnext.crm.utils as erp_utils
 import frappe
+from frappe.desk.doctype.event import event as frappe_event
 
 
 def monkey_patch():
     erp_utils.link_open_tasks = link_open_tasks
     erp_utils.link_open_events = link_open_events
+    frappe_event.Event.set_participants_email = lambda self: None
 
 
 def link_open_tasks(ref_doctype, ref_docname, doc):
