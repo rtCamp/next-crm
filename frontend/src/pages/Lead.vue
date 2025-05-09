@@ -758,8 +758,9 @@ const breadcrumbs = computed(() => {
 })
 
 usePageMeta(() => {
+  const title = lead?.data?.title || lead?.data?.name
   return {
-    title: lead.data.title || lead.data?.name || lead.data?.name,
+    title,
   }
 })
 
