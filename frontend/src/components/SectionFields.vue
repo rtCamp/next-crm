@@ -41,7 +41,9 @@
                 </Button>
               </template>
               <template #body>
-                <div class="my-2 p-1.5 min-w-40 space-y-1.5 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div
+                  class="my-2 p-1.5 min-w-40 space-y-1.5 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                >
                   <div>
                     <DropdownItem
                       v-if="field.options?.length"
@@ -142,7 +144,20 @@
             :placeholder="field.placeholder"
             :debounce="500"
             @change.stop="emit('update', field.name, $event.target.value)"
-          />
+          >
+            <template #prefix v-if="data[field.name] && /^(https?:\/\/|www\.)[^\s$.?#].[^\s]*$/.test(data[field.name])">
+              <a
+                :href="
+                  data[field.name].startsWith('https') || data[field.name].startsWith('http')
+                    ? data[field.name]
+                    : 'https://' + data[field.name]
+                "
+                target="_blank"
+              >
+                <FeatherIcon name="external-link" class="h-4 text-ink-gray-5" />
+              </a>
+            </template>
+          </FormControl>
         </div>
         <div class="ml-1">
           <ArrowUpRightIcon
