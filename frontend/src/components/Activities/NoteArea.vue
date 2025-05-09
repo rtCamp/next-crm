@@ -8,9 +8,9 @@
         </span>
       </div>
       <div class="flex items-center gap-2 ml-auto whitespace-nowrap">
-        <Tooltip :text="dateFormat(note.modified, dateTooltipFormat)">
+        <Tooltip :text="dateFormat(note.added_on, dateTooltipFormat)">
           <div class="truncate text-sm text-ink-gray-7">
-            {{ __(timeAgo(note.modified)) }}
+            {{ __(timeAgo(note.added_on)) }}
           </div>
         </Tooltip>
         <Dropdown
