@@ -145,7 +145,7 @@
             :debounce="500"
             @change.stop="emit('update', field.name, $event.target.value)"
           >
-            <template #prefix>
+            <template #suffix>
               <a
                 :href="
                   data[field.name].startsWith('https') || data[field.name].startsWith('http')
