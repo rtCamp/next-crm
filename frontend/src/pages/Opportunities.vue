@@ -43,68 +43,73 @@
     @update="(data) => viewControls.updateKanbanSettings(data)"
     @loadMore="(columnName) => viewControls.loadMoreKanban(columnName)"
   >
-    <template #title="{ titleField, itemName }">
-      <div class="flex gap-2 items-center">
-        <div v-if="titleField === 'status'">
-          <IndicatorIcon :class="getRow(itemName, titleField).color" />
+    <template #title="{ fields, titleField, itemName }">
+      <div class="flex gap-2 items-center justify-between">
+        <div class="flex gap-2 items-center">
+          <div v-if="titleField === 'status'">
+            <IndicatorIcon :class="getRow(itemName, titleField).color" />
+          </div>
+          <div
+            v-else-if="
+              titleField === 'customer' && getRow(itemName, titleField).label
+            "
+          >
+            <Avatar
+              class="flex items-center"
+              :image="getRow(itemName, titleField).logo"
+              :label="getRow(itemName, titleField).label"
+              size="sm"
+            />
+          </div>
+          <div
+            v-else-if="
+              titleField === 'opportunity_owner' &&
+              getRow(itemName, titleField).full_name
+            "
+          >
+            <Avatar
+              class="flex items-center"
+              :image="getRow(itemName, titleField).user_image"
+              :label="getRow(itemName, titleField).full_name"
+              size="sm"
+            />
+          </div>
+          <div
+            v-if="
+              [
+                'modified',
+                'creation',
+                'first_response_time',
+                'first_responded_on',
+                'response_by',
+              ].includes(titleField)
+            "
+            class="truncate text-base"
+          >
+            <Tooltip :text="getRow(itemName, titleField).label">
+              <div>{{ getRow(itemName, titleField).timeAgo }}</div>
+            </Tooltip>
+          </div>
+          <div v-else-if="titleField === 'sla_status'" class="truncate text-base">
+            <Badge
+              v-if="getRow(itemName, titleField).value"
+              :variant="'subtle'"
+              :theme="getRow(itemName, titleField).color"
+              size="md"
+              :label="getRow(itemName, titleField).value"
+            />
+          </div>
+          <div
+            v-else-if="getRow(itemName, titleField).label"
+            class="text-base"
+          >
+            {{ getRow(itemName, titleField).label }}
+          </div>
+          <div class="text-ink-gray-4" v-else>{{ __('No Title') }}</div>
         </div>
-        <div
-          v-else-if="
-            titleField === 'customer' && getRow(itemName, titleField).label
-          "
-        >
-          <Avatar
-            class="flex items-center"
-            :image="getRow(itemName, titleField).logo"
-            :label="getRow(itemName, titleField).label"
-            size="sm"
-          />
-        </div>
-        <div
-          v-else-if="
-            titleField === 'opportunity_owner' &&
-            getRow(itemName, titleField).full_name
-          "
-        >
-          <Avatar
-            class="flex items-center"
-            :image="getRow(itemName, titleField).user_image"
-            :label="getRow(itemName, titleField).full_name"
-            size="sm"
-          />
-        </div>
-        <div
-          v-if="
-            [
-              'modified',
-              'creation',
-              'first_response_time',
-              'first_responded_on',
-              'response_by',
-            ].includes(titleField)
-          "
-          class="truncate text-base"
-        >
-          <Tooltip :text="getRow(itemName, titleField).label">
-            <div>{{ getRow(itemName, titleField).timeAgo }}</div>
-          </Tooltip>
-        </div>
-        <div v-else-if="titleField === 'sla_status'" class="truncate text-base">
-          <Badge
-            v-if="getRow(itemName, titleField).value"
-            :variant="'subtle'"
-            :theme="getRow(itemName, titleField).color"
-            size="md"
-            :label="getRow(itemName, titleField).value"
-          />
-        </div>
-        <div
-          v-else-if="getRow(itemName, titleField).label"
-          class="text-base"
-        >
-          {{ getRow(itemName, titleField).label }}
-        </div>
-        <div class="text-ink-gray-4" v-else>{{ __('No Title') }}</div>
+        <Badge v-if='fields["custom_priority"]' :variant="'subtle'" :theme="fields['custom_priority'] === 'High' ? 'red' : fields['custom_priority'] === 'Medium' ? 'orange' : 'gray'" class="text-base">
+          {{ fields["custom_priority"] }}
+        </Badge>
       </div>
     </template>
 
