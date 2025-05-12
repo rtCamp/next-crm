@@ -107,9 +107,7 @@
           </div>
           <div class="text-ink-gray-4" v-else>{{ __('No Title') }}</div>
         </div>
-        <Badge v-if='fields["custom_priority"]' :variant="'subtle'" :theme="fields['custom_priority'] === 'High' ? 'red' : fields['custom_priority'] === 'Medium' ? 'orange' : 'gray'" class="text-base">
-          {{ fields["custom_priority"] }}
-        </Badge>
+        <Badge v-if='fields["custom_priority"]' :variant="'subtle'" :theme="fields['custom_priority'] === 'High' ? 'red' : fields['custom_priority'] === 'Medium' ? 'orange' : 'gray'" class="text-base" :label="fields['custom_priority']"/>
       </div>
     </template>
 

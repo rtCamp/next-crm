@@ -124,6 +124,15 @@
           <div v-else-if="column.type === 'Check'">
             <FormControl type="checkbox" :modelValue="item" :disabled="true" class="text-ink-gray-9" />
           </div>
+          <div v-else-if="column.key === 'custom_priority'" class="truncate text-base">
+            <Badge
+              v-if="item"
+              :variant="'subtle'"
+              :theme="item === 'High' ? 'red' : item === 'Medium' ? 'orange' : 'gray'"
+              size="md"
+              :label="item"
+            />
+          </div>
           <div
             v-else
             class="truncate text-base"
