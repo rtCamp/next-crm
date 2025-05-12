@@ -3,11 +3,11 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
-
+import frappeui from 'frappe-ui/vite'
 // https://vitejs.dev/config/
 
 export default defineConfig(async ({ mode }) => {
-  const frappeui = (await import("frappe-ui/vite")).default;
+  
   const env = loadEnv(mode, process.cwd())
   let proxyConfig = {}
 
@@ -113,9 +113,6 @@ export default defineConfig(async ({ mode }) => {
     build: {
       outDir: '../next_crm/public/frontend',
       emptyOutDir: true,
-      commonjsOptions: {
-        include: [/tailwind.config.js/, /node_modules/],
-      },
       sourcemap: true,
     },
     optimizeDeps: {
