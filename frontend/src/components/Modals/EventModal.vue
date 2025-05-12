@@ -262,7 +262,6 @@ async function updateEvent() {
         {
           reference_doctype: props.doctype,
           reference_docname: props.doc || null,
-          email: getUser().email,
         },
         ...event_participants.value.map((email) => ({
           reference_doctype: 'User',
@@ -296,7 +295,7 @@ function render() {
         .filter((participant) => participant.reference_doctype === 'User' && participant.reference_docname === 'Guest')
         .map((participant) => participant.email)
     } else {
-      event_participants.value = []
+      event_participants.value = [getUser().email]
     }
   })
 }

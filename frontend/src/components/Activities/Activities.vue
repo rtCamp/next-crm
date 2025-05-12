@@ -380,6 +380,12 @@ const all_activities = createResource({
   cache: ['activity', doc.value.data.name],
   auto: true,
   transform: ([versions, calls, notes, todos, events, attachments]) => {
+    props.tabs[1].count.value = versions.filter((activity) => activity.activity_type === 'communication').length
+    props.tabs[2].count.value = versions.filter((activity) => activity.activity_type === 'comment').length
+    props.tabs[3].count.value = todos.length
+    props.tabs[4].count.value = events.length
+    props.tabs[5].count.value = notes.length
+    props.tabs[6].count.value = attachments.length
     return { versions, calls, notes, todos, events, attachments }
   },
 })

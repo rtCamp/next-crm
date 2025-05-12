@@ -1,11 +1,7 @@
 <template>
   <TextEditor
     ref="textEditor"
-    :editor-class="[
-      'prose-sm max-w-none',
-      editable && 'min-h-[7rem]',
-      '[&_p.reply-to-content]:hidden',
-    ]"
+    :editor-class="['prose-sm max-w-none', editable && 'min-h-[7rem]', '[&_p.reply-to-content]:hidden']"
     :content="content"
     @change="editable ? (content = $event) : null"
     :starterkit-options="{
@@ -19,35 +15,25 @@
     <template #top>
       <div class="flex flex-col gap-3">
         <div class="sm:mx-10 mx-4 flex items-center gap-2 border-t pt-2.5">
-          <span class="text-xs text-ink-gray-4">{{ __('TO') }}:</span>
+          <span class="text-xs text-ink-gray-4">{{ __('TO') }}: <span class="text-red-500">*</span></span>
           <MultiselectInput
             class="flex-1"
             v-model="toEmails"
             :validate="validateEmail"
-            :error-message="
-              (value) => __('{0} is an invalid email address', [value])
-            "
+            :error-message="(value) => __('{0} is an invalid email address', [value])"
           />
           <div class="flex gap-1.5">
             <Button
               :label="__('CC')"
               variant="ghost"
               @click="toggleCC()"
-              :class="[
-                cc
-                  ? '!bg-surface-gray-4 hover:bg-surface-gray-3'
-                  : '!text-ink-gray-4',
-              ]"
+              :class="[cc ? '!bg-surface-gray-4 hover:bg-surface-gray-3' : '!text-ink-gray-4']"
             />
             <Button
               :label="__('BCC')"
               variant="ghost"
               @click="toggleBCC()"
-              :class="[
-                bcc
-                  ? '!bg-surface-gray-4 hover:bg-surface-gray-3'
-                  : '!text-ink-gray-4',
-              ]"
+              :class="[bcc ? '!bg-surface-gray-4 hover:bg-surface-gray-3' : '!text-ink-gray-4']"
             />
           </div>
         </div>
@@ -58,9 +44,7 @@
             class="flex-1"
             v-model="ccEmails"
             :validate="validateEmail"
-            :error-message="
-              (value) => __('{0} is an invalid email address', [value])
-            "
+            :error-message="(value) => __('{0} is an invalid email address', [value])"
           />
         </div>
         <div v-if="bcc" class="sm:mx-10 mx-4 flex items-center gap-2">
@@ -70,9 +54,7 @@
             class="flex-1"
             v-model="bccEmails"
             :validate="validateEmail"
-            :error-message="
-              (value) => __('{0} is an invalid email address', [value])
-            "
+            :error-message="(value) => __('{0} is an invalid email address', [value])"
           />
         </div>
         <div class="sm:mx-10 mx-4 flex items-center gap-2 pb-2.5">
@@ -86,40 +68,23 @@
     </template>
     <template v-slot:editor="{ editor }">
       <EditorContent
-        :class="[
-          editable &&
-            'sm:mx-10 mx-4 max-h-[35vh] overflow-y-auto border-t py-3',
-        ]"
+        :class="[editable && 'sm:mx-10 mx-4 max-h-[35vh] overflow-y-auto border-t py-3']"
         :editor="editor"
       />
     </template>
     <template v-slot:bottom>
       <div v-if="editable" class="flex flex-col gap-2">
         <div class="flex flex-wrap gap-2 sm:px-10 px-4">
-          <AttachmentItem
-            v-for="a in attachments"
-            :key="a.file_url"
-            :label="a.file_name"
-          >
+          <AttachmentItem v-for="a in attachments" :key="a.file_url" :label="a.file_name">
             <template #suffix>
-              <FeatherIcon
-                class="h-3.5"
-                name="x"
-                @click.stop="removeAttachment(a)"
-              />
+              <FeatherIcon class="h-3.5" name="x" @click.stop="removeAttachment(a)" />
             </template>
           </AttachmentItem>
         </div>
-        <div
-          class="flex justify-between gap-2 overflow-hidden border-t sm:px-10 px-4 py-2.5"
-        >
+        <div class="flex justify-between gap-2 overflow-hidden border-t sm:px-10 px-4 py-2.5">
           <div class="flex gap-1 items-center overflow-x-auto">
             <TextEditorBubbleMenu :buttons="textEditorMenuButtons" />
-            <IconPicker
-              v-model="emoji"
-              v-slot="{ togglePopover }"
-              @update:modelValue="() => appendEmoji()"
-            >
+            <IconPicker v-model="emoji" v-slot="{ togglePopover }" @update:modelValue="() => appendEmoji()">
               <Button variant="ghost" @click="togglePopover()">
                 <template #icon>
                   <SmileIcon class="h-4" />
@@ -142,10 +107,7 @@
                 </Button>
               </template>
             </FileUploader>
-            <Button
-              variant="ghost"
-              @click="showEmailTemplateSelectorModal = true"
-            >
+            <Button variant="ghost" @click="showEmailTemplateSelectorModal = true">
               <template #icon>
                 <Email2Icon class="h-4" />
               </template>
@@ -153,21 +115,13 @@
           </div>
           <div class="mt-2 flex items-center justify-end space-x-2 sm:mt-0">
             <Button v-bind="discardButtonProps || {}" :label="__('Discard')" />
-            <Button
-              variant="solid"
-              v-bind="submitButtonProps || {}"
-              :label="__('Send')"
-            />
+            <Button variant="solid" v-bind="submitButtonProps || {}" :label="__('Send')" />
           </div>
         </div>
       </div>
     </template>
   </TextEditor>
-  <EmailTemplateSelectorModal
-    v-model="showEmailTemplateSelectorModal"
-    :doctype="doctype"
-    @apply="applyEmailTemplate"
-  />
+  <EmailTemplateSelectorModal v-model="showEmailTemplateSelectorModal" :doctype="doctype" @apply="applyEmailTemplate" />
 </template>
 
 <script setup>
@@ -261,13 +215,10 @@ function removeAttachment(attachment) {
 const showEmailTemplateSelectorModal = ref(false)
 
 async function applyEmailTemplate(template) {
-  let data = await call(
-    'frappe.email.doctype.email_template.email_template.get_email_template',
-    {
-      template_name: template.name,
-      doc: modelValue.value,
-    },
-  )
+  let data = await call('frappe.email.doctype.email_template.email_template.get_email_template', {
+    template_name: template.name,
+    doc: modelValue.value,
+  })
 
   if (template.subject) {
     subject.value = data.subject
