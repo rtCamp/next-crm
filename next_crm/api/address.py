@@ -32,24 +32,6 @@ def get_linked_address(link_doctype, link_name):
         )
         return addresses
 
-    if "Opportunity" == link_doctype:
-        opportunity = frappe.get_cached_doc("Opportunity", link_name)
-        if opportunity.opportunity_from and opportunity.opportunity_from == "Lead":
-            filters = [
-                [
-                    "Dynamic Link",
-                    "link_doctype",
-                    "in",
-                    [link_doctype, opportunity.opportunity_from],
-                ],
-                [
-                    "Dynamic Link",
-                    "link_name",
-                    "in",
-                    [link_name, opportunity.party_name],
-                ],
-            ]
-
     addresses = frappe.get_list(
         "Address",
         fields=[
@@ -112,4 +94,30 @@ def remove_address(link_doctype, link_name, address):
     address_doc = frappe.get_doc("Address", address)
     address_doc.links = [d for d in address_doc.links if d.link_name != link_name]
     address_doc.save()
+    return True
+
+
+def migrate_lead_addresses_to_opportunity(lead_name, opportunity_name):
+    addresses = frappe.get_list(
+        "Address",
+        filters=[
+            ["Dynamic Link", "link_doctype", "=", "Lead"],
+            ["Dynamic Link", "link_name", "=", lead_name],
+        ],
+        pluck="name",
+    )
+    if not addresses:
+        return
+
+    for address in addresses:
+        address_doc = frappe.get_doc("Address", address)
+        address_doc.append(
+            "links",
+            {
+                "link_doctype": "Opportunity",
+                "link_name": opportunity_name,
+            },
+        )
+        address_doc.save()
+
     return True
