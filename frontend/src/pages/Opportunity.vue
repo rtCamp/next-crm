@@ -82,8 +82,8 @@
             />
           </div>
         </Tooltip>
-        <div class="flex flex-col gap-2.5 truncat text-ink-gray-9">
-          <Tooltip :text="customer.data?.name || opportunity.data?.party_name || __('Set an customer')">
+        <div class="flex flex-col gap-2.5 truncate text-ink-gray-9">
+          <Tooltip :text="customer.data?.name || opportunity.data?.title || opportunity.data?.party_name || __('Set an customer')">
             <div class="truncate text-2xl font-medium" @click="showRenameModal = true">
               {{ customer.data?.name || opportunity.data?.title || opportunity.data?.party_name || __('Untitled') }}
             </div>
