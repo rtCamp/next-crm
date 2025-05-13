@@ -430,10 +430,14 @@ def get_data(
                     page_length = kc.get("page_length")
 
                 if order:
+                    if "custom_priority" not in rows:
+                        rows.append("custom_priority")
                     column_data = get_records_based_on_order(
                         doctype, rows, column_filters, page_length, order
                     )
                 else:
+                    if "custom_priority" not in rows:
+                        rows.append("custom_priority")
                     column_data = frappe.get_list(
                         doctype,
                         fields=rows,

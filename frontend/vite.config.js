@@ -2,15 +2,15 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import path from 'path'
-import frappeui from 'frappe-ui/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-
+import frappeui from 'frappe-ui/vite'
 // https://vitejs.dev/config/
 
-export default defineConfig(({  mode }) => {
-  const env = loadEnv(mode,process.cwd())
-  let proxyConfig = {}
+export default defineConfig(async ({ mode }) => {
   
+  const env = loadEnv(mode, process.cwd())
+  let proxyConfig = {}
+
   if (env.VITE_SITE_NAME && env.VITE_SITE_PORT) {
     proxyConfig = {
       '^/(app|api|assets|files|private)': {
@@ -27,7 +27,16 @@ export default defineConfig(({  mode }) => {
       proxy: proxyConfig,
     },
     plugins: [
-      frappeui(),
+      frappeui({
+        frappeProxy: true,
+        lucideIcons: true,
+        jinjaBootData: true,
+        buildConfig: {
+          indexHtmlPath: '../next_crm/www/next-crm/index.html',
+          emptyOutDir: true,
+          sourcemap: true,
+        },
+      }),
       vue({
         script: {
           propsDestructure: true,
@@ -72,6 +81,9 @@ export default defineConfig(({  mode }) => {
             },
           ],
         },
+        workbox: {
+          maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4 MiB
+        }
       }),
       {
         name: 'transform-index.html',
@@ -101,13 +113,11 @@ export default defineConfig(({  mode }) => {
     build: {
       outDir: '../next_crm/public/frontend',
       emptyOutDir: true,
-      commonjsOptions: {
-        include: [/tailwind.config.js/, /node_modules/],
-      },
       sourcemap: true,
     },
     optimizeDeps: {
-      include: ['feather-icons', 'showdown', 'tailwind.config.js', 'engine.io-client', 'prosemirror-state'],
+      include: ['feather-icons', 'showdown', 'tailwind.config.js', 'engine.io-client', 'prosemirror-state', "highlight.js/lib/core", 'prosemirror-view',
+        'lowlight'],
     },
   }
 })

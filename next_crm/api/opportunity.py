@@ -29,32 +29,6 @@ def get_opportunity(name):
 
 
 @frappe.whitelist()
-def add_address(opportunity, address):
-    if not frappe.has_permission("Opportunity", "write", opportunity):
-        frappe.throw(
-            _("Not allowed to add address to Opportunity"), frappe.PermissionError
-        )
-
-    opportunity_doc = frappe.get_cached_doc("Opportunity", opportunity)
-    address_doc = frappe.get_doc("Address", address)
-
-    if opportunity_doc.opportunity_from:
-        address_doc.append(
-            "links",
-            {
-                "link_doctype": opportunity_doc.opportunity_from,
-                "link_name": opportunity_doc.party_name,
-            },
-        )
-
-    address_doc.append(
-        "links", {"link_doctype": "Opportunity", "link_name": opportunity}
-    )
-    address_doc.save()
-    return True
-
-
-@frappe.whitelist()
 def declare_enquiry_lost_api(
     name, lost_reasons_list, competitors, detailed_reason=None
 ):

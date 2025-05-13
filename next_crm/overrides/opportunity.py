@@ -11,6 +11,7 @@ from erpnext.crm.utils import (
 )
 from frappe import _
 from frappe.desk.form.assign_to import add as assign
+from frappe.utils import get_datetime
 
 from next_crm.ncrm.doctype.crm_service_level_agreement.utils import get_sla
 from next_crm.ncrm.doctype.crm_stage_change_log.crm_stage_change_log import (
@@ -36,6 +37,8 @@ class OverrideOpportunity(Opportunity):
 
         if self.has_value_changed("status"):
             add_status_change_log(self)
+            if self.status == "Won":
+                self.custom_won_date = get_datetime()
 
         if self.has_value_changed("sales_stage"):
             add_stage_change_log(self)

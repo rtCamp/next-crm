@@ -91,6 +91,7 @@ import { usersStore } from '@/stores/users'
 import { useStorage } from '@vueuse/core'
 import { call, createResource } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
+import { createToast } from '../utils'
 
 const props = defineProps({
   doctype: {
@@ -170,6 +171,14 @@ const emailEmpty = computed(() => {
 
 async function sendMail() {
   let recipients = newEmailEditor.value.toEmails
+  if (!recipients.length) {
+    createToast({
+      title: __('Please add at least one recipient'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+    return false
+  }
   let subject = newEmailEditor.value.subject
   let cc = newEmailEditor.value.ccEmails || []
   let bcc = newEmailEditor.value.bccEmails || []
@@ -177,19 +186,30 @@ async function sendMail() {
   if (attachments.value.length) {
     capture('email_attachments_added')
   }
-  await call('frappe.core.doctype.communication.email.make', {
-    recipients: recipients.join(', '),
-    attachments: attachments.value.map((x) => x.name),
-    cc: cc.join(', '),
-    bcc: bcc.join(', '),
-    subject: subject,
-    content: newEmail.value,
-    doctype: props.doctype,
-    name: doc.value.data.name,
-    send_email: 1,
-    sender: getUser().email,
-    sender_full_name: getUser()?.full_name || undefined,
-  })
+  try {
+    await call('frappe.core.doctype.communication.email.make', {
+      recipients: recipients.join(', '),
+      attachments: attachments.value.map((x) => x.name),
+      cc: cc.join(', '),
+      bcc: bcc.join(', '),
+      subject: subject,
+      content: newEmail.value,
+      doctype: props.doctype,
+      name: doc.value.data.name,
+      send_email: 1,
+      sender: getUser().email,
+      sender_full_name: getUser()?.full_name || undefined,
+    })
+  } catch (error) {
+    createToast({
+      title: __('Error'),
+      text: error.message,
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+    return false
+  }
+  return true
 }
 
 async function sendComment() {
@@ -212,7 +232,10 @@ async function sendComment() {
 async function submitEmail() {
   if (emailEmpty.value) return
   showEmailBox.value = false
-  await sendMail()
+  let sendResult = await sendMail()
+  if (!sendResult) {
+    return false
+  }
   newEmail.value = ''
   reload.value = true
   emit('scroll')

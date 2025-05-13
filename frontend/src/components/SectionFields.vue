@@ -41,7 +41,9 @@
                 </Button>
               </template>
               <template #body>
-                <div class="my-2 p-1.5 min-w-40 space-y-1.5 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div
+                  class="my-2 p-1.5 min-w-40 space-y-1.5 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                >
                   <div>
                     <DropdownItem
                       v-if="field.options?.length"
@@ -134,6 +136,28 @@
             @change="(data) => emit('update', field.name, data)"
             :onCreate="field.create"
           />
+          <FormControl
+            v-else-if="data[field.name] && /^(https?:\/\/|www\.)[^\s$.?#].[^\s]*$/.test(data[field.name])"
+            class="form-control"
+            type="text"
+            :value="data[field.name]"
+            :placeholder="field.placeholder"
+            :debounce="500"
+            @change.stop="emit('update', field.name, $event.target.value)"
+          >
+            <template #suffix>
+              <a
+                :href="
+                  data[field.name].startsWith('https') || data[field.name].startsWith('http')
+                    ? data[field.name]
+                    : 'https://' + data[field.name]
+                "
+                target="_blank"
+              >
+                <FeatherIcon name="external-link" class="h-4 text-ink-gray-5" />
+              </a>
+            </template>
+          </FormControl>
           <FormControl
             v-else
             class="form-control"

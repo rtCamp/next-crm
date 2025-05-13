@@ -41,7 +41,6 @@ def get_opportunity_activities(name):
 
     activities = []
     calls = []
-    notes = []
     todos = []
     events = []
     attachments = []
@@ -49,7 +48,7 @@ def get_opportunity_activities(name):
 
     if opportunity_from == "Lead":
         lead = doc[3]
-        activities, calls, notes, todos, events, attachments = get_lead_activities(
+        activities, calls, _notes, todos, events, attachments = get_lead_activities(
             lead, False
         )
         creation_text = "converted the lead to this opportunity"
@@ -196,13 +195,14 @@ def get_opportunity_activities(name):
         activities.append(activity)
 
     calls = calls + get_linked_calls(name)
-    notes = notes + get_linked_notes(name)
+    notes = get_linked_notes(name)
     todos = todos + get_linked_todos(name)
     events = events + get_linked_events(name)
     attachments = attachments + get_attachments("Opportunity", name)
 
     activities.sort(key=lambda x: x["creation"], reverse=True)
     activities = handle_multiple_versions(activities)
+    notes.sort(key=lambda x: x["added_on"], reverse=True)
 
     return activities, calls, notes, todos, events, attachments
 
@@ -376,6 +376,7 @@ def get_lead_activities(name, get_events=True):
 
     activities.sort(key=lambda x: x["creation"], reverse=True)
     activities = handle_multiple_versions(activities)
+    notes.sort(key=lambda x: x["added_on"], reverse=True)
 
     return activities, calls, notes, todos, events, attachments
 
@@ -468,7 +469,7 @@ def get_linked_notes(name):
     notes = frappe.db.get_all(
         "CRM Note",
         filters={"parent": name},
-        fields=["name", "custom_title", "note", "owner", "modified"],
+        fields=["name", "custom_title", "note", "owner", "added_on"],
     )
     return notes or []
 
