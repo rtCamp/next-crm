@@ -165,19 +165,11 @@ def search_emails(txt: str):
 
 @frappe.whitelist()
 def get_linked_contact(link_doctype, link_name):
-    link_names = [link_name]
-    link_doctypes = [link_doctype]
-    if link_doctype == "Opportunity":
-        opportunity = frappe.get_cached_doc("Opportunity", link_name)
-        if opportunity.opportunity_from and opportunity.opportunity_from == "Lead":
-            link_doctypes.append(opportunity.opportunity_from)
-            link_names.append(opportunity.party_name)
-
     contacts = frappe.get_list(
         "Contact",
         [
-            ["Dynamic Link", "link_doctype", "in", link_doctypes],
-            ["Dynamic Link", "link_name", "in", link_names],
+            ["Dynamic Link", "link_doctype", "=", link_doctype],
+            ["Dynamic Link", "link_name", "=", link_name],
         ],
         distinct=True,
         pluck="name",
@@ -193,18 +185,6 @@ def link_contact_to_doc(contact, doctype, docname):
 
     contact_doc = frappe.get_doc("Contact", contact)
 
-    if doctype == "Opportunity":
-        opportunity_doc = frappe.get_cached_doc("Opportunity", docname)
-
-        if opportunity_doc.opportunity_from:
-            contact_doc.append(
-                "links",
-                {
-                    "link_doctype": opportunity_doc.opportunity_from,
-                    "link_name": opportunity_doc.party_name,
-                },
-            )
-
     contact_doc.append("links", {"link_doctype": doctype, "link_name": docname})
     contact_doc.save()
 
@@ -218,13 +198,7 @@ def remove_link_from_contact(contact, doctype, docname):
 
     contact_doc = frappe.get_doc("Contact", contact)
 
-    link_names = [docname]
-    if doctype == "Opportunity":
-        opportunity_doc = frappe.get_cached_doc("Opportunity", docname)
-        if opportunity_doc.opportunity_from:
-            link_names.append(opportunity_doc.party_name)
-
-    contact_doc.links = [d for d in contact_doc.links if d.link_name not in link_names]
+    contact_doc.links = [d for d in contact_doc.links if d.link_name != docname]
     contact_doc.save()
 
     return contact_doc.name
@@ -276,3 +250,29 @@ def get_primary_mobile_no(contact):
         if phone.is_primary:
             return phone.phone
     return contact.phone_nos[0].phone if contact.phone_nos else ""
+
+
+def migrate_lead_contacts_to_opportunity(lead_name, opportunity_name):
+    contacts = frappe.get_all(
+        "Contact",
+        filters=[
+            ["Dynamic Link", "link_doctype", "=", "Lead"],
+            ["Dynamic Link", "link_name", "=", lead_name],
+        ],
+        pluck="name",
+    )
+    if not contacts:
+        return
+
+    for contact in contacts:
+        contact_doc = frappe.get_doc("Contact", contact)
+        contact_doc.append(
+            "links",
+            {
+                "link_doctype": "Opportunity",
+                "link_name": opportunity_name,
+            },
+        )
+        contact_doc.save()
+
+    return True
