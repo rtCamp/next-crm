@@ -854,9 +854,10 @@ async function addContact(contact) {
 }
 
 async function addAddress(address) {
-  let d = await call('next_crm.api.opportunity.add_address', {
-    opportunity: props.opportunityId,
+  let d = await call('next_crm.api.address.link_address_to_doc', {
     address,
+    doctype: "Opportunity",
+    docname: props.opportunityId,
   })
   if (d) {
     opportunityAddresses.reload()
