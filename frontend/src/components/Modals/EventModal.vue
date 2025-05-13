@@ -230,6 +230,14 @@ async function updateEvent() {
   }
   if (!_event.value.sync_with_google_calendar) {
     _event.value.google_calendar = null
+  } else if (!_event.value.google_calendar) {
+    createToast({
+      title: __('Error'),
+      text: __('Select Google Calendar to which event should be synced'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+    return
   }
   _event.value.assigned_by = getUser().name
   if (_event.value.name) {
