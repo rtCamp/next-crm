@@ -98,7 +98,7 @@ def remove_address(link_doctype, link_name, address):
 
 
 def migrate_lead_addresses_to_opportunity(lead_name, opportunity_name):
-    addresses = frappe.get_list(
+    addresses = frappe.get_all(
         "Address",
         filters=[
             ["Dynamic Link", "link_doctype", "=", "Lead"],
