@@ -77,10 +77,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  multiple:{
+  multiple: {
     type: Boolean,
     default: false,
-  }
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -93,7 +93,10 @@ const value = computed({
   get: () => (valuePropPassed.value ? attrs.value : props.modelValue),
   set: (val) => {
     if (props.multiple) {
-      emit(valuePropPassed.value ? 'change' : 'update:modelValue', val.map(v => v.value))
+      emit(
+        valuePropPassed.value ? 'change' : 'update:modelValue',
+        val.map((v) => v.value),
+      )
     } else {
       emit(valuePropPassed.value ? 'change' : 'update:modelValue', val?.value)
     }
