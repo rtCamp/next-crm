@@ -381,7 +381,22 @@ function getValueControl(f) {
       type: 'select',
       options: timespanOptions,
     })
-  } else if (['like', 'not like', 'in', 'not in'].includes(operator)) {
+  } else if (['in', 'not in'].includes(operator)) {
+    if (typeSelect.includes(fieldtype)) {
+      const _options = getSelectOptions(options)
+      return h(FormControl, {
+        type: 'select',
+        options: _options.map((o) => ({
+          label: o,
+          value: o,
+        })),
+      })
+    } else if (fieldtype == 'Link') {
+      return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
+    } else {
+      return h(FormControl, { type: 'text' })
+    }
+  } else if (['like', 'not like'].includes(operator)) {
     return h(FormControl, { type: 'text' })
   } else if (typeSelect.includes(fieldtype) || typeCheck.includes(fieldtype)) {
     const _options =

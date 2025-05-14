@@ -5,12 +5,13 @@
     </label>
     <Autocomplete
       ref="autocomplete"
-      :options="options.data"
+      :options="options.data ?? []"
       v-model="value"
       :size="attrs.size || 'sm'"
       :variant="attrs.variant"
       :placeholder="attrs.placeholder"
       :filterable="false"
+      :multiple="props.multiple"
     >
       <template #target="{ open, togglePopover }">
         <slot name="target" v-bind="{ open, togglePopover }" />
@@ -54,7 +55,7 @@
 </template>
 
 <script setup>
-import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
+import { Autocomplete } from 'frappe-ui'
 import { watchDebounced } from '@vueuse/core'
 import { createResource } from 'frappe-ui'
 import { useAttrs, computed, ref } from 'vue'
@@ -69,13 +70,17 @@ const props = defineProps({
     default: () => [],
   },
   modelValue: {
-    type: String,
+    type: [String, Array],
     default: '',
   },
   hideMe: {
     type: Boolean,
     default: false,
   },
+  multiple:{
+    type: Boolean,
+    default: false,
+  }
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -87,7 +92,11 @@ const valuePropPassed = computed(() => 'value' in attrs)
 const value = computed({
   get: () => (valuePropPassed.value ? attrs.value : props.modelValue),
   set: (val) => {
-    return val?.value && emit(valuePropPassed.value ? 'change' : 'update:modelValue', val?.value)
+    if (props.multiple) {
+      emit(valuePropPassed.value ? 'change' : 'update:modelValue', val.map(v => v.value))
+    } else {
+      emit(valuePropPassed.value ? 'change' : 'update:modelValue', val?.value)
+    }
   },
 })
 
