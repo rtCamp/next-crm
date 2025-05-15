@@ -527,7 +527,7 @@ import {
   call,
   usePageMeta,
 } from 'frappe-ui'
-import { ref, computed, h, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, h, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 
@@ -761,7 +761,6 @@ const fieldsLayout = createResource({
   cache: ['fieldsLayout', props.opportunityId],
   params: { doctype: 'Opportunity', name: props.opportunityId },
   auto: true,
-  transform: (data) => getParsedFields(data),
 })
 
 function getParsedFields(sections) {
@@ -784,6 +783,15 @@ function getParsedFields(sections) {
   })
   return sections
 }
+
+watch(
+  () => fieldsLayout.data,
+  (data) => {
+    if (!data) return
+    const sections = getParsedFields(data)
+    fieldsLayout.data = sections
+  },
+)
 
 const showContactModal = ref(false)
 const showAddressModal = ref(false)
