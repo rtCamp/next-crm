@@ -703,24 +703,22 @@ const quickFilterOptions = computed(() => {
 
 const quickFilterList = computed(() => {
   if (!quickFilters.data) return []
-  
+
   return quickFilters.data.map((filter) => {
     const newFilter = { ...filter }
-    
+
     newFilter.value = filter.fieldtype === 'Check' ? false : ''
-    
+
     if (list.value.params?.filters?.[newFilter.fieldname]) {
       const filterValue = list.value.params.filters[newFilter.fieldname]
-      
+
       if (Array.isArray(filterValue)) {
         if (filterValue[0]?.toLowerCase() === 'in') {
           newFilter.value = filterValue[1]
-        } 
-        else if (filterValue[0]?.toLowerCase() === 'like' && filterValue[1]) {
+        } else if (filterValue[0]?.toLowerCase() === 'like' && filterValue[1]) {
           newFilter.value = filterValue[1].replace(/%/g, '')
         }
-      } 
-      else if (typeof filterValue === 'boolean' || filterValue) {
+      } else if (typeof filterValue === 'boolean' || filterValue) {
         newFilter.value = filterValue
       }
     }
@@ -754,7 +752,7 @@ function applyQuickFilter(filter, value) {
     if (['Check', 'Select', 'Date', 'Datetime'].includes(filter.fieldtype)) {
       filters[field] = value
     } else if (filter.fieldtype === 'Link') {
-      filters[field] = ["in", value]
+      filters[field] = ['in', value]
     } else {
       filters[field] = ['LIKE', `%${value}%`]
     }

@@ -21,7 +21,11 @@
     :doctype="filter.options"
     :placeholder="filter.label"
     :filters="filter.filters"
-    @change="(data) => {updateFilter({...filter,value:filter.value}, data)}"
+    @change="
+      (data) => {
+        updateFilter({ ...filter, value: filter.value }, data)
+      }
+    "
     :multiple="true"
   />
   <component
