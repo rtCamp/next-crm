@@ -229,5 +229,5 @@ class CRMServiceLevelAgreement(Document):
             return res
         holiday_list = frappe.get_doc("Holiday List", self.holiday_list)
         for row in holiday_list.holidays:
-            res.append(row.date)
+            res.append(row.holiday_date)
         return res
