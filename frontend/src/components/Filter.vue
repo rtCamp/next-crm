@@ -366,6 +366,11 @@ function getValueControl(f) {
         value: o,
       })),
     })
+  } else if (operator === 'equals' || operator === 'not equals') {
+      if(fieldtype == 'Link'){
+        return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple:true})
+      }
+    return h(FormControl, { type: 'text' })
   } else if (typeLink.includes(fieldtype)) {
     if (fieldtype == 'Dynamic Link') {
       return h(FormControl, { type: 'text' })
@@ -503,7 +508,9 @@ function parseFilters(filters) {
   const filtersArray = Array.from(filters)
   const obj = filtersArray.map(transformIn).reduce((p, c) => {
     if (['equals', '='].includes(c.operator)) {
-      p[c.fieldname] = c.value == 'Yes' ? true : c.value == 'No' ? false : c.value
+      p[c.fieldname] = c.value == 'Yes' ? true : c.value == 'No' ? false : Array.isArray(c.value) ? ['in', c.value] : c.value
+    } else if (['not equals',"!="].includes(c.operator)) {
+      p[c.fieldname] = c.value == 'Yes' ? true : c.value == 'No' ? false : Array.isArray(c.value) ? ["not in", c.value] : c.value
     } else {
       p[c.fieldname] = [operatorMap[c.operator.toLowerCase()], c.value]
     }

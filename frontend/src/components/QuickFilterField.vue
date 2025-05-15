@@ -21,7 +21,8 @@
     :doctype="filter.options"
     :placeholder="filter.label"
     :filters="filter.filters"
-    @change="(data) => updateFilter(filter, data)"
+    @change="(data) => {updateFilter({...filter,value:filter.value}, data)}"
+    :multiple="true"
   />
   <component
     v-else-if="['Date', 'Datetime'].includes(filter.fieldtype)"

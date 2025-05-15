@@ -164,7 +164,7 @@ function reload(val) {
 
 function clearValue(close) {
   emit(valuePropPassed.value ? 'change' : 'update:modelValue', '')
-  close()
+  close?.()
 }
 
 const labelClasses = computed(() => {
