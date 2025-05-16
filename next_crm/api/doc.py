@@ -548,6 +548,14 @@ def get_data(
                     "options": get_options(field.get("type"), field.get("options")),
                 }
 
+    # Explicitly adding "Link Type" to Link fields if empty
+    field_map = {f["value"]: f for f in fields}
+
+    for column in columns:
+        key = column.get("key")
+        if key in field_map:
+            column["type"] = field_map[key]["type"]
+
     return {
         "data": data,
         "columns": columns,

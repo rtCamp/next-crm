@@ -1195,9 +1195,12 @@ function applyFilter({ event, idx, column, item, firstColumn }) {
   let filters = { ...list.value.params.filters }
 
   let value = item.name || item.label || item
-
   if (value) {
-    filters[column.key] = value
+    if (column.type == 'Link') {
+      filters[column.key] = ['in', Array.isArray(value) ? value : [value]]
+    } else {
+      filters[column.key] = value
+    }
   } else {
     delete filters[column.key]
   }
