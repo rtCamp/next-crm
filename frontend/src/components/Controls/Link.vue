@@ -12,6 +12,7 @@
       :placeholder="attrs.placeholder"
       :filterable="false"
       :multiple="props.multiple"
+      @update:query="onQueryUpdate"
     >
       <template #target="{ open, togglePopover }">
         <slot name="target" v-bind="{ open, togglePopover }" />
@@ -119,16 +120,21 @@ const value = computed({
 
 const autocomplete = ref(null)
 const text = ref('')
+const query = ref('')
+
+function onQueryUpdate(val) {
+  query.value = val
+}
 
 watchDebounced(
-  () => autocomplete.value?.query,
+  query,
   (val) => {
     val = val || ''
     if (text.value === val) return
     text.value = val
     reload(val)
   },
-  { debounce: 300, immediate: true },
+  { debounce: 300, immediate: false },
 )
 
 watchDebounced(
