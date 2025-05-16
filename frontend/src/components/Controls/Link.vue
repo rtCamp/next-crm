@@ -90,7 +90,16 @@ const attrs = useAttrs()
 const valuePropPassed = computed(() => 'value' in attrs)
 
 const value = computed({
-  get: () => (valuePropPassed.value ? attrs.value : props.modelValue),
+  get: () =>
+    valuePropPassed.value
+      ? attrs.value === ''
+        ? attrs.value
+        : Array.isArray(attrs.value)
+          ? attrs.value
+          : [attrs.value]
+      : Array.isArray(props.modelValue)
+        ? props.modelValue
+        : [props.modelValue],
   set: (val) => {
     if (props.multiple) {
       if (Array.isArray(val)) {
