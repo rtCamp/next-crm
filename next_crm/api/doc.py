@@ -397,10 +397,7 @@ def get_data(
             and isinstance(filters.get(column_field), list)
             and filters.get(column_field)[0] == "in"
         ):
-            selected_columns = [
-                enabled_column.strip()
-                for enabled_column in filters.get(column_field)[1].split(",")
-            ]
+            selected_columns = filters.get(column_field)[1]
             for kc in kanban_columns:
                 if kc.get("name") not in selected_columns:
                     continue
@@ -547,6 +544,14 @@ def get_data(
                     "type": field.get("type"),
                     "options": get_options(field.get("type"), field.get("options")),
                 }
+
+    # Explicitly adding "Link Type" to Link fields if empty
+    field_map = {f["value"]: f for f in fields}
+
+    for column in columns:
+        key = column.get("key")
+        if key in field_map:
+            column["type"] = field_map[key]["type"]
 
     return {
         "data": data,

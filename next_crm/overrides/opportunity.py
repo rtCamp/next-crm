@@ -166,7 +166,7 @@ class OverrideOpportunity(Opportunity):
             },
             {
                 "label": "Status",
-                "type": "Select",
+                "type": "Link",
                 "key": "status",
                 "width": "10rem",
             },
