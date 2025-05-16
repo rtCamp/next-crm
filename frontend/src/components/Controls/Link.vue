@@ -93,10 +93,15 @@ const value = computed({
   get: () => (valuePropPassed.value ? attrs.value : props.modelValue),
   set: (val) => {
     if (props.multiple) {
-      emit(
-        valuePropPassed.value ? 'change' : 'update:modelValue',
-        val.map((v) => v.value),
-      )
+      if (Array.isArray(val)) {
+        const filtered = val.filter((v) => v && v.value !== undefined && v.value !== null && v.value !== '')
+        emit(
+          valuePropPassed.value ? 'change' : 'update:modelValue',
+          filtered.map((v) => v.value),
+        )
+      } else {
+        emit(valuePropPassed.value ? 'change' : 'update:modelValue', [])
+      }
     } else {
       emit(valuePropPassed.value ? 'change' : 'update:modelValue', val?.value)
     }

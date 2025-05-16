@@ -351,7 +351,9 @@ function getValueControl(f) {
         })),
       })
     } else if (fieldtype == 'Link') {
-      f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(Boolean)
+      f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(
+        (v) => v !== undefined && v !== '' && v !== null,
+      )
       return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
     } else {
       return h(FormControl, { type: 'text' })
@@ -369,7 +371,9 @@ function getValueControl(f) {
     })
   } else if (operator === 'equals' || operator === 'not equals') {
     if (fieldtype == 'Link') {
-      f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(Boolean)
+      f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(
+        (v) => v !== undefined && v !== '' && v !== null,
+      )
       return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
     }
     return h(FormControl, { type: 'text' })
