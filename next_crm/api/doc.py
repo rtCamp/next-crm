@@ -397,10 +397,7 @@ def get_data(
             and isinstance(filters.get(column_field), list)
             and filters.get(column_field)[0] == "in"
         ):
-            selected_columns = [
-                enabled_column.strip()
-                for enabled_column in filters.get(column_field)[1].split(",")
-            ]
+            selected_columns = filters.get(column_field)[1]
             for kc in kanban_columns:
                 if kc.get("name") not in selected_columns:
                     continue
