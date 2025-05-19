@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-1.5 p-[2px] -m-[2px] truncate max-w-40">
+  <div class="space-y-1.5 p-[2px] -m-[2px] truncate">
     <label class="block" :class="labelClasses" v-if="attrs.label">
       {{ __(attrs.label) }}
     </label>
@@ -92,20 +92,18 @@ const valuePropPassed = computed(() => 'value' in attrs)
 
 const value = computed({
   get: () => {
-    if (valuePropPassed.value) {
-      if (attrs.value === '') {
-        return attrs.value
-      } else if (Array.isArray(attrs.value)) {
-        return attrs.value
-      } else {
-        return [attrs.value]
-      }
+    if (props.multiple) {
+      return valuePropPassed.value
+        ? attrs.value === ''
+          ? attrs.value
+          : Array.isArray(attrs.value)
+            ? attrs.value
+            : [attrs.value]
+        : Array.isArray(props.modelValue)
+          ? props.modelValue
+          : [props.modelValue]
     } else {
-      if (Array.isArray(props.modelValue)) {
-        return props.modelValue
-      } else {
-        return [props.modelValue]
-      }
+      return valuePropPassed.value ? attrs.value : props.modelValue
     }
   },
   set: (val) => {
