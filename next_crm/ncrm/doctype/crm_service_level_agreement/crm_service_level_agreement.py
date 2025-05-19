@@ -22,12 +22,16 @@ class CRMServiceLevelAgreement(Document):
     def validate(self):
         self.validate_default()
         self.validate_condition()
+        self.validate_weekdays()
 
     def validate_default(self):
         if self.default:
+            filters = {"apply_on": self.apply_on, "default": True}
+            if self.name:
+                filters["name"] = ["!=", self.name]
             other_slas = frappe.get_all(
                 "CRM Service Level Agreement",
-                filters={"apply_on": self.apply_on, "default": True},
+                filters=filters,
                 fields=["name"],
             )
             if other_slas:
@@ -47,6 +51,25 @@ class CRMServiceLevelAgreement(Document):
             frappe.throw(
                 _("The Condition '{0}' is invalid: {1}").format(self.condition, str(e))
             )
+
+    def validate_weekdays(self):
+        # check that there should not be a duplicate weekday in working_hours
+        workdays = []
+        for row in self.working_hours:
+            if row.workday in workdays:
+                frappe.throw(
+                    _("Duplicate workday {0} found in working hours").format(
+                        row.workday
+                    )
+                )
+            workdays.append(row.workday)
+            # check that the start time should be less than end time
+            if row.start_time >= row.end_time:
+                frappe.throw(
+                    _("Start time should be less than end time for workday {0}").format(
+                        row.workday
+                    )
+                )
 
     def apply(self, doc: Document):
         self.handle_creation(doc)
