@@ -380,12 +380,6 @@ const all_activities = createResource({
   cache: ['activity', doc.value.data.name],
   auto: true,
   transform: ([versions, calls, notes, todos, events, attachments]) => {
-    props.tabs[1].count.value = versions.filter((activity) => activity.activity_type === 'communication').length
-    props.tabs[2].count.value = versions.filter((activity) => activity.activity_type === 'comment').length
-    props.tabs[3].count.value = todos.length
-    props.tabs[4].count.value = events.length
-    props.tabs[5].count.value = notes.length
-    props.tabs[6].count.value = attachments.length
     return { versions, calls, notes, todos, events, attachments }
   },
 })
@@ -594,6 +588,18 @@ watch([reload, reload_email], ([reload_value, reload_email_value]) => {
     reload_email.value = false
   }
 })
+
+watch(
+  () => all_activities.data,
+  (value) => {
+    props.tabs[1].count.value = value?.versions.filter((activity) => activity.activity_type === 'communication').length
+    props.tabs[2].count.value = value?.versions.filter((activity) => activity.activity_type === 'comment').length
+    props.tabs[3].count.value = value?.todos.length
+    props.tabs[4].count.value = value?.events.length
+    props.tabs[5].count.value = value?.notes.length
+    props.tabs[6].count.value = value?.attachments.length
+  },
+)
 
 defineExpose({ emailBox, all_activities })
 </script>
