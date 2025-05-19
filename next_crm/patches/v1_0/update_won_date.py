@@ -1,4 +1,15 @@
 def execute():
+    from frappe import enqueue
+
+    enqueue(
+        update_won_date,
+        queue="long",
+        timeout=3600,
+        enqueue_after_commit=True,
+    )
+
+
+def update_won_date():
     from frappe import db, get_all
     from frappe.utils import getdate, update_progress_bar
 
