@@ -1,16 +1,18 @@
 <template>
-  <div class="space-y-1.5 p-[2px] -m-[2px]">
+  <div class="space-y-1.5 p-[2px] -m-[2px] truncate max-w-40">
     <label class="block" :class="labelClasses" v-if="attrs.label">
       {{ __(attrs.label) }}
     </label>
     <Autocomplete
       ref="autocomplete"
-      :options="options.data"
+      :options="options.data ?? []"
       v-model="value"
       :size="attrs.size || 'sm'"
       :variant="attrs.variant"
       :placeholder="attrs.placeholder"
       :filterable="false"
+      :multiple="props.multiple"
+      @update:query="onQueryUpdate"
     >
       <template #target="{ open, togglePopover }">
         <slot name="target" v-bind="{ open, togglePopover }" />
@@ -54,7 +56,7 @@
 </template>
 
 <script setup>
-import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
+import { Autocomplete } from 'frappe-ui'
 import { watchDebounced } from '@vueuse/core'
 import { createResource } from 'frappe-ui'
 import { useAttrs, computed, ref } from 'vue'
@@ -69,10 +71,14 @@ const props = defineProps({
     default: () => [],
   },
   modelValue: {
-    type: String,
+    type: [String, Array],
     default: '',
   },
   hideMe: {
+    type: Boolean,
+    default: false,
+  },
+  multiple: {
     type: Boolean,
     default: false,
   },
@@ -85,24 +91,57 @@ const attrs = useAttrs()
 const valuePropPassed = computed(() => 'value' in attrs)
 
 const value = computed({
-  get: () => (valuePropPassed.value ? attrs.value : props.modelValue),
+  get: () => {
+    if (valuePropPassed.value) {
+      if (attrs.value === '') {
+        return attrs.value
+      } else if (Array.isArray(attrs.value)) {
+        return attrs.value
+      } else {
+        return [attrs.value]
+      }
+    } else {
+      if (Array.isArray(props.modelValue)) {
+        return props.modelValue
+      } else {
+        return [props.modelValue]
+      }
+    }
+  },
   set: (val) => {
-    return val?.value && emit(valuePropPassed.value ? 'change' : 'update:modelValue', val?.value)
+    if (props.multiple) {
+      if (Array.isArray(val)) {
+        const filtered = val.filter((v) => v && v.value !== undefined && v.value !== null && v.value !== '')
+        emit(
+          valuePropPassed.value ? 'change' : 'update:modelValue',
+          filtered.map((v) => v.value),
+        )
+      } else {
+        emit(valuePropPassed.value ? 'change' : 'update:modelValue', [])
+      }
+    } else {
+      emit(valuePropPassed.value ? 'change' : 'update:modelValue', val?.value)
+    }
   },
 })
 
 const autocomplete = ref(null)
 const text = ref('')
+const query = ref('')
+
+function onQueryUpdate(val) {
+  query.value = val
+}
 
 watchDebounced(
-  () => autocomplete.value?.query,
+  query,
   (val) => {
     val = val || ''
     if (text.value === val) return
     text.value = val
     reload(val)
   },
-  { debounce: 300, immediate: true },
+  { debounce: 300, immediate: false },
 )
 
 watchDebounced(
@@ -152,7 +191,7 @@ function reload(val) {
 
 function clearValue(close) {
   emit(valuePropPassed.value ? 'change' : 'update:modelValue', '')
-  close()
+  close?.()
 }
 
 const labelClasses = computed(() => {
