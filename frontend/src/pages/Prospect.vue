@@ -210,10 +210,7 @@
   />
   <CustomerModal
     v-model="showCustomerModal"
-    v-model:customer="_customer"
-    :options="{
-      redirect: true,
-    }"
+    :customer="_customer"
   />
 </template>
   
