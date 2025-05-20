@@ -137,11 +137,8 @@
             size="xs"
           />
         </div>
-        <div v-else-if="fieldName === 'probability'">
-          {{ getRow(itemName, fieldName).label }}%
-        </div>
         <div
-          v-else-if="
+          v-if="
             [
               'modified',
               'creation',
@@ -170,6 +167,9 @@
             :avatars="getRow(itemName, fieldName).label"
             size="xs"
           />
+        </div>
+        <div v-else-if="fieldName === 'probability'">
+          {{ getRow(itemName, fieldName).label }}%
         </div>
         <div v-else class="truncate text-base">
           {{ getRow(itemName, fieldName).label }}
