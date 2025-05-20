@@ -175,6 +175,7 @@ const options = createResource({
 })
 
 function reload(val) {
+  if (!props.doctype) return
   if (options.data?.length && val === options.params?.txt && props.doctype === options.params?.doctype) return
 
   options.update({
