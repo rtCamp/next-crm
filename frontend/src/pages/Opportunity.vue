@@ -468,6 +468,12 @@
       }"
   />
   <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"/>
+  <MissingValueModal v-model="showMissingValueModal" label="Update Missing Fields" :missingFieldValues="missingFields" :filteredFields="filteredFields" @update="(data) => {
+    updateOpportunityFields({ ...data, status: 'Won' }, () => {
+      callback?.()
+    })
+  }"
+  />
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -499,6 +505,7 @@ import ContactModal from '@/components/Modals/ContactModal.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import RenameModal from '@/components/Modals/RenameModal.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
+import MissingValueModal from '@/components/Modals/MissingValueModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -612,7 +619,8 @@ const showSidePanelModal = ref(false)
 const showFilesUploader = ref(false)
 const showRenameModal = ref(false)
 const _customer = ref({})
-const showLostReasonModal =  ref (false)
+const showLostReasonModal = ref(false)
+const showMissingValueModal = ref(false)
 
 function updateOpportunity(fieldname, value, callback) {
   value = Array.isArray(fieldname) ? '' : value
@@ -648,6 +656,40 @@ function updateOpportunity(fieldname, value, callback) {
     },
   })
 }
+function updateOpportunityFields(fields, callback) {
+  for (const [fieldname, value] of Object.entries(fields)) {
+    if (validateRequired(fieldname, value)) return
+  }
+
+  createResource({
+    url: 'frappe.client.set_value',
+    params: {
+      doctype: 'Opportunity',
+      name: props.opportunityId,
+      fieldname:fields,
+    },
+    auto: true,
+    onSuccess: () => {
+      opportunity.reload()
+      reload.value = true
+      createToast({
+        title: __('Opportunity updated'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+      callback?.()
+    },
+    onError: (err) => {
+      createToast({
+        title: __('Error updating opportunity'),
+        text: __(err.messages?.[0]),
+        icon: 'x',
+        iconClasses: 'text-ink-red-4',
+      })
+    },
+  })
+}
+
 
 function validateRequired(fieldname, value) {
   let meta = opportunity.data.fields_meta || {}
@@ -990,15 +1032,71 @@ function triggerCall() {
 }
 
 function updateField(name, value, callback) {
-  if(name == "status" && value == "Lost"){
-    showLostReasonModal.value  = true
-  }else{
-    updateOpportunity(name, value, () => {
-      opportunity.data[name] = value
-      callback?.()
-    })
+  const isStatusField = name === "status";
+
+  if (isStatusField && value === "Lost") {
+    showLostReasonModal.value = true;
+    return;
   }
+
+  if (isStatusField && value === "Won") {
+    const requiredFields = [
+      "title", "contact_person", "customer", "territory", "custom_project_manager",
+      "custom_complexity_level", "opportunity_amount", "currency", "custom__project_size",
+      "source", "industry", "custom_deal_type", "custom_timezone", "custom_current_host",
+      "custom_project_type", "custom_estimatedpurchased_hours", "custom_service_type",
+      "custom_duration", "custom_previous_cms", "custom_billing_type", "custom_description"
+    ];
+
+    const missingFieldArray = getMissingRequiredFields(requiredFields, opportunity.data);
+    if (missingFieldArray.length) {
+      showMissingValueModal.value = true;
+      missingFields.value = Object.fromEntries(
+        Object.entries(opportunity.data)
+          .filter(([key]) => requiredFields.includes(key))
+      );
+      return;
+    }
+  }
+
+  updateOpportunity(name, value, () => {
+    opportunity.data[name] = value;
+    callback?.();
+  });
 }
+
+const missingFields = ref({})
+
+const fieldDefinitions = computed(() => {
+    if (!opportunity?.data?.fields_meta || !missingFields.value) return []
+    
+    return Object.keys(missingFields.value).map(fieldname => {
+        const fieldMeta = opportunity.data.fields_meta[fieldname] || {}
+        const isSelectField = fieldMeta.fieldtype === 'Select'
+        let options = fieldMeta.options
+        
+        if (isSelectField && options && typeof options === 'string') {
+            options = options.split('\n')
+                .map(opt => opt.trim())
+                .filter(opt => opt.length > 0)
+        }
+        
+        return {
+            ...fieldMeta,
+            name:fieldname,
+            label: fieldMeta.label,
+            type: fieldMeta.fieldtype || 'Data',
+            options: options,
+            reqd: true,
+        }
+    })
+})
+
+const filteredFields = computed(() => {
+    return fieldDefinitions.value.filter(field =>
+        Object.prototype.hasOwnProperty.call(missingFields.value, field.fieldname)
+    )
+})
 
 async function deleteOpportunity(name) {
   await call('frappe.client.delete', {
@@ -1019,6 +1117,14 @@ function afterRename(renamed_docname) {
     location.reload();
   });
 }
+
+function getMissingRequiredFields(requiredFieldKeys,data) {
+  return requiredFieldKeys.filter(key => {
+    const value = data[key]
+    return value === undefined || value === null || String(value).trim() === ''
+  })
+}
+
 </script>
 
 <style scoped>

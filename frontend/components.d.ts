@@ -133,6 +133,7 @@ declare module 'vue' {
     MenuIcon: typeof import('./src/components/Icons/MenuIcon.vue')['default']
     MinimizeIcon: typeof import('./src/components/Icons/MinimizeIcon.vue')['default']
     MissedCallIcon: typeof import('./src/components/Icons/MissedCallIcon.vue')['default']
+    MissingValueModal: typeof import('./src/components/Modals/MissingValueModal.vue')['default']
     MobileAppHeader: typeof import('./src/components/Mobile/MobileAppHeader.vue')['default']
     MobileLayout: typeof import('./src/components/Layouts/MobileLayout.vue')['default']
     MobileSidebar: typeof import('./src/components/Mobile/MobileSidebar.vue')['default']
