@@ -35,10 +35,10 @@
             label: __('Opportunity'),
             onClick: createOpportunity
           },
-          // {
-          //   label: __('Customer'),
-          //   onClick: createCustomer
-          // },
+          {
+            label: __('Customer'),
+            onClick: createCustomer
+          },
         ]"
         @click.stop
       >
@@ -208,6 +208,13 @@
       afterAddContact: afterAddContact
     }"
   />
+  <CustomerModal
+    v-model="showCustomerModal"
+    v-model:customer="_customer"
+    :options="{
+      redirect: true,
+    }"
+  />
 </template>
   
 <script setup>
@@ -251,6 +258,7 @@
     usePageMeta,
     createResource,
   } from 'frappe-ui'
+  import CustomerModal from '@/components/Modals/CustomerModal.vue'
   import { h, computed, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { capture } from '@/telemetry'
@@ -269,7 +277,9 @@
   const showQuickEntryModal = ref(false)
   const showAddContactModal = ref(false)
   const showAddAddressModal = ref(false)
-  
+  const showCustomerModal = ref(false)
+  const _customer = ref({})
+
   const route = useRoute()
   const router = useRouter()
   
@@ -622,33 +632,12 @@ function getAddressRowObject(address) {
 }
 
 async function createCustomer() {
-  $dialog({
-    title: __('Create Customer'),
-    message: __('Are you sure you want to create a new Customer from this Prospect\'s details?'),
-    actions: [
-      {
-        label: __('Create'),
-        theme: 'green',
-        variant: 'solid',
-        async onClick(close) {
-          try {
-            const customer = await call('next_crm.overrides.prospect.create_customer', {
-              prospect: prospect.name,
-            })
-            close()
-            router.push({ name: 'Customer', params: { customerId: customer } })
-          } catch (error) {
-            createToast({
-              title: __('Error'),
-              text: error,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
-          }
-        },
-      },
-    ],
-  })
+  _customer.value.customer_name = prospect.name
+  _customer.value.website = prospect.doc.website
+  _customer.value.no_of_employees = prospect.doc.no_of_employees
+  _customer.value.industry = prospect.doc.industry
+  _customer.value.territory = prospect.doc.territory
+  showCustomerModal.value = true
 }
 
 function addAddressButtonCB() {
