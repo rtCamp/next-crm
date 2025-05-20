@@ -89,14 +89,14 @@
                 </div>
                 <div class="flex flex-col gap-2 truncate">
                   <div class="truncate text-2xl font-medium">
-                    <span>{{ customer.doc.name }}</span>
+                    <span>{{ customer.doc?.name }}</span>
                   </div>
                   <div
-                    v-if="customer.doc.website"
+                    v-if="customer.doc?.website"
                     class="flex items-center gap-1.5 text-base text-ink-gray-8"
                   >
                     <WebsiteIcon class="size-4" />
-                    <span>{{ website(customer.doc.website) }}</span>
+                    <span>{{ website(customer.doc?.website) }}</span>
                   </div>
                   <ErrorMessage :message="__(error)" />
                 </div>
@@ -226,7 +226,7 @@
   <LinkAddressModal
     v-model="showAddAddressModal"
     doctype="Customer",
-    :docname="customer.doc.name"
+    :docname="customer.doc?.name"
     :options="{
       afterAddAddress: afterAddAddress
     }"
@@ -234,7 +234,7 @@
   <LinkContactModal
     v-model="showAddContactModal"
     doctype="Customer",
-    :docname="customer.doc.name"
+    :docname="customer.doc?.name"
     :options="{
       afterAddContact: afterAddContact
     }"
