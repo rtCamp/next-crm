@@ -61,14 +61,14 @@
               <div class="flex gap-4 items-center">
                 <div class="flex flex-col gap-2 truncate">
                   <div class="truncate text-2xl font-medium text-ink-gray-9">
-                    <span>{{ prospect.doc.name }}</span>
+                    <span>{{ prospect.doc?.name }}</span>
                   </div>
                   <div
-                    v-if="prospect.doc.website"
+                    v-if="prospect.doc?.website"
                     class="flex items-center gap-1.5 text-base text-ink-gray-8"
                   >
                     <WebsiteIcon class="size-4" />
-                    <span>{{ website(prospect.doc.website) }}</span>
+                    <span>{{ website(prospect.doc?.website) }}</span>
                   </div>
                 </div>
               </div>
@@ -195,7 +195,7 @@
   <LinkAddressModal
     v-model="showAddAddressModal"
     doctype="Prospect"
-    :docname="prospect.doc.name"
+    :docname="prospect.doc?.name"
     :options="{
       afterAddAddress: afterAddAddress
     }"
@@ -203,7 +203,7 @@
   <LinkContactModal
     v-model="showAddContactModal"
     doctype="Prospect"
-    :docname="prospect.doc.name"
+    :docname="prospect.doc?.name"
     :options="{
       afterAddContact: afterAddContact
     }"
