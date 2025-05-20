@@ -7,19 +7,20 @@ from next_crm.ncrm.doctype.crm_form_script.crm_form_script import get_form_scrip
 
 @frappe.whitelist()
 def get_opportunity(name):
-    Opportunity = frappe.qb.DocType("Opportunity")
+    opportunity = frappe.get_doc("Opportunity", name, for_update=False).as_dict()
+    # Opportunity = frappe.qb.DocType("Opportunity")
 
-    query = (
-        frappe.qb.from_(Opportunity)
-        .select("*")
-        .where(Opportunity.name == name)
-        .limit(1)
-    )
+    # query = (
+    #     frappe.qb.from_(Opportunity)
+    #     .select("*")
+    #     .where(Opportunity.name == name)
+    #     .limit(1)
+    # )
 
-    opportunity = query.run(as_dict=True)
-    if not len(opportunity):
-        frappe.throw(_("Opportunity not found"), frappe.DoesNotExistError)
-    opportunity = opportunity.pop()
+    # opportunity = query.run(as_dict=True)
+    # if not len(opportunity):
+    #     frappe.throw(_("Opportunity not found"), frappe.DoesNotExistError)
+    # opportunity = opportunity.pop()
 
     opportunity["doctype"] = "Opportunity"
     opportunity["fields_meta"] = get_fields_meta("Opportunity")
