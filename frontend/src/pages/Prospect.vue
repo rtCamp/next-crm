@@ -637,6 +637,7 @@ async function createCustomer() {
   _customer.value.no_of_employees = prospect.doc.no_of_employees
   _customer.value.industry = prospect.doc.industry
   _customer.value.territory = prospect.doc.territory
+  _customer.value.annual_revenue = prospect.doc.annual_revenue
   showCustomerModal.value = true
 }
 
