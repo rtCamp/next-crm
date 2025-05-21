@@ -105,10 +105,9 @@
               </Button>
             </div>
             <TableMultiselectInput
-              v-else-if="field.fieldtype === 'Table MultiSelect'"
-              v-model="data[field.fieldname]"
+              v-else-if="field.type === 'Table MultiSelect'"
               :doctype="field.options"
-              @change="(v) => fieldChange(v, field)"
+              @change="(v) => (data[field.name] = v)"
             />
             <Link
               v-else-if="field.type === 'User'"
