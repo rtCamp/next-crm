@@ -128,6 +128,18 @@ def get_opportunity_activities(name):
         }
         activities.append(activity)
 
+    for info_log in docinfo.info_logs:
+        activity = {
+            "name": info_log.name,
+            "activity_type": "comment",
+            "creation": info_log.creation,
+            "owner": info_log.owner,
+            "content": info_log.content,
+            "attachments": get_attachments("Comment", info_log.name),
+            "is_lead": False,
+        }
+        activities.append(activity)
+
     for communication in docinfo.communications + docinfo.automated_messages:
         activity = {
             "activity_type": "communication",
