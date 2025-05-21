@@ -163,6 +163,7 @@
             :defaultValue="data[field.name]"
             :doctype="field.doctype"
             :read_only="field.read_only"
+            @change="(data) => emit('update', field.name, data)"
           />
           <FormControl
             v-else
