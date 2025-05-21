@@ -530,7 +530,7 @@ function parseFilters(filters) {
             ? false
             : Array.isArray(c.value)
               ? ['!=', c.value[c.value.length - 1]]
-              : c.value
+              : ['!=', c.value]
     } else {
       p[c.fieldname] = [operatorMap[c.operator.toLowerCase()], c.value]
     }
