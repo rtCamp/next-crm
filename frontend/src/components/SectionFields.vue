@@ -160,9 +160,8 @@
           </FormControl>
           <TableMultiselectInput
             v-else-if="field.type === 'Table MultiSelect'"
-            v-model="data[field.name]"
-            :doctype="field.all_properties.options"
-            @change="(v) => fieldChange(v, field)"
+            :defaultValue="data[field.name]"
+            :doctype="field.doctype"
             :read_only="field.read_only"
           />
           <FormControl

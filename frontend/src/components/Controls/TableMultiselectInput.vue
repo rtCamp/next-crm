@@ -3,7 +3,7 @@
     <div
       :class="[
         'group flex flex-wrap gap-1 min-h-20 p-1.5 rounded text-base bg-surface-gray-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3 text-ink-gray-8 transition-colors w-full',
-        { 'pointer-events-none opacity-70': props.read_only || props.disabled },
+        { 'pointer-events-none opacity-70': isDisabled },
       ]"
     >
       <Button
@@ -16,7 +16,7 @@
         class="rounded bg-surface-white hover:!bg-surface-gray-1 focus-visible:ring-outline-gray-4"
         @keydown.delete.capture.stop="removeLastValue"
       >
-        <template #suffix>
+        <template v-if="!isDisabled" #suffix>
           <FeatherIcon class="h-3.5" name="x" @click.stop="removeValue(value)" />
         </template>
       </Button>
@@ -25,7 +25,6 @@
           v-if="linkField"
           class="form-control flex-1 truncate cursor-text"
           :value="query"
-          :filters="filters"
           :doctype="linkField.options"
           @change="(v) => addValue(v)"
           :hideMe="true"
@@ -54,7 +53,7 @@ const props = defineProps({
     type: Function,
     default: (value) => `${value} is an Invalid value`,
   },
-  value: {
+  defaultValue: {
     type: Array,
     default: () => [],
   },
@@ -72,10 +71,10 @@ const emit = defineEmits(['change'])
 
 const { getFields } = getMeta(props.doctype)
 
-const values = defineModel()
-
+const values = defineModel({ default: () => [] })
+const isDisabled = computed(() => props.read_only || props.disabled)
 watch(
-  () => props.value,
+  () => props.defaultValue,
   (newValue) => {
     values.value = newValue
   },
@@ -86,13 +85,6 @@ const error = ref(null)
 const query = ref('')
 
 const linkField = ref('')
-
-const filters = computed(() => {
-  if (!linkField.value) return []
-  return {
-    name: ['not in', parsedValues.value],
-  }
-})
 
 const parsedValues = computed(() => {
   error.value = ''
@@ -105,6 +97,7 @@ const getLinkField = () => {
   error.value = ''
   if (!linkField.value) {
     let fields = getFields()
+    if (!fields) return
     linkField.value = fields?.find((df) => ['Link', 'User'].includes(df.fieldtype))
 
     if (!linkField.value) {
@@ -117,35 +110,39 @@ const getLinkField = () => {
 const addValue = (value) => {
   error.value = null
 
-  if (values.value.some((row) => row[linkField.value.fieldname] === value)) {
+  if (values.value?.some((row) => row[linkField.value.fieldname] === value)) {
     error.value = 'Value already exists'
     return
   }
-
   if (value) {
-    values.value.push({ [linkField.value.fieldname]: value })
+    values.value = [...values.value, { [linkField.value.fieldname]: value }]
+
     emit('change', values.value)
     !error.value && (query.value = '')
   }
 }
-
 const removeValue = (value) => {
-  let _value = values.value.filter((row) => row[linkField.value.fieldname] !== value)
-  emit('change', _value)
+  if (!linkField.value?.fieldname) return
+
+  const key = linkField.value.fieldname
+
+  values.value = values.value.filter((row) => row[key] !== value)
+  emit('change', values.value)
 }
 
 const removeLastValue = () => {
-  if (query.value) return
+  if (query.value || !values.value.length) return
 
-  let valueRef = valuesRef.value[valuesRef.value.length - 1]?.$el
+  const lastIndex = values.value.length - 1
+  const valueRef = valuesRef.value[lastIndex]?.$el
+
   if (document.activeElement === valueRef) {
-    values.value.pop()
+    values.value = values.value.slice(0, lastIndex)
     emit('change', values.value)
+
     nextTick(() => {
-      if (values.value.length) {
-        valueRef = valuesRef.value[valuesRef.value.length - 1].$el
-        valueRef?.focus()
-      }
+      const newLastRef = valuesRef.value[values.value.length - 1]?.$el
+      newLastRef?.focus()
     })
   } else {
     valueRef?.focus()
