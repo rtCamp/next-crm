@@ -954,7 +954,8 @@ const tabs = computed(() => {
       name: 'Comments',
       label: __('Comments'),
       icon: CommentIcon,
-      count: ref(0)
+      count: ref(0),
+      condition: () => lead?.custom_hide_comments_tab,
     },
     {
       name: 'Calls',
