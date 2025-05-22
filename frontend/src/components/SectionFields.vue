@@ -15,7 +15,7 @@
       <div class="flex items-center justify-between w-[65%]">
         <div class="grid min-h-[28px] flex-1 items-center overflow-hidden text-base">
           <div
-            v-if="field.read_only && !['checkbox', 'dropdown'].includes(field.type)"
+            v-if="field.read_only && !['checkbox', 'dropdown', 'Table MultiSelect'].includes(field.type)"
             class="flex h-7 cursor-pointer items-center px-2 py-1 text-ink-gray-5"
           >
             <Tooltip :text="__(field.tooltip)">
@@ -158,6 +158,13 @@
               </a>
             </template>
           </FormControl>
+          <TableMultiselectInput
+            v-else-if="field.type === 'Table MultiSelect'"
+            :defaultValue="data[field.name]"
+            :doctype="field.doctype"
+            :read_only="field.read_only"
+            @change="(data) => emit('update', field.name, data)"
+          />
           <FormControl
             v-else
             class="form-control"
@@ -196,6 +203,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { usersStore } from '@/stores/users'
 import { Tooltip } from 'frappe-ui'
 import { computed } from 'vue'
+import TableMultiselectInput from '@/components/Controls/TableMultiselectInput.vue'
 
 const props = defineProps({
   fields: {
