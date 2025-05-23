@@ -185,12 +185,25 @@ function parse_filters(link_filters) {
         parent: this.doc.parenttype ? this.frm.doc : null,
         frappe,
       }
-      value = frappe.utils.eval(value, context)
+      value = evalFilter(value, context)
     }
     filters[fieldname] = [operator, value]
   })
 
   return filters
+}
+function evalFilter(code, context = {}) {
+  let variable_names = Object.keys(context)
+  let variables = Object.values(context)
+  code = `let out = ${code}; return out`
+  try {
+    let expression_function = new Function(...variable_names, code)
+    return expression_function(...variables)
+  } catch (error) {
+    console.log('Error evaluating the following expression:')
+    console.error(code)
+    throw error
+  }
 }
 function reload(val) {
   if (!props.doctype) return
