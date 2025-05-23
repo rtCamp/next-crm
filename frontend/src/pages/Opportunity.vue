@@ -946,6 +946,8 @@ const createProject = async (projectData) => {
       icon: 'x',
       iconClasses: 'text-ink-red-4',
     })
+  }finally{
+    showCreateProjectModal.value = false;
   }
 };
 
