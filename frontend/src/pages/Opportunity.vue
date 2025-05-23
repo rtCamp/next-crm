@@ -467,7 +467,12 @@
         afterRename: afterRename
       }"
   />
-  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"/>
+  <LostReasonModal
+    v-if="opportunity?.data?.name"
+    v-model="showLostReasonModal"
+    :opportunity="opportunity"
+    @reload="() => reload = true"
+  />
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'

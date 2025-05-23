@@ -154,6 +154,7 @@ const updateOpportunity = async () => {
       detailed_reason: detailedReason.value,
     })
     props.opportunity.reload()
+    emit('reload')
     createToast({
       title: __('Opportunity updated'),
       icon: 'check',
