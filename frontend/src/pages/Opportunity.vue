@@ -475,7 +475,7 @@
   />
   <OpportunityFromSetModal
     v-model="showOpportunityFromModal"
-    :opportunity_from="opportunityFrom"
+    :opportunityFrom="opportunityFrom"
     :title="opportunity?.data?.party_name"
     :docname="opportunity?.data?.name"
     @after="() => {
@@ -543,7 +543,7 @@ import {
   call,
   usePageMeta,
 } from 'frappe-ui'
-import { ref, computed, h, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 
@@ -628,7 +628,10 @@ const showSidePanelModal = ref(false)
 const showFilesUploader = ref(false)
 const showRenameModal = ref(false)
 const showOpportunityFromModal = ref(false)
-const opportunityFrom = ref(opportunity?.data?.opportunity_from)
+const opportunityFrom = reactive({
+  opportunityFrom: opportunity?.data?.opportunity_from,
+  partyName: opportunity?.data?.party_name,
+})
 const _customer = ref({})
 const showLostReasonModal =  ref (false)
 
@@ -637,8 +640,8 @@ function updateOpportunity(fieldname, value, callback) {
 
   if (validateRequired(fieldname, value)) return
 
-  if (fieldname == 'opportunity_from') {
-    opportunityFrom.value = value
+  if (fieldname == 'opportunity_from' || fieldname == 'party_name') {
+    fieldname == 'opportunity_from' ? opportunityFrom.opportunityFrom = value : opportunityFrom.partyName = value
     showOpportunityFromModal.value = true
     return
   }
