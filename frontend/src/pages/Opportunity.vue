@@ -471,7 +471,7 @@
     v-if="opportunity?.data?.name"
     v-model="showLostReasonModal"
     :opportunity="opportunity"
-    @after-lost-reason="() => reload = true"
+    @reload="() => reload = true"
   />
 </template>
 <script setup>
