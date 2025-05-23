@@ -893,33 +893,33 @@ const projectResource = createResource({
   url: "/api/resource/Project",
 })
 
+const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
+  "title": "project_name",
+  "contact_person": "custom_client_point_of_contact",
+  "customer": "customer",
+  "territory": "custom_territory",
+  "custom_project_manager": "custom_project_manager",
+  "custom_complexity_level": "custom_complexity",
+  "opportunity_amount": "total_sales_amount",
+  "currency": "custom_currency",
+  "custom__project_size": "custom_project_size",
+  "source": "custom_source",
+  "industry": "custom_industry",
+  "custom_deal_type": "custom_deal_type",
+  "custom_timezone": "custom_timezone",
+  "custom_current_host": "custom_host",
+  "custom_project_type": "project_type",
+  "custom_estimatedpurchased_hours": "custom_total_hours_purchased",
+  "custom_service_type": "custom_service_type",
+  "custom_restricted_under_nda": "custom_restricted_under_nda",
+  "custom_duration": "custom_duration",
+  "custom_previous_cms": "custom_previous_cms",
+  "custom_billing_type": "custom_billing_type",
+  "custom_description": "custom_project_detail",
+};
+
 const createProject = async (projectData) => {
   try {
-    const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
-      "title": "project_name",
-      "contact_person": "custom_client_point_of_contact",
-      "customer": "customer",
-      "territory": "custom_territory",
-      "custom_project_manager": "custom_project_manager",
-      "custom_complexity_level": "custom_complexity",
-      "opportunity_amount": "total_sales_amount",
-      "currency": "custom_currency",
-      "custom__project_size": "custom_project_size",
-      "source": "custom_source",
-      "industry": "custom_industry",
-      "custom_deal_type": "custom_deal_type",
-      "custom_timezone": "custom_timezone",
-      "custom_current_host": "custom_host",
-      "custom_project_type": "project_type",
-      "custom_estimatedpurchased_hours": "custom_total_hours_purchased",
-      "custom_service_type": "custom_service_type",
-      "custom_restricted_under_nda": "custom_restricted_under_nda",
-      "custom_duration": "custom_duration",
-      "custom_previous_cms": "custom_previous_cms",
-      "custom_billing_type": "custom_billing_type",
-      "custom_description": "custom_project_detail",
-    };
-
     const projectPayload = {
       project_name: projectData.title,
       status: "Open"
@@ -983,13 +983,7 @@ const filteredFields = computed(() => {
 })
 
 const createProjectFromOpportunity = async () => {
-  const requiredFields = [
-    "title", "contact_person", "customer", "territory", "custom_project_manager",
-    "custom_complexity_level", "opportunity_amount", "currency", "custom__project_size",
-    "source", "industry", "custom_deal_type", "custom_timezone", "custom_current_host",
-    "custom_project_type", "custom_estimatedpurchased_hours", "custom_service_type",
-    "custom_duration", "custom_previous_cms", "custom_billing_type", "custom_description"
-  ];
+  const requiredFields = Object.keys(OPPORTUNITY_TO_PROJECT_KEY_MAP);
   const filteredRequiredFields = requiredFields.filter(field => field in opportunity.data.fields_meta);
   const missingFieldArray = getMissingRequiredFields(filteredRequiredFields, opportunity.data);
   if (missingFieldArray.length) {
