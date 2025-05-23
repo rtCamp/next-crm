@@ -938,6 +938,7 @@ const createProject = async (projectData) => {
       icon: 'check',
       iconClasses: 'text-ink-green-3',
     })
+    showCreateProjectModal.value = false;
 
   } catch (error) {
     createToast({
@@ -946,8 +947,6 @@ const createProject = async (projectData) => {
       icon: 'x',
       iconClasses: 'text-ink-red-4',
     })
-  }finally{
-    showCreateProjectModal.value = false;
   }
 };
 
@@ -973,7 +972,7 @@ const fieldDefinitions = computed(() => {
       label: fieldMeta.label,
       type: fieldMeta.fieldtype || 'Data',
       options: options,
-      reqd: true,
+      mandatory: true,
     }
   })
 })
