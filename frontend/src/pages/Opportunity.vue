@@ -712,7 +712,7 @@ const tabs = computed(() => {
       label: __('Comments'),
       icon: CommentIcon,
       count: ref(0),
-      condition: () => opportunity?.custom_hide_comments_tab,
+      condition: () => !Boolean(opportunity?.data?.hide_comments_tab),
     },
     {
       name: 'Calls',

@@ -1,40 +1,45 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2024-09-29 13:48:02.715924",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "restore_defaults"
- ],
- "fields": [
-  {
-   "fieldname": "restore_defaults",
-   "fieldtype": "Button",
-   "label": "Restore Defaults"
-  }
- ],
- "index_web_pages_for_search": 1,
- "issingle": 1,
- "links": [],
- "modified": "2024-09-29 13:49:07.835379",
- "modified_by": "Administrator",
- "module": "NCRM",
- "name": "NCRM Settings",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "creation",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "creation": "2024-09-29 13:48:02.715924",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": ["restore_defaults", "hide_comments_tab"],
+  "fields": [
+    {
+      "fieldname": "restore_defaults",
+      "fieldtype": "Button",
+      "label": "Restore Defaults"
+    },
+    {
+      "default": "1",
+      "description": "This flag controls the visibility of the comments section in next-crm for opportunity and Lead",
+      "fieldname": "hide_comments_tab",
+      "fieldtype": "Check",
+      "label": "Hide Comments Tab"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "issingle": 1,
+  "links": [],
+  "modified": "2025-05-23 10:51:30.482563",
+  "modified_by": "Administrator",
+  "module": "NCRM",
+  "name": "NCRM Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": []
 }
