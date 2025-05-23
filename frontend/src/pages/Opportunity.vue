@@ -939,11 +939,10 @@ const createProject = async (projectData) => {
       iconClasses: 'text-ink-green-3',
     })
     showCreateProjectModal.value = false;
-
-  } catch (error) {
+  } catch{
     createToast({
-      title: __('Error creating project'),
-      text: __(error.message),
+      title: __(projectResource.error.exc_type || 'Error creating project'),
+      text: __(projectResource.error.messages[0] || 'Something went wrong'),
       icon: 'x',
       iconClasses: 'text-ink-red-4',
     })
