@@ -716,7 +716,8 @@ const tabs = computed(() => {
       name: 'Comments',
       label: __('Comments'),
       icon: CommentIcon,
-      count: ref(0)
+      count: ref(0),
+      condition: () => !Boolean(opportunity?.data?.hide_comments_tab),
     },
     {
       name: 'Calls',
