@@ -998,7 +998,6 @@ const createProjectFromOpportunity = async () => {
       Object.entries(opportunity.data)
         .filter(([key]) => requiredFields.includes(key))
     );
-    return;
   } else {
     await createProject(opportunity.data);
   }
