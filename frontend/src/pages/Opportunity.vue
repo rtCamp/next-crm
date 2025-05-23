@@ -996,6 +996,7 @@ const createProjectFromOpportunity = async () => {
   const missingFieldArray = getMissingRequiredFields(filteredRequiredFields, opportunity.data);
   if (missingFieldArray.length) {
     showMissingValueModal.value = true;
+    showCreateProjectModal.value = false;
     missingFields.value = Object.fromEntries(
       Object.entries(opportunity.data)
         .filter(([key]) => requiredFields.includes(key))
