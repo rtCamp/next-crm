@@ -473,6 +473,16 @@
     :opportunity="opportunity"
     @reload="() => reload = true"
   />
+  <OpportunityFromSetModal
+    v-model="showOpportunityFromModal"
+    :opportunity_from="opportunityFrom"
+    :title="opportunity?.data?.party_name"
+    :docname="opportunity?.data?.name"
+    @after="() => {
+      opportunity.reload()
+      reload = true
+    }"
+  />
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -504,6 +514,7 @@ import ContactModal from '@/components/Modals/ContactModal.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import RenameModal from '@/components/Modals/RenameModal.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
+import OpportunityFromSetModal from '../components/Modals/OpportunityFromSetModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -616,6 +627,8 @@ const showCustomerModal = ref(false)
 const showSidePanelModal = ref(false)
 const showFilesUploader = ref(false)
 const showRenameModal = ref(false)
+const showOpportunityFromModal = ref(false)
+const opportunityFrom = ref(opportunity?.data?.opportunity_from)
 const _customer = ref({})
 const showLostReasonModal =  ref (false)
 
@@ -623,6 +636,12 @@ function updateOpportunity(fieldname, value, callback) {
   value = Array.isArray(fieldname) ? '' : value
 
   if (validateRequired(fieldname, value)) return
+
+  if (fieldname == 'opportunity_from') {
+    opportunityFrom.value = value
+    showOpportunityFromModal.value = true
+    return
+  }
 
   createResource({
     url: 'frappe.client.set_value',
