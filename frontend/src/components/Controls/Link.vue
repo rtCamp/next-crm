@@ -155,7 +155,7 @@ const options = createResource({
   params: {
     txt: text.value,
     doctype: props.doctype,
-    filters: props.filters,
+    filters: parse_filters(props.filters),
   },
   transform: (data) => {
     let allData = data.map((option) => {
@@ -173,7 +173,25 @@ const options = createResource({
     return allData
   },
 })
+function parse_filters(link_filters) {
+  if (!Array.isArray(link_filters)) return link_filters
+  let filters = {}
+  link_filters.forEach((filter) => {
+    let [_, fieldname, operator, value] = filter
+    if (value?.startsWith?.('eval:')) {
+      value = value.split('eval:')[1]
+      let context = {
+        doc: this.doc,
+        parent: this.doc.parenttype ? this.frm.doc : null,
+        frappe,
+      }
+      value = frappe.utils.eval(value, context)
+    }
+    filters[fieldname] = [operator, value]
+  })
 
+  return filters
+}
 function reload(val) {
   if (!props.doctype) return
   if (options.data?.length && val === options.params?.txt && props.doctype === options.params?.doctype) return
@@ -182,7 +200,7 @@ function reload(val) {
     params: {
       txt: val,
       doctype: props.doctype,
-      filters: props.filters,
+      filters: parse_filters(props.filters),
     },
   })
   options.reload()
