@@ -91,14 +91,8 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  options: {
-    type: Object,
-    default: {
-      afterLostReason: () => {},
-    },
-  },
 })
-const emit = defineEmits(['reload'])
+const emit = defineEmits(['reload', 'after-lost-reason'])
 
 const show = defineModel()
 const detailedReason = ref('')
@@ -160,7 +154,7 @@ const updateOpportunity = async () => {
       detailed_reason: detailedReason.value,
     })
     props.opportunity.reload()
-    props.options.afterLostReason()
+    emit('after-lost-reason')
     createToast({
       title: __('Opportunity updated'),
       icon: 'check',
