@@ -467,7 +467,7 @@
         afterRename: afterRename
       }"
   />
-  <LostReasonModal 
+  <LostReasonModal
     v-if="opportunity?.data?.name"
     v-model="showLostReasonModal"
     :opportunity="opportunity"
