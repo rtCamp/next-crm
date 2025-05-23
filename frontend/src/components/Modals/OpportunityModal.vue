@@ -80,6 +80,7 @@ const opportunity = reactive({
   opportunity_owner: '',
   lead: '',
   opportunity_amount: '',
+  lost_reason: [],
 })
 
 const isOpportunityCreating = ref(false)

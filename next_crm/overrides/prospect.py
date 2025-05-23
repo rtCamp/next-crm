@@ -1,11 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import frappe
-from erpnext.crm.doctype.prospect.prospect import (
-    Prospect,
-    make_customer,
-    make_opportunity,
-)
+from erpnext.crm.doctype.prospect.prospect import Prospect, make_opportunity
 from frappe import _
 
 
@@ -80,16 +76,3 @@ def create_opportunity(prospect, doc=None):
     opportunity = make_opportunity(prospect.name)
     opportunity.insert()
     return opportunity.name
-
-
-@frappe.whitelist()
-def create_customer(prospect):
-    if not frappe.has_permission("Customer", "create"):
-        frappe.throw(
-            _("Not allowed to create Customer from Prospect"), frappe.PermissionError
-        )
-
-    prospect = frappe.get_cached_doc("Prospect", prospect)
-    customer = make_customer(prospect.name)
-    customer.insert()
-    return customer.name
