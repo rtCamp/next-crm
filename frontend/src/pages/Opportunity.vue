@@ -467,7 +467,7 @@
         afterRename: afterRename
       }"
   />
-  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"/>
+  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity" @reload="() => reload = true"/>
   <MissingValueModal v-model="showMissingValueModal" label="Update Missing Fields" :missingFieldValues="missingFields" :filteredFields="filteredFields" @update="(data) => {
     updateOpportunityFields({ ...data, status: 'Won' }, () => {
       callback?.()
