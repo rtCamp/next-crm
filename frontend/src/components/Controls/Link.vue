@@ -160,7 +160,7 @@ const options = createResource({
   transform: (data) => {
     let allData = data
       .map((option) => ({
-        label: option.description || option.value,
+        label: props.doctype == 'User' ? option.description : option.value,
         value: option.value,
       }))
       .filter((option, index, self) => index === self.findIndex((t) => t.value === option.value))
