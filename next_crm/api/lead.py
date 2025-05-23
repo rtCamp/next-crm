@@ -20,4 +20,6 @@ def get_lead(name):
     lead["fields_meta"] = get_fields_meta("Lead")
     lead["_form_script"] = get_form_script("Lead")
     lead["_assign"] = get_assigned_users("Lead", lead.name)
+    hide_comments_tab = frappe.db.get_single_value("NCRM Settings", "hide_comments_tab")
+    lead["hide_comments_tab"] = hide_comments_tab
     return lead

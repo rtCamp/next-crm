@@ -592,12 +592,24 @@ watch([reload, reload_email], ([reload_value, reload_email_value]) => {
 watch(
   () => all_activities.data,
   (value) => {
-    props.tabs[1].count.value = value?.versions.filter((activity) => activity.activity_type === 'communication').length
-    props.tabs[2].count.value = value?.versions.filter((activity) => activity.activity_type === 'comment').length
-    props.tabs[3].count.value = value?.todos.length
-    props.tabs[4].count.value = value?.events.length
-    props.tabs[5].count.value = value?.notes.length
-    props.tabs[6].count.value = value?.attachments.length
+    const getActivityCount = (type) =>
+      value?.versions?.filter((activity) => activity.activity_type === type).length || 0
+
+    const tabCounts = {
+      Emails: getActivityCount('communication'),
+      Comments: getActivityCount('comment'),
+      ToDos: value?.todos?.length || 0,
+      Events: value?.events?.length || 0,
+      Notes: value?.notes?.length || 0,
+      Attachments: value?.attachments?.length || 0,
+    }
+
+    for (const [name, count] of Object.entries(tabCounts)) {
+      const tab = props.tabs.find((t) => t.name === name)
+      if (tab) {
+        tab.count.value = count
+      }
+    }
   },
 )
 

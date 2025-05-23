@@ -13,6 +13,8 @@ def get_opportunity(name):
     opportunity["fields_meta"] = get_fields_meta("Opportunity")
     opportunity["_form_script"] = get_form_script("Opportunity")
     opportunity["_assign"] = get_assigned_users("Opportunity", opportunity.name)
+    hide_comments_tab = frappe.db.get_single_value("NCRM Settings", "hide_comments_tab")
+    opportunity["hide_comments_tab"] = hide_comments_tab
     return opportunity
 
 
