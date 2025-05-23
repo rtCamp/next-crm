@@ -158,12 +158,12 @@ const options = createResource({
     filters: parse_filters(props.filters),
   },
   transform: (data) => {
-    let allData = data.map((option) => {
-      return {
-        label: option.value,
+    let allData = data
+      .map((option) => ({
+        label: option.description || option.value,
         value: option.value,
-      }
-    })
+      }))
+      .filter((option, index, self) => index === self.findIndex((t) => t.value === option.value))
     if (!props.hideMe && props.doctype == 'User') {
       allData.unshift({
         label: '@me',
