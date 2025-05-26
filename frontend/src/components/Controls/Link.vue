@@ -30,13 +30,13 @@
         <slot name="item-label" v-bind="{ active, selected, option }" />
       </template>
 
-      <template #footer="{ value, close }">
+      <template #footer="{ value, togglePopover }">
         <div v-if="attrs.onCreate">
           <Button
             variant="ghost"
             class="w-full !justify-start"
             :label="__('Create New')"
-            @click="attrs.onCreate(value, close)"
+            @click="attrs.onCreate(value, togglePopover)"
           >
             <template #prefix>
               <FeatherIcon name="plus" class="h-4" />
@@ -44,7 +44,12 @@
           </Button>
         </div>
         <div>
-          <Button variant="ghost" class="w-full !justify-start" :label="__('Clear')" @click="() => clearValue(close)">
+          <Button
+            variant="ghost"
+            class="w-full !justify-start"
+            :label="__('Clear')"
+            @click="() => clearValue(togglePopover)"
+          >
             <template #prefix>
               <FeatherIcon name="x" class="h-4" />
             </template>
