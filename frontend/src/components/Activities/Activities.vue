@@ -119,6 +119,26 @@
         <div class="mb-4" :id="activity.name" v-else-if="activity.activity_type == 'comment'">
           <CommentArea :activity="activity" />
         </div>
+        <div v-else-if="activity.activity_type == 'note'">
+          <div class="mb-4 cursor-pointer text-base" @click="modalRef.showNote(activity)">
+            <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
+              <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
+                <UserAvatar :user="activity.owner" size="md" class="mr-1" />
+                <span class="font-medium text-ink-gray-8">{{ activity.owner_name }}</span>
+                <span>added a</span>
+                <span class="max-w-xs truncate font-medium text-ink-gray-8">note</span>
+              </div>
+              <div class="ml-auto whitespace-nowrap">
+                <Tooltip :text="dateFormat(activity.added_on, dateTooltipFormat)">
+                  <div class="text-sm text-ink-gray-5">
+                    {{ __(timeAgo(activity.added_on)) }}
+                  </div>
+                </Tooltip>
+              </div>
+            </div>
+            <div class="mt-2 p-3 bg-gray-50 rounded-lg" v-html="activity.note"></div>
+          </div>
+        </div>
         <div
           class="mb-4 flex flex-col gap-2 py-1.5"
           :id="activity.name"
@@ -436,6 +456,22 @@ const activities = computed(() => {
   let _activities = []
   if (title.value == 'Activity') {
     _activities = get_activities()
+    const notesAsActivities = (all_activities.data?.notes || []).map((note) => ({
+      ...note,
+      activity_type: 'note',
+      icon: NoteIcon,
+      creation: note.added_on,
+      content: note.note,
+      custom_title: note.custom_title,
+      owner: note.owner,
+      owner_name: note.owner_name,
+      name: note.name,
+      type: 'note',
+      value: 'added a note',
+      attachments: [],
+    }))
+
+    _activities = [..._activities, ...notesAsActivities]
   } else if (title.value == 'Emails') {
     if (!all_activities.data?.versions) return []
     _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'communication')
@@ -570,6 +606,9 @@ function timelineIcon(activity_type, is_lead) {
       break
     case 'attachment_log':
       icon = AttachmentIcon
+      break
+    case 'note':
+      icon = NoteIcon
       break
     default:
       icon = DotIcon
