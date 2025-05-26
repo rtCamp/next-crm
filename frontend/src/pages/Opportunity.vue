@@ -9,25 +9,15 @@
     </template>
     <template #right-header>
       <CustomActions v-if="customActions" :actions="customActions" />
-      <AssignTo
-        v-model="opportunity.data._assignedTo"
-        :data="opportunity.data"
-        doctype="Opportunity"
-      />
+      <AssignTo v-model="opportunity.data._assignedTo" :data="opportunity.data" doctype="Opportunity" />
       <Dropdown :options="statusOptions('opportunity', updateField, customStatuses)">
         <template #default="{ open }">
-          <Button
-            :label="opportunity.data.status"
-            :class="getDealStatus(opportunity.data.status).colorClass"
-          >
+          <Button :label="opportunity.data.status" :class="getDealStatus(opportunity.data.status).colorClass">
             <template #prefix>
               <IndicatorIcon />
             </template>
             <template #suffix>
-              <FeatherIcon
-                :name="open ? 'chevron-up' : 'chevron-down'"
-                class="h-4"
-              />
+              <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4" />
             </template>
           </Button>
         </template>
@@ -39,51 +29,35 @@
       <template #tab-item="{ tab, selected }">
         <button
           class="group flex items-center gap-2 border-b border-transparent py-2.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:border-gray-400 hover:text-ink-gray-9"
-          :class="{ 'text-ink-gray-9': selected }"
-        >
+          :class="{ 'text-ink-gray-9': selected }">
           <component v-if="tab.icon" :is="tab.icon" class="h-5" />
           {{ __(tab.label) }}
-          <Badge
-            v-if="tab.label != 'Activity'"
-            variant="solid"
-            theme="gray"
-            size="sm"
-          >
+          <Badge v-if="tab.label != 'Activity'" variant="solid" theme="gray" size="sm">
             {{ tab.count || 0 }}
           </Badge>
         </button>
       </template>
       <template #tab-panel>
-        <Activities
-          ref="activities"
-          doctype="Opportunity"
-          :tabs="tabs"
-          v-model:reload="reload"
-          v-model:tabIndex="tabIndex"
-          v-model="opportunity"
-        />
+        <Activities ref="activities" doctype="Opportunity" :tabs="tabs" v-model:reload="reload"
+          v-model:tabIndex="tabIndex" v-model="opportunity" />
       </template>
     </Tabs>
     <Resizer side="right" class="flex flex-col justify-between border-l">
-      <div
-        class="flex h-10.5 cursor-copy items-center border-b px-5 py-2.5 text-lg font-medium text-ink-gray-9"
-        @click="copyToClipboard(opportunity.data.name)"
-      >
+      <div class="flex h-10.5 cursor-copy items-center border-b px-5 py-2.5 text-lg font-medium text-ink-gray-9"
+        @click="copyToClipboard(opportunity.data.name)">
         {{ __(opportunity.data.name) }}
       </div>
       <div class="flex items-center justify-start gap-5 border-b p-5">
         <Tooltip :text="__('Customer logo')">
           <div class="group relative size-12">
-            <Avatar
-              size="3xl"
-              class="size-12"
+            <Avatar size="3xl" class="size-12"
               :label="customer.data?.name || opportunity.data?.party_name || __('Untitled')"
-              :image="customer.data?.image"
-            />
+              :image="customer.data?.image" />
           </div>
         </Tooltip>
         <div class="flex flex-col gap-2.5 truncate text-ink-gray-9">
-          <Tooltip :text="customer.data?.name || opportunity.data?.title || opportunity.data?.party_name || __('Set an customer')">
+          <Tooltip
+            :text="customer.data?.name || opportunity.data?.title || opportunity.data?.party_name || __('Set an customer')">
             <div class="truncate text-2xl font-medium" @click="showRenameModal = true">
               {{ customer.data?.name || opportunity.data?.title || opportunity.data?.party_name || __('Untitled') }}
             </div>
@@ -96,26 +70,20 @@
             </Tooltip>
             <Tooltip :text="__('Send an email')">
               <Button class="h-7 w-7">
-                <Email2Icon
-                  class="h-4 w-4"
-                  @click="
-                    opportunity.data.email
-                      ? openEmailBox()
-                      : errorMessage(__('No email set'))
-                  "
-                />
+                <Email2Icon class="h-4 w-4" @click="
+                  opportunity.data.email
+                    ? openEmailBox()
+                    : errorMessage(__('No email set'))
+                  " />
               </Button>
             </Tooltip>
             <Tooltip :text="__('Go to website')">
               <Button class="h-7 w-7">
-                <LinkIcon
-                  class="h-4 w-4"
-                  @click="
-                    opportunity.data.website
-                      ? openWebsite(opportunity.data.website)
-                      : errorMessage(__('No website set'))
-                  "
-                />
+                <LinkIcon class="h-4 w-4" @click="
+                  opportunity.data.website
+                    ? openWebsite(opportunity.data.website)
+                    : errorMessage(__('No website set'))
+                  " />
               </Button>
             </Tooltip>
             <Tooltip :text="__('Attach a file')">
@@ -126,178 +94,99 @@
           </div>
         </div>
       </div>
-      <SLASection
-        v-if="opportunity.data.sla_status"
-        v-model="opportunity.data"
-        @updateField="updateField"
-      />
-      <div
-        v-if="fieldsLayout.data"
-        class="flex flex-1 flex-col justify-between overflow-hidden"
-      >
+      <SLASection v-if="opportunity.data.sla_status" v-model="opportunity.data" @updateField="updateField" />
+      <div v-if="fieldsLayout.data" class="flex flex-1 flex-col justify-between overflow-hidden">
         <div class="flex flex-col overflow-y-auto">
-          <div
-            v-for="(section, i) in fieldsLayout.data"
-            :key="section.label"
-            class="section flex flex-col p-3"
-            :class="{ 'border-b': i !== fieldsLayout.data.length - 1 }"
-          >
+          <div v-for="(section, i) in fieldsLayout.data" :key="section.label" class="section flex flex-col p-3"
+            :class="{ 'border-b': i !== fieldsLayout.data.length - 1 }">
             <Section :is-opened="section.opened" :label="section.label">
               <template #actions>
                 <div v-if="section.contacts" class="pr-2">
-                  <Link
-                    value=""
-                    doctype="Contact"
-                    @change="(e) => addContact(e)"
-                    :onCreate="
-                      (value, close) => {
-                        _contact = {
-                          first_name: value,
-                          company_name: opportunity.data.customer,
-                        }
-                        showContactModal = true
-                        close()
-                      }
-                    "
-                  >
-                    <template #target="{ togglePopover }">
-                      <Button
-                        class="h-7 px-3"
-                        variant="ghost"
-                        icon="plus"
-                        @click="togglePopover()"
-                      />
-                    </template>
+                  <Link value="" doctype="Contact" @change="(e) => addContact(e)" :onCreate="(value, close) => {
+                    _contact = {
+                      first_name: value,
+                      company_name: opportunity.data.customer,
+                    }
+                    showContactModal = true
+                    close()
+                  }
+                    ">
+                  <template #target="{ togglePopover }">
+                    <Button class="h-7 px-3" variant="ghost" icon="plus" @click="togglePopover()" />
+                  </template>
                   </Link>
                 </div>
                 <div v-else-if="section.addresses" class="pr-2">
-                  <Link
-                    value=""
-                    doctype="Address"
-                    @change="(e) => addAddress(e)"
-                    :onCreate="
-                      (value, close) => {
-                        _address = {
-                          name: value,
-                        }
-                        showAddressModal = true
-                        close()
-                      }
-                    "
-                  >
-                    <template #target="{ togglePopover }">
-                      <Button
-                        class="h-7 px-3"
-                        variant="ghost"
-                        icon="plus"
-                        @click="togglePopover()"
-                      />
-                    </template>
+                  <Link value="" doctype="Address" @change="(e) => addAddress(e)" :onCreate="(value, close) => {
+                    _address = {
+                      name: value,
+                    }
+                    showAddressModal = true
+                    close()
+                  }
+                    ">
+                  <template #target="{ togglePopover }">
+                    <Button class="h-7 px-3" variant="ghost" icon="plus" @click="togglePopover()" />
+                  </template>
                   </Link>
                 </div>
-                <Button
-                  v-else-if="
-                    ((!section.contacts && !section.addresses && i == 2) || i == 0) && isManager()
-                  "
-                  variant="ghost"
-                  class="w-7 mr-2"
-                  @click="showSidePanelModal = true"
-                >
+                <Button v-else-if="
+                  ((!section.contacts && !section.addresses && i == 2) || i == 0) && isManager()
+                " variant="ghost" class="w-7 mr-2" @click="showSidePanelModal = true">
                   <EditIcon class="h-4 w-4" />
                 </Button>
               </template>
-              <SectionFields
-                v-if="section.fields"
-                :fields="section.fields"
-                :isLastSection="i == fieldsLayout.data.length - 1"
-                v-model="opportunity.data"
-                @update="updateField"
-              />
+              <SectionFields v-if="section.fields" :fields="section.fields"
+                :isLastSection="i == fieldsLayout.data.length - 1" v-model="opportunity.data" @update="updateField" />
               <div v-else>
-                <div
-                  v-if="
-                    section.contacts && opportunityContacts?.loading && opportunityContacts?.data?.length == 0
-                  "
-                  class="flex min-h-20 flex-1 items-center justify-center gap-3 text-base text-ink-gray-4"
-                >
+                <div v-if="
+                  section.contacts && opportunityContacts?.loading && opportunityContacts?.data?.length == 0
+                " class="flex min-h-20 flex-1 items-center justify-center gap-3 text-base text-ink-gray-4">
                   <LoadingIndicator class="h-4 w-4" />
                   <span>{{ __('Loading...') }}</span>
                 </div>
-                <div
-                  v-if="
-                    section.addresses && opportunityAddresses?.loading && opportunityAddresses?.data?.length == 0
-                  "
-                  class="flex min-h-20 flex-1 items-center justify-center gap-3 text-base text-ink-gray-4"
-                >
+                <div v-if="
+                  section.addresses && opportunityAddresses?.loading && opportunityAddresses?.data?.length == 0
+                " class="flex min-h-20 flex-1 items-center justify-center gap-3 text-base text-ink-gray-4">
                   <LoadingIndicator class="h-4 w-4" />
                   <span>{{ __('Loading...') }}</span>
                 </div>
-                <div
-                  v-else-if="section.contacts && opportunityContacts?.data?.length"
-                  v-for="(contact, i) in opportunityContacts.data"
-                  :key="contact.name"
-                >
-                  <div
-                    class="px-2 pb-2.5"
-                    :class="[i == 0 ? 'pt-5' : 'pt-2.5']"
-                  >
+                <div v-else-if="section.contacts && opportunityContacts?.data?.length"
+                  v-for="(contact, i) in opportunityContacts.data" :key="contact.name">
+                  <div class="px-2 pb-2.5" :class="[i == 0 ? 'pt-5' : 'pt-2.5']">
                     <Section :is-opened="contact.opened">
                       <template #header="{ opened, toggle }">
                         <div
-                          class="flex cursor-pointer items-center justify-between gap-2 pr-1 text-base leading-5 text-ink-gray-7"
-                        >
-                          <div
-                            class="flex h-7 items-center gap-2 truncate"
-                            @click="toggle()"
-                          >
-                            <Avatar
-                              :label="contact.full_name"
-                              :image="contact.image"
-                              size="md"
-                            />
+                          class="flex cursor-pointer items-center justify-between gap-2 pr-1 text-base leading-5 text-ink-gray-7">
+                          <div class="flex h-7 items-center gap-2 truncate" @click="toggle()">
+                            <Avatar :label="contact.full_name" :image="contact.image" size="md" />
                             <div class="truncate">
                               {{ contact.full_name }}
                             </div>
-                            <Badge
-                              v-if="contact.name == opportunity.data.contact_person"
-                              class="ml-2"
-                              variant="outline"
-                              :label="__('Primary')"
-                              theme="green"
-                            />
+                            <Badge v-if="contact.name == opportunity.data.contact_person" class="ml-2" variant="outline"
+                              :label="__('Primary')" theme="green" />
                           </div>
                           <div class="flex items-center">
                             <Dropdown :options="contactOptions(contact)">
-                              <Button
-                                icon="more-horizontal"
-                                class="text-ink-gray-5"
-                                variant="ghost"
-                              />
+                              <Button icon="more-horizontal" class="text-ink-gray-5" variant="ghost" />
                             </Dropdown>
-                            <Button
-                              variant="ghost"
-                              @click="
-                                router.push({
-                                  name: 'Contact',
-                                  params: { contactId: contact.name },
-                                })
-                              "
-                            >
+                            <Button variant="ghost" @click="
+                              router.push({
+                                name: 'Contact',
+                                params: { contactId: contact.name },
+                              })
+                              ">
                               <ArrowUpRightIcon class="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" @click="toggle()">
-                              <FeatherIcon
-                                name="chevron-right"
+                              <FeatherIcon name="chevron-right"
                                 class="h-4 w-4 text-ink-gray-9 transition-all duration-300 ease-in-out"
-                                :class="{ 'rotate-90': opened }"
-                              />
+                                :class="{ 'rotate-90': opened }" />
                             </Button>
                           </div>
                         </div>
                       </template>
-                      <div
-                        class="flex flex-col gap-1.5 text-base text-ink-gray-8"
-                      >
+                      <div class="flex flex-col gap-1.5 text-base text-ink-gray-8">
                         <div class="flex items-center gap-3 pb-1.5 pl-1 pt-4">
                           <Email2Icon class="h-4 w-4" />
                           {{ contact.email }}
@@ -309,79 +198,45 @@
                       </div>
                     </Section>
                   </div>
-                  <div
-                    v-if="i != opportunityContacts.data.length - 1"
-                    class="mx-2 h-px border-t border-gray-200"
-                  />
+                  <div v-if="i != opportunityContacts.data.length - 1" class="mx-2 h-px border-t border-gray-200" />
                 </div>
-                <div
-                  v-else-if="section.addresses && opportunityAddresses?.data?.length"
-                  v-for="(address, i) in opportunityAddresses.data"
-                  :key="address.name"
-                >
-                  <div
-                    class="px-2 pb-2.5"
-                    :class="[i == 0 ? 'pt-5' : 'pt-2.5']"
-                  >
+                <div v-else-if="section.addresses && opportunityAddresses?.data?.length"
+                  v-for="(address, i) in opportunityAddresses.data" :key="address.name">
+                  <div class="px-2 pb-2.5" :class="[i == 0 ? 'pt-5' : 'pt-2.5']">
                     <Section :is-opened="address.opened">
                       <template #header="{ opened, toggle }">
                         <div
-                          class="flex cursor-pointer items-center justify-between gap-2 pr-1 text-base leading-5 text-ink-gray-7"
-                        >
-                          <div
-                            class="flex h-7 items-center gap-2 truncate"
-                            @click="toggle()"
-                          >
+                          class="flex cursor-pointer items-center justify-between gap-2 pr-1 text-base leading-5 text-ink-gray-7">
+                          <div class="flex h-7 items-center gap-2 truncate" @click="toggle()">
                             <div class="truncate">
                               {{ address.name }}
                             </div>
-                            <Badge
-                              v-if="address.is_primary_address"
-                              class="ml-2"
-                              variant="outline"
-                              :label="__('Bill')"
-                              theme="green"
-                            />
-                            <Badge
-                              v-if="address.is_shipping_address"
-                              class="ml-0"
-                              variant="outline"
-                              :label="__('Ship')"
-                              theme="green"
-                            />
+                            <Badge v-if="address.is_primary_address" class="ml-2" variant="outline" :label="__('Bill')"
+                              theme="green" />
+                            <Badge v-if="address.is_shipping_address" class="ml-0" variant="outline" :label="__('Ship')"
+                              theme="green" />
                           </div>
                           <div class="flex items-center">
                             <Dropdown :options="addressOptions(address)">
-                              <Button
-                                icon="more-horizontal"
-                                class="text-ink-gray-5"
-                                variant="ghost"
-                              />
+                              <Button icon="more-horizontal" class="text-ink-gray-5" variant="ghost" />
                             </Dropdown>
-                            <Button
-                              variant="ghost"
-                              @click="
-                                router.push({
-                                  name: 'Address',
-                                  params: { addressId: address.name },
-                                })
-                              "
-                            >
+                            <Button variant="ghost" @click="
+                              router.push({
+                                name: 'Address',
+                                params: { addressId: address.name },
+                              })
+                              ">
                               <ArrowUpRightIcon class="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" @click="toggle()">
-                              <FeatherIcon
-                                name="chevron-right"
+                              <FeatherIcon name="chevron-right"
                                 class="h-4 w-4 text-ink-gray-9 transition-all duration-300 ease-in-out"
-                                :class="{ 'rotate-90': opened }"
-                              />
+                                :class="{ 'rotate-90': opened }" />
                             </Button>
                           </div>
                         </div>
                       </template>
-                      <div
-                        class="flex flex-col gap-1.5 text-base text-ink-gray-8"
-                      >
+                      <div class="flex flex-col gap-1.5 text-base text-ink-gray-8">
                         <div class="flex items-center gap-3 pb-1.5 pl-1 pt-4">
                           <AddressIcon class="h-4 w-4" />
                           {{ address.address_line1 }}
@@ -393,21 +248,13 @@
                       </div>
                     </Section>
                   </div>
-                  <div
-                    v-if="i != opportunityAddresses.data.length - 1"
-                    class="mx-2 h-px border-t border-gray-200"
-                  />
+                  <div v-if="i != opportunityAddresses.data.length - 1" class="mx-2 h-px border-t border-gray-200" />
                 </div>
-                <div
-                  v-else-if="section.addresses"
-                  class="flex h-20 items-center justify-center text-base text-ink-gray-5"
-                >
+                <div v-else-if="section.addresses"
+                  class="flex h-20 items-center justify-center text-base text-ink-gray-5">
                   {{ __('No addresses added') }}
                 </div>
-                <div
-                  v-else
-                  class="flex h-20 items-center justify-center text-base text-ink-gray-5"
-                >
+                <div v-else class="flex h-20 items-center justify-center text-base text-ink-gray-5">
                   {{ __('No contacts added') }}
                 </div>
               </div>
@@ -417,57 +264,61 @@
       </div>
     </Resizer>
   </div>
-  <CustomerModal
-    v-model="showCustomerModal"
-    v-model:customer="_customer"
-    :options="{
-      redirect: false,
-      afterInsert: (doc) => updateField('customer', doc.name),
-    }"
-  />
-  <ContactModal
-    v-model="showContactModal"
-    :contact="_contact"
-    :options="{
-      redirect: false,
-      afterInsert: (doc) => addContact(doc.name),
-    }"
-  />
-  <AddressModal
-    v-model="showAddressModal"
-    :address="_address"
-    :options="{
-      afterInsert: (doc) => addAddress(doc.name),
-    }"
-  />
-  <SidePanelModal
-    v-if="showSidePanelModal"
-    v-model="showSidePanelModal"
-    doctype="Opportunity"
-    @reload="() => fieldsLayout.reload()"
-  />
-  <FilesUploader
-    v-if="opportunity.data?.name"
-    v-model="showFilesUploader"
-    doctype="Opportunity"
-    :docname="opportunity.data.name"
-    @after="
+  <CustomerModal v-model="showCustomerModal" v-model:customer="_customer" :options="{
+    redirect: false,
+    afterInsert: (doc) => updateField('customer', doc.name),
+  }" />
+  <ContactModal v-model="showContactModal" :contact="_contact" :options="{
+    redirect: false,
+    afterInsert: (doc) => addContact(doc.name),
+  }" />
+  <AddressModal v-model="showAddressModal" :address="_address" :options="{
+    afterInsert: (doc) => addAddress(doc.name),
+  }" />
+  <SidePanelModal v-if="showSidePanelModal" v-model="showSidePanelModal" doctype="Opportunity"
+    @reload="() => fieldsLayout.reload()" />
+  <FilesUploader v-if="opportunity.data?.name" v-model="showFilesUploader" doctype="Opportunity"
+    :docname="opportunity.data.name" @after="
       () => {
         activities?.all_activities?.reload()
         changeTabTo('attachments')
       }
-    "
-  />
-  <RenameModal
-      v-model="showRenameModal"
-      doctype="Opportunity"
-      :docname="opportunity?.data?.name"
-      :title="opportunity?.data?.title"
-      :options="{
-        afterRename: afterRename
-      }"
-  />
-  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"/>
+    " />
+  <RenameModal v-model="showRenameModal" doctype="Opportunity" :docname="opportunity?.data?.name"
+    :title="opportunity?.data?.title" :options="{
+      afterRename: afterRename
+    }" />
+  <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"
+    @reload="() => reload = true" />
+  <OpportunityFromSetModal v-model="showOpportunityFromModal" :opportunityFrom="opportunityFrom"
+    :title="opportunity?.data?.party_name" :docname="opportunity?.data?.name" @after="() => {
+      opportunity.reload()
+      reload = true
+    }" />
+  <MissingValueModal v-model="showMissingValueModal" label="Update Missing Fields" :missingFieldValues="missingFields"
+    :filteredFields="filteredFields" @update="(data) => {
+      updateOpportunityFields({ ...data }, () => {
+        callback?.()
+      })
+    }" />
+  <Dialog :options="{
+    title: 'Confirm',
+    message: 'Do you want to create a project from this opportunity?',
+    size: 'xl',
+    icon: {
+      name: 'alert-triangle',
+      appearance: 'warning',
+    },
+    actions: [
+      {
+        label: 'Create Project',
+        variant: 'solid',
+        onClick: () => {
+          return createProjectFromOpportunity()
+        },
+      },
+    ],
+  }" v-model="showCreateProjectModal" />
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -499,6 +350,8 @@ import ContactModal from '@/components/Modals/ContactModal.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import RenameModal from '@/components/Modals/RenameModal.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
+import OpportunityFromSetModal from '../components/Modals/OpportunityFromSetModal.vue'
+import MissingValueModal from '@/components/Modals/MissingValueModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -527,7 +380,7 @@ import {
   call,
   usePageMeta,
 } from 'frappe-ui'
-import { ref, computed, h, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 
@@ -611,13 +464,26 @@ const showCustomerModal = ref(false)
 const showSidePanelModal = ref(false)
 const showFilesUploader = ref(false)
 const showRenameModal = ref(false)
+const showOpportunityFromModal = ref(false)
+const opportunityFrom = reactive({
+  opportunityFrom: opportunity?.data?.opportunity_from,
+  partyName: opportunity?.data?.party_name,
+})
 const _customer = ref({})
-const showLostReasonModal =  ref (false)
+const showLostReasonModal = ref(false)
+const showMissingValueModal = ref(false)
+const showCreateProjectModal = ref(false)
 
 function updateOpportunity(fieldname, value, callback) {
   value = Array.isArray(fieldname) ? '' : value
 
   if (validateRequired(fieldname, value)) return
+
+  if (fieldname == 'opportunity_from' || fieldname == 'party_name') {
+    fieldname == 'opportunity_from' ? opportunityFrom.opportunityFrom = value : opportunityFrom.partyName = value
+    showOpportunityFromModal.value = true
+    return
+  }
 
   createResource({
     url: 'frappe.client.set_value',
@@ -628,7 +494,7 @@ function updateOpportunity(fieldname, value, callback) {
       value,
     },
     auto: true,
-    onSuccess: () => {
+    onSuccess: (data) => {
       opportunity.reload()
       reload.value = true
       createToast({
@@ -637,6 +503,9 @@ function updateOpportunity(fieldname, value, callback) {
         iconClasses: 'text-ink-green-3',
       })
       callback?.()
+      if (data.status === "Won") {
+        showCreateProjectModal.value = true;
+      }
     },
     onError: (err) => {
       createToast({
@@ -648,6 +517,40 @@ function updateOpportunity(fieldname, value, callback) {
     },
   })
 }
+const updateOpportunityFields = async (fields, callback) => {
+  for (const [fieldname, value] of Object.entries(fields)) {
+    if (validateRequired(fieldname, value)) return
+  }
+  createResource({
+    url: 'frappe.client.set_value',
+    params: {
+      doctype: 'Opportunity',
+      name: props.opportunityId,
+      fieldname: fields,
+    },
+    auto: true,
+    onSuccess: async () => {
+      opportunity.reload()
+      reload.value = true
+      createToast({
+        title: __('Opportunity updated'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+      callback?.()
+      await createProject(opportunity.data)
+    },
+    onError: (err) => {
+      createToast({
+        title: __('Error updating opportunity'),
+        text: __(err.messages?.[0]),
+        icon: 'x',
+        iconClasses: 'text-ink-red-4',
+      })
+    },
+  })
+}
+
 
 function validateRequired(fieldname, value) {
   let meta = opportunity.data.fields_meta || {}
@@ -711,7 +614,8 @@ const tabs = computed(() => {
       name: 'Comments',
       label: __('Comments'),
       icon: CommentIcon,
-      count: ref(0)
+      count: ref(0),
+      condition: () => !Boolean(opportunity?.data?.hide_comments_tab),
     },
     {
       name: 'Calls',
@@ -947,7 +851,7 @@ const opportunityContacts = createResource({
   url: '/api/method/next_crm.api.contact.get_lead_opportunity_contacts',
   params: {
     doctype: "Opportunity",
-    docname: props.opportunityId 
+    docname: props.opportunityId
   },
   cache: ['opportunity_contacts', props.opportunityId],
   auto: true,
@@ -990,14 +894,128 @@ function triggerCall() {
 }
 
 function updateField(name, value, callback) {
-  if(name == "status" && value == "Lost"){
-    showLostReasonModal.value  = true
-  }else{
-    updateOpportunity(name, value, () => {
-      opportunity.data[name] = value
-      callback?.()
+  const isStatusField = name === "status";
+
+  if (isStatusField && value === "Lost") {
+    showLostReasonModal.value = true;
+    return;
+  }
+
+  updateOpportunity(name, value, () => {
+    opportunity.data[name] = value;
+    callback?.();
+  });
+}
+
+const projectResource = createResource({
+  url: "/api/resource/Project",
+})
+
+const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
+  "title": "project_name",
+  "contact_person": "custom_client_point_of_contact",
+  "customer": "customer",
+  "territory": "custom_territory",
+  "custom_project_manager": "custom_project_manager",
+  "custom_complexity_level": "custom_complexity",
+  "opportunity_amount": "total_sales_amount",
+  "currency": "custom_currency",
+  "custom__project_size": "custom_project_size",
+  "source": "custom_source",
+  "industry": "custom_industry",
+  "custom_deal_type": "custom_deal_type",
+  "custom_timezone": "custom_timezone",
+  "custom_current_host": "custom_host",
+  "custom_project_type": "project_type",
+  "custom_estimatedpurchased_hours": "custom_total_hours_purchased",
+  "custom_service_type": "custom_service_type",
+  "custom_restricted_under_nda": "custom_restricted_under_nda",
+  "custom_duration": "custom_duration",
+  "custom_previous_cms": "custom_previous_cms",
+  "custom_billing_type": "custom_billing_type",
+  "custom_description": "custom_project_detail",
+};
+
+const createProject = async (projectData) => {
+  try {
+    const projectPayload = {
+      project_name: projectData.title,
+      status: "Open"
+    };
+
+    Object.entries(OPPORTUNITY_TO_PROJECT_KEY_MAP).forEach(([sourceKey, targetKey]) => {
+      if (projectData[sourceKey] !== undefined && projectData[sourceKey] !== null) {
+        projectPayload[targetKey] = projectData[sourceKey];
+      }
+    });
+
+    await projectResource.submit(projectPayload);
+    createToast({
+      title: __('Project created successfully'),
+      text: __(`Created project named ${projectPayload.project_name}`),
+      icon: 'check',
+      iconClasses: 'text-ink-green-3',
+    })
+    showCreateProjectModal.value = false;
+  } catch{
+    createToast({
+      title: __(projectResource.error.exc_type || 'Error creating project'),
+      text: __(projectResource.error.messages[0] || 'Something went wrong'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
     })
   }
+};
+
+const missingFields = ref({})
+
+const fieldDefinitions = computed(() => {
+  if (!opportunity?.data?.fields_meta || !missingFields.value) return []
+
+  return Object.keys(missingFields.value).map(fieldname => {
+    const fieldMeta = opportunity.data.fields_meta[fieldname] || {}
+    const isSelectField = fieldMeta.fieldtype === 'Select'
+    let options = fieldMeta.options
+
+    if (isSelectField && options && typeof options === 'string') {
+      options = options.split('\n')
+        .map(opt => opt.trim())
+        .filter(opt => opt.length > 0)
+    }
+
+    return {
+      ...fieldMeta,
+      name: fieldname,
+      label: fieldMeta.label,
+      type: fieldMeta.fieldtype || 'Data',
+      options: options,
+      mandatory: fieldMeta.fieldtype !== "Check"? true : false,
+      reqd:fieldMeta.fieldtype !== "Check"? true : false,
+    }
+  })
+})
+
+const filteredFields = computed(() => {
+  return fieldDefinitions.value.filter(field =>
+    Object.prototype.hasOwnProperty.call(missingFields.value, field.fieldname)
+  )
+})
+
+const createProjectFromOpportunity = async () => {
+  const requiredFields = Object.keys(OPPORTUNITY_TO_PROJECT_KEY_MAP);
+  const filteredRequiredFields = requiredFields.filter(field => field in opportunity.data.fields_meta);
+  const missingFieldArray = getMissingRequiredFields(filteredRequiredFields, opportunity.data);
+  if (missingFieldArray.length) {
+    showMissingValueModal.value = true;
+    showCreateProjectModal.value = false;
+    missingFields.value = Object.fromEntries(
+      Object.entries(opportunity.data)
+        .filter(([key]) => requiredFields.includes(key))
+    );
+  } else {
+    await createProject(opportunity.data);
+  }
+
 }
 
 async function deleteOpportunity(name) {
@@ -1019,12 +1037,21 @@ function afterRename(renamed_docname) {
     location.reload();
   });
 }
+
+function getMissingRequiredFields(requiredFieldKeys, data) {
+  return requiredFieldKeys.filter(key => {
+    const value = data[key]
+    return value === undefined || value === null || String(value).trim() === ''
+  })
+}
+
 </script>
 
 <style scoped>
 :deep(.section:has(.section-field.hidden)) {
   display: none;
 }
+
 :deep(.section:has(.section-field:not(.hidden))) {
   display: flex;
 }

@@ -119,6 +119,39 @@
         <div class="mb-4" :id="activity.name" v-else-if="activity.activity_type == 'comment'">
           <CommentArea :activity="activity" />
         </div>
+        <div v-else-if="activity.activity_type == 'note'">
+          <div class="mb-4 cursor-pointer text-base" @click="modalRef.showNote(activity)">
+            <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
+              <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
+                <UserAvatar :user="activity.owner" size="md" class="mr-1" />
+                <span class="font-medium text-ink-gray-8">{{ activity.owner_name }}</span>
+                <span>added a</span>
+                <span class="max-w-xs truncate font-medium text-ink-gray-8">note</span>
+              </div>
+              <div class="ml-auto whitespace-nowrap">
+                <Tooltip :text="dateFormat(activity.added_on, dateTooltipFormat)">
+                  <div class="text-sm text-ink-gray-5">
+                    {{ __(timeAgo(activity.added_on)) }}
+                  </div>
+                </Tooltip>
+              </div>
+            </div>
+            <div
+              class="activity group flex max-h-64 cursor-pointer flex-col justify-between gap-2 rounded-md bg-surface-gray-1 px-4 py-3 hover:bg-surface-gray-2"
+            >
+              <div v-if="activity.custom_title" class="flex items-center justify-between">
+                <div class="truncate text-lg font-medium text-ink-gray-8" v-html="activity.custom_title"></div>
+              </div>
+
+              <div class="relative w-full flex-1 overflow-hidden">
+                <div
+                  class="tiptap ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 !prose-sm max-w-none !text-sm text-ink-gray-5 focus:outline-none"
+                  v-html="activity.note"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div
           class="mb-4 flex flex-col gap-2 py-1.5"
           :id="activity.name"
@@ -436,6 +469,27 @@ const activities = computed(() => {
   let _activities = []
   if (title.value == 'Activity') {
     _activities = get_activities()
+
+    if (Boolean(doc?.value?.data?.hide_comments_tab)) {
+      _activities = _activities.filter((activity) => activity.activity_type !== 'comment')
+    }
+
+    const notesAsActivities = (all_activities.data?.notes || []).map((note) => ({
+      ...note,
+      activity_type: 'note',
+      icon: NoteIcon,
+      creation: note.added_on,
+      content: note.note,
+      custom_title: note.custom_title,
+      owner: note.owner,
+      owner_name: note.owner_name,
+      name: note.name,
+      type: 'note',
+      value: 'added a note',
+      attachments: [],
+    }))
+
+    _activities = [..._activities, ...notesAsActivities]
   } else if (title.value == 'Emails') {
     if (!all_activities.data?.versions) return []
     _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'communication')
@@ -571,6 +625,9 @@ function timelineIcon(activity_type, is_lead) {
     case 'attachment_log':
       icon = AttachmentIcon
       break
+    case 'note':
+      icon = NoteIcon
+      break
     default:
       icon = DotIcon
   }
@@ -592,12 +649,24 @@ watch([reload, reload_email], ([reload_value, reload_email_value]) => {
 watch(
   () => all_activities.data,
   (value) => {
-    props.tabs[1].count.value = value?.versions.filter((activity) => activity.activity_type === 'communication').length
-    props.tabs[2].count.value = value?.versions.filter((activity) => activity.activity_type === 'comment').length
-    props.tabs[3].count.value = value?.todos.length
-    props.tabs[4].count.value = value?.events.length
-    props.tabs[5].count.value = value?.notes.length
-    props.tabs[6].count.value = value?.attachments.length
+    const getActivityCount = (type) =>
+      value?.versions?.filter((activity) => activity.activity_type === type).length || 0
+
+    const tabCounts = {
+      Emails: getActivityCount('communication'),
+      Comments: getActivityCount('comment'),
+      ToDos: value?.todos?.length || 0,
+      Events: value?.events?.length || 0,
+      Notes: value?.notes?.length || 0,
+      Attachments: value?.attachments?.length || 0,
+    }
+
+    for (const [name, count] of Object.entries(tabCounts)) {
+      const tab = props.tabs.find((t) => t.name === name)
+      if (tab) {
+        tab.count.value = count
+      }
+    }
   },
 )
 

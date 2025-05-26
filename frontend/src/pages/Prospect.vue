@@ -35,10 +35,10 @@
             label: __('Opportunity'),
             onClick: createOpportunity
           },
-          // {
-          //   label: __('Customer'),
-          //   onClick: createCustomer
-          // },
+          {
+            label: __('Customer'),
+            onClick: createCustomer
+          },
         ]"
         @click.stop
       >
@@ -61,14 +61,14 @@
               <div class="flex gap-4 items-center">
                 <div class="flex flex-col gap-2 truncate">
                   <div class="truncate text-2xl font-medium text-ink-gray-9">
-                    <span>{{ prospect.doc.name }}</span>
+                    <span>{{ prospect.doc?.name }}</span>
                   </div>
                   <div
-                    v-if="prospect.doc.website"
+                    v-if="prospect.doc?.website"
                     class="flex items-center gap-1.5 text-base text-ink-gray-8"
                   >
                     <WebsiteIcon class="size-4" />
-                    <span>{{ website(prospect.doc.website) }}</span>
+                    <span>{{ website(prospect.doc?.website) }}</span>
                   </div>
                 </div>
               </div>
@@ -195,7 +195,7 @@
   <LinkAddressModal
     v-model="showAddAddressModal"
     doctype="Prospect"
-    :docname="prospect.doc.name"
+    :docname="prospect.doc?.name"
     :options="{
       afterAddAddress: afterAddAddress
     }"
@@ -203,10 +203,14 @@
   <LinkContactModal
     v-model="showAddContactModal"
     doctype="Prospect"
-    :docname="prospect.doc.name"
+    :docname="prospect.doc?.name"
     :options="{
       afterAddContact: afterAddContact
     }"
+  />
+  <CustomerModal
+    v-model="showCustomerModal"
+    :customer="_customer"
   />
 </template>
   
@@ -251,6 +255,7 @@
     usePageMeta,
     createResource,
   } from 'frappe-ui'
+  import CustomerModal from '@/components/Modals/CustomerModal.vue'
   import { h, computed, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { capture } from '@/telemetry'
@@ -269,7 +274,9 @@
   const showQuickEntryModal = ref(false)
   const showAddContactModal = ref(false)
   const showAddAddressModal = ref(false)
-  
+  const showCustomerModal = ref(false)
+  const _customer = ref({})
+
   const route = useRoute()
   const router = useRouter()
   
@@ -622,33 +629,13 @@ function getAddressRowObject(address) {
 }
 
 async function createCustomer() {
-  $dialog({
-    title: __('Create Customer'),
-    message: __('Are you sure you want to create a new Customer from this Prospect\'s details?'),
-    actions: [
-      {
-        label: __('Create'),
-        theme: 'green',
-        variant: 'solid',
-        async onClick(close) {
-          try {
-            const customer = await call('next_crm.overrides.prospect.create_customer', {
-              prospect: prospect.name,
-            })
-            close()
-            router.push({ name: 'Customer', params: { customerId: customer } })
-          } catch (error) {
-            createToast({
-              title: __('Error'),
-              text: error,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
-          }
-        },
-      },
-    ],
-  })
+  _customer.value.customer_name = prospect.name
+  _customer.value.website = prospect.doc.website
+  _customer.value.no_of_employees = prospect.doc.no_of_employees
+  _customer.value.industry = prospect.doc.industry
+  _customer.value.territory = prospect.doc.territory
+  _customer.value.annual_revenue = prospect.doc.annual_revenue
+  showCustomerModal.value = true
 }
 
 function addAddressButtonCB() {

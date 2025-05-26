@@ -116,8 +116,8 @@ async function updateNote() {
         parenttype: props.doctype,
         parent: props.doc || '',
         parentfield: 'notes',
-        owner: getUser().email,
-        added_by: getUser().email,
+        owner: getUser().name,
+        added_by: getUser().name,
         added_on: dateFormat(new Date(), 'YYYY_MM_DD_HH_mm_ss'),
       },
     })

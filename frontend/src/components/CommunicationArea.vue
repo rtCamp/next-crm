@@ -14,6 +14,7 @@
       </Button>
       <Button
         variant="ghost"
+        v-if="doc?.data.hide_comments_tab !== 1"
         :label="__('Comment')"
         :class="[showCommentBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
         @click="toggleCommentBox()"

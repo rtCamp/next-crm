@@ -180,7 +180,7 @@ def get_quick_filters(doctype: str):
                 "fieldtype": field.get("fieldtype"),
                 "options": options,
                 "filters": (
-                    [["name", "in", ["Customer", "Lead", "Prospect"]]]
+                    [["DocType", "name", "in", ["Customer", "Lead", "Prospect"]]]
                     if field.fieldname == "opportunity_from"
                     else []
                 ),
@@ -739,7 +739,7 @@ def get_field_obj(field):
 
     obj["placeholder"] = field.get("placeholder") or "Add " + field.label + "..."
 
-    if field.fieldtype == "Link":
+    if field.fieldtype == "Link" or field.fieldtype == "Table MultiSelect":
         obj["placeholder"] = field.get("placeholder") or "Select " + field.label + "..."
         obj["doctype"] = field.options
     elif field.fieldtype == "Select" and field.options:
@@ -765,6 +765,8 @@ def get_type(field):
         return "number"
     elif field.fieldtype in ["Small Text", "Text", "Long Text", "Text Editor"]:
         return "textarea"
+    elif field.fieldtype == "Table MultiSelect":
+        return "Table MultiSelect"
     elif field.read_only:
         return "read_only"
     return field.fieldtype.lower()

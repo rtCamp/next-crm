@@ -30,13 +30,13 @@
         <slot name="item-label" v-bind="{ active, selected, option }" />
       </template>
 
-      <template #footer="{ value, close }">
+      <template #footer="{ value, togglePopover }">
         <div v-if="attrs.onCreate">
           <Button
             variant="ghost"
             class="w-full !justify-start"
             :label="__('Create New')"
-            @click="attrs.onCreate(value, close)"
+            @click="attrs.onCreate(value, togglePopover)"
           >
             <template #prefix>
               <FeatherIcon name="plus" class="h-4" />
@@ -44,7 +44,12 @@
           </Button>
         </div>
         <div>
-          <Button variant="ghost" class="w-full !justify-start" :label="__('Clear')" @click="() => clearValue(close)">
+          <Button
+            variant="ghost"
+            class="w-full !justify-start"
+            :label="__('Clear')"
+            @click="() => clearValue(togglePopover)"
+          >
             <template #prefix>
               <FeatherIcon name="x" class="h-4" />
             </template>
@@ -155,15 +160,15 @@ const options = createResource({
   params: {
     txt: text.value,
     doctype: props.doctype,
-    filters: props.filters,
+    filters: parse_filters(props.filters),
   },
   transform: (data) => {
-    let allData = data.map((option) => {
-      return {
-        label: option.value,
+    let allData = data
+      .map((option) => ({
+        label: props.doctype == 'User' ? option.description : option.value,
         value: option.value,
-      }
-    })
+      }))
+      .filter((option, index, self) => index === self.findIndex((t) => t.value === option.value))
     if (!props.hideMe && props.doctype == 'User') {
       allData.unshift({
         label: '@me',
@@ -173,15 +178,47 @@ const options = createResource({
     return allData
   },
 })
+function parse_filters(link_filters) {
+  if (!Array.isArray(link_filters)) return link_filters
+  let filters = {}
+  link_filters.forEach((filter) => {
+    let [_, fieldname, operator, value] = filter
+    if (value?.startsWith?.('eval:')) {
+      value = value.split('eval:')[1]
+      let context = {
+        doc: this.doc,
+        parent: this.doc.parenttype ? this.frm.doc : null,
+        frappe,
+      }
+      value = evalFilter(value, context)
+    }
+    filters[fieldname] = [operator, value]
+  })
 
+  return filters
+}
+function evalFilter(code, context = {}) {
+  let variable_names = Object.keys(context)
+  let variables = Object.values(context)
+  code = `let out = ${code}; return out`
+  try {
+    let expression_function = new Function(...variable_names, code)
+    return expression_function(...variables)
+  } catch (error) {
+    console.log('Error evaluating the following expression:')
+    console.error(code)
+    throw error
+  }
+}
 function reload(val) {
+  if (!props.doctype) return
   if (options.data?.length && val === options.params?.txt && props.doctype === options.params?.doctype) return
 
   options.update({
     params: {
       txt: val,
       doctype: props.doctype,
-      filters: props.filters,
+      filters: parse_filters(props.filters),
     },
   })
   options.reload()
