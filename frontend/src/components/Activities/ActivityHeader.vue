@@ -109,6 +109,7 @@ const defaultActions = computed(() => {
       icon: h(CommentIcon, { class: 'h-4 w-4' }),
       label: __('New Comment'),
       onClick: () => (props.emailBox.showComment = true),
+      condition: () => !Boolean(props.doc?.data?.hide_comments_tab),
     },
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),

@@ -456,6 +456,11 @@ const activities = computed(() => {
   let _activities = []
   if (title.value == 'Activity') {
     _activities = get_activities()
+
+    if (Boolean(doc?.value?.data?.hide_comments_tab)) {
+      _activities = _activities.filter((activity) => activity.activity_type !== 'comment')
+    }
+
     const notesAsActivities = (all_activities.data?.notes || []).map((note) => ({
       ...note,
       activity_type: 'note',
