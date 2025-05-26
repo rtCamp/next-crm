@@ -120,7 +120,7 @@
           <CommentArea :activity="activity" />
         </div>
         <div v-else-if="activity.activity_type == 'note'">
-          <div class="mb-4 cursor-pointer" @click="modalRef.showNote(activity)">
+          <div class="mb-4 cursor-pointer text-base" @click="modalRef.showNote(activity)">
             <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
               <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
                 <UserAvatar :user="activity.owner" size="md" class="mr-1" />
