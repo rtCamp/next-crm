@@ -20,6 +20,7 @@ from next_crm.ncrm.doctype.crm_stage_change_log.crm_stage_change_log import (
 from next_crm.ncrm.doctype.crm_status_change_log.crm_status_change_log import (
     add_status_change_log,
 )
+from next_crm.utils import link_gmail_threads
 
 
 class OverrideOpportunity(Opportunity):
@@ -53,6 +54,8 @@ class OverrideOpportunity(Opportunity):
             ):
                 copy_comments(self.opportunity_from, self.party_name, self)
                 link_communications(self.opportunity_from, self.party_name, self)
+                if "frappe_gmail_thread" in frappe.get_installed_apps():
+                    link_gmail_threads(self.opportunity_from, self.party_name, self)
         self.set_primary_email_mobile_no()
 
     def before_save(self):
