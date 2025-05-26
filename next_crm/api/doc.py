@@ -180,7 +180,7 @@ def get_quick_filters(doctype: str):
                 "fieldtype": field.get("fieldtype"),
                 "options": options,
                 "filters": (
-                    [["name", "in", ["Customer", "Lead", "Prospect"]]]
+                    [["DocType", "name", "in", ["Customer", "Lead", "Prospect"]]]
                     if field.fieldname == "opportunity_from"
                     else []
                 ),
