@@ -124,7 +124,7 @@
             <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
               <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
                 <UserAvatar :user="activity.owner" size="md" class="mr-1" />
-                <span class="font-medium text-ink-gray-8"></span>
+                <span class="font-medium text-ink-gray-8">{{ activity.owner_name }}</span>
                 <span>added a</span>
                 <span class="max-w-xs truncate font-medium text-ink-gray-8">note</span>
               </div>
@@ -455,8 +455,7 @@ function get_activities() {
 const activities = computed(() => {
   let _activities = []
   if (title.value == 'Activity') {
-    _activities = [...(all_activities.data?.versions || []), ...(all_activities.data?.calls || [])]
-
+    _activities = get_activities()
     const notesAsActivities = (all_activities.data?.notes || []).map((note) => ({
       ...note,
       activity_type: 'note',
@@ -473,16 +472,48 @@ const activities = computed(() => {
     }))
 
     _activities = [..._activities, ...notesAsActivities]
+  } else if (title.value == 'Emails') {
+    if (!all_activities.data?.versions) return []
+    _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'communication')
+  } else if (title.value == 'Comments') {
+    if (!all_activities.data?.versions) return []
+    _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'comment')
+  } else if (title.value == 'Calls') {
+    if (!all_activities.data?.calls) return []
+    return sortByCreation(all_activities.data.calls)
+  } else if (title.value == 'ToDos') {
+    if (!all_activities.data?.todos) return []
+    return sortByCreation(all_activities.data.todos)
+  } else if (title.value == 'Events') {
+    if (!all_activities.data?.events) return []
+    return sortByCreation(all_activities.data.events)
   } else if (title.value == 'Notes') {
     if (!all_activities.data?.notes) return []
     return sortByCreation(all_activities.data.notes)
+  } else if (title.value == 'Attachments') {
+    if (!all_activities.data?.attachments) return []
+    return sortByCreation(all_activities.data.attachments)
   }
+
   _activities.forEach((activity) => {
-    if (activity.activity_type == 'note') return
-
     activity.icon = timelineIcon(activity.activity_type, activity.is_lead)
-  })
 
+    if (
+      activity.activity_type == 'incoming_call' ||
+      activity.activity_type == 'outgoing_call' ||
+      activity.activity_type == 'communication'
+    )
+      return
+
+    update_activities_details(activity)
+
+    if (activity.other_versions) {
+      activity.show_others = false
+      activity.other_versions.forEach((other_version) => {
+        update_activities_details(other_version)
+      })
+    }
+  })
   return sortByCreation(_activities)
 })
 
@@ -575,6 +606,9 @@ function timelineIcon(activity_type, is_lead) {
       break
     case 'attachment_log':
       icon = AttachmentIcon
+      break
+    case 'note':
+      icon = NoteIcon
       break
     default:
       icon = DotIcon
