@@ -119,6 +119,26 @@
         <div class="mb-4" :id="activity.name" v-else-if="activity.activity_type == 'comment'">
           <CommentArea :activity="activity" />
         </div>
+        <div v-else-if="activity.activity_type == 'note'">
+          <div class="mb-4 cursor-pointer" @click="modalRef.showNote(activity)">
+            <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
+              <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
+                <UserAvatar :user="activity.owner" size="md" class="mr-1" />
+                <span class="font-medium text-ink-gray-8"></span>
+                <span>added a</span>
+                <span class="max-w-xs truncate font-medium text-ink-gray-8">note</span>
+              </div>
+              <div class="ml-auto whitespace-nowrap">
+                <Tooltip :text="dateFormat(activity.added_on, dateTooltipFormat)">
+                  <div class="text-sm text-ink-gray-5">
+                    {{ __(timeAgo(activity.added_on)) }}
+                  </div>
+                </Tooltip>
+              </div>
+            </div>
+            <div class="mt-2 p-3 bg-gray-50 rounded-lg" v-html="activity.note"></div>
+          </div>
+        </div>
         <div
           class="mb-4 flex flex-col gap-2 py-1.5"
           :id="activity.name"
@@ -435,49 +455,34 @@ function get_activities() {
 const activities = computed(() => {
   let _activities = []
   if (title.value == 'Activity') {
-    _activities = get_activities()
-  } else if (title.value == 'Emails') {
-    if (!all_activities.data?.versions) return []
-    _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'communication')
-  } else if (title.value == 'Comments') {
-    if (!all_activities.data?.versions) return []
-    _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'comment')
-  } else if (title.value == 'Calls') {
-    if (!all_activities.data?.calls) return []
-    return sortByCreation(all_activities.data.calls)
-  } else if (title.value == 'ToDos') {
-    if (!all_activities.data?.todos) return []
-    return sortByCreation(all_activities.data.todos)
-  } else if (title.value == 'Events') {
-    if (!all_activities.data?.events) return []
-    return sortByCreation(all_activities.data.events)
+    _activities = [...(all_activities.data?.versions || []), ...(all_activities.data?.calls || [])]
+
+    const notesAsActivities = (all_activities.data?.notes || []).map((note) => ({
+      ...note,
+      activity_type: 'note',
+      icon: NoteIcon,
+      creation: note.added_on,
+      content: note.note,
+      custom_title: note.custom_title,
+      owner: note.owner,
+      owner_name: note.owner_name,
+      name: note.name,
+      type: 'note',
+      value: 'added a note',
+      attachments: [],
+    }))
+
+    _activities = [..._activities, ...notesAsActivities]
   } else if (title.value == 'Notes') {
     if (!all_activities.data?.notes) return []
     return sortByCreation(all_activities.data.notes)
-  } else if (title.value == 'Attachments') {
-    if (!all_activities.data?.attachments) return []
-    return sortByCreation(all_activities.data.attachments)
   }
-
   _activities.forEach((activity) => {
+    if (activity.activity_type == 'note') return
+
     activity.icon = timelineIcon(activity.activity_type, activity.is_lead)
-
-    if (
-      activity.activity_type == 'incoming_call' ||
-      activity.activity_type == 'outgoing_call' ||
-      activity.activity_type == 'communication'
-    )
-      return
-
-    update_activities_details(activity)
-
-    if (activity.other_versions) {
-      activity.show_others = false
-      activity.other_versions.forEach((other_version) => {
-        update_activities_details(other_version)
-      })
-    }
   })
+
   return sortByCreation(_activities)
 })
 
