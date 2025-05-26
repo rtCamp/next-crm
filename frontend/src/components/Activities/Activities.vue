@@ -136,7 +136,20 @@
                 </Tooltip>
               </div>
             </div>
-            <div class="mt-2 p-3 bg-gray-50 rounded-lg" v-html="activity.note"></div>
+            <div
+              class="activity group flex max-h-64 cursor-pointer flex-col justify-between gap-2 rounded-md bg-surface-gray-1 px-4 py-3 hover:bg-surface-gray-2"
+            >
+              <div v-if="activity.custom_title" class="flex items-center justify-between">
+                <div class="truncate text-lg font-medium text-ink-gray-8" v-html="activity.custom_title"></div>
+              </div>
+
+              <div class="relative w-full flex-1 overflow-hidden">
+                <div
+                  class="tiptap ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 !prose-sm max-w-none !text-sm text-ink-gray-5 focus:outline-none"
+                  v-html="activity.note"
+                ></div>
+              </div>
+            </div>
           </div>
         </div>
         <div
