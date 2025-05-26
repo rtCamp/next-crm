@@ -989,7 +989,8 @@ const fieldDefinitions = computed(() => {
       label: fieldMeta.label,
       type: fieldMeta.fieldtype || 'Data',
       options: options,
-      mandatory: true,
+      mandatory: fieldMeta.fieldtype !== "Check"? true : false,
+      reqd:fieldMeta.fieldtype !== "Check"? true : false,
     }
   })
 })
