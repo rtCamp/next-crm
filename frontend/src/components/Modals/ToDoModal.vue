@@ -146,8 +146,8 @@ const _todo = ref({
   allocated_to: '',
   assigned_by: '',
   date: '',
-  status: 'Backlog',
-  priority: 'Low',
+  status: 'Open',
+  priority: 'Medium',
   reference_type: props.doctype,
   reference_name: null,
 })

@@ -553,8 +553,8 @@ const todo = ref({
   description: '',
   allocated_to: '',
   date: '',
-  priority: 'Low',
-  status: 'Backlog',
+  priority: 'Medium',
+  status: 'Open',
 })
 
 function showToDo(name) {

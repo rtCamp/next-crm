@@ -285,8 +285,8 @@ const todo = ref({
   description: '',
   allocated_to: '',
   date: '',
-  status: 'Backlog',
-  priority: 'Low',
+  status: 'Open',
+  priority: 'Medium',
   reference_type: 'Lead',
   reference_name: '',
 })
@@ -314,8 +314,8 @@ function createToDo(column) {
     description: '',
     allocated_to: '',
     date: '',
-    status: 'Backlog',
-    priority: 'Low',
+    status: 'Open',
+    priority: 'Medium',
     reference_type: 'Lead',
     reference_name: '',
   }

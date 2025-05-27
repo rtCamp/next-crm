@@ -54,8 +54,8 @@ function showToDo(t) {
     description: '',
     allocated_to: '',
     date: '',
-    priority: 'Low',
-    status: 'Backlog',
+    priority: 'Medium',
+    status: 'Open',
   }
   showToDoModal.value = true
 }
