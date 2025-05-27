@@ -383,6 +383,7 @@ import {
 import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
+import { getMeta } from '@/stores/meta'
 
 const { $dialog, $socket, makeCall } = globalStore()
 const { statusOptions, getDealStatus } = statusesStore()
@@ -938,12 +939,9 @@ const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
 
 const createProject = async (projectData) => {
   try {
-    const data = await call('frappe.desk.form.load.getdoctype', {
-      doctype: 'Project',
-    })
-    const projectMeta = data?.docs?.find(doc => doc.name === 'Project')
-    const hasCustomOpportunity = projectMeta?.fields?.some(item => item.fieldname === 'custom_opportunity')
-    
+    const { getFields } = await getMeta("Project");
+    const projectMeta = getFields();
+    const hasCustomOpportunity = projectMeta?.some(item => item.fieldname === 'custom_opportunity');
     const projectPayload = {
       project_name: projectData.title,
       status: "Open",
