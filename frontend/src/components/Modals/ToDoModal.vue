@@ -195,6 +195,16 @@ async function updateToDo() {
   }
   _todo.value.assigned_by = getUser().name
 
+  if (!_todo.value.description.trim()) {
+    createToast({
+      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
+      text: __('ToDo description is mandatory'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+    return
+  }
+
   try {
     if (_todo.value.name) {
       let d = await call('frappe.client.set_value', {
