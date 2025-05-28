@@ -33,6 +33,7 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
+import { createToast } from '@/utils'
 
 const { getUser } = usersStore()
 
@@ -87,19 +88,47 @@ function showEvent(t) {
 }
 
 async function deleteToDo(name) {
-  await call('frappe.client.delete', {
-    doctype: 'ToDo',
-    name,
-  })
-  activities.value.reload()
+  try {
+    await call('frappe.client.delete', {
+      doctype: 'ToDo',
+      name,
+    })
+    activities.value.reload()
+    createToast({
+      title: __('Todo deleted successfully'),
+      icon: 'check',
+      iconClasses: 'text-ink-green-3',
+    })
+  } catch (error) {
+    createToast({
+      title: __(`Error deleting ToDo`),
+      text: __(error.message),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+  }
 }
 
 async function deleteEvent(name) {
-  await call('frappe.client.delete', {
-    doctype: 'Event',
-    name,
-  })
-  activities.value.reload()
+  try {
+    await call('frappe.client.delete', {
+      doctype: 'Event',
+      name,
+    })
+    activities.value.reload()
+    createToast({
+      title: __('Event deleted successfully'),
+      icon: 'check',
+      iconClasses: 'text-ink-green-3',
+    })
+  } catch (error) {
+    createToast({
+      title: __(`Error deleting Event`),
+      text: __(error.message),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+  }
 }
 
 function updateToDoStatus(status, todo) {
@@ -108,9 +137,23 @@ function updateToDoStatus(status, todo) {
     name: todo.name,
     fieldname: 'status',
     value: status,
-  }).then(() => {
-    activities.value.reload()
   })
+    .then(() => {
+      activities.value.reload()
+      createToast({
+        title: __('ToDo status updated successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    })
+    .catch((error) => {
+      createToast({
+        title: __(`Error updating ToDo status`),
+        text: __(error.message),
+        icon: 'x',
+        iconClasses: 'text-ink-red-4',
+      })
+    })
 }
 
 function updateEventStatus(status, event) {

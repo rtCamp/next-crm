@@ -129,6 +129,7 @@ import { TextEditor, Dropdown, Tooltip, call, DatePicker, DateTimePicker } from 
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMeta } from '@/stores/meta'
+import { createToast } from '@/utils'
 
 const props = defineProps({
   todo: {
@@ -193,31 +194,51 @@ async function updateToDo() {
     _todo.value.allocated_to = getUser().name
   }
   _todo.value.assigned_by = getUser().name
-  if (_todo.value.name) {
-    let d = await call('frappe.client.set_value', {
-      doctype: 'ToDo',
-      name: _todo.value.name,
-      fieldname: _todo.value,
-    })
-    if (d.name) {
-      todos.value.reload()
-    }
-  } else {
-    let d = await call('frappe.client.insert', {
-      doc: {
+
+  try {
+    if (_todo.value.name) {
+      let d = await call('frappe.client.set_value', {
         doctype: 'ToDo',
-        reference_type: props.doctype,
-        reference_name: props.doc || null,
-        ..._todo.value,
-      },
-    })
-    if (d.name) {
-      capture('todo_created')
-      todos.value.reload()
-      emit('after')
+        name: _todo.value.name,
+        fieldname: _todo.value,
+      })
+      if (d.name) {
+        todos.value.reload()
+      }
+      createToast({
+        title: __('Todo updated successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    } else {
+      let d = await call('frappe.client.insert', {
+        doc: {
+          doctype: 'ToDo',
+          reference_type: props.doctype,
+          reference_name: props.doc || null,
+          ..._todo.value,
+        },
+      })
+      if (d.name) {
+        capture('todo_created')
+        todos.value.reload()
+        emit('after')
+      }
+      createToast({
+        title: __('Todo created successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
     }
+    show.value = false
+  } catch (error) {
+    createToast({
+      title: __(`Error ${editMode ? 'updating' : 'adding'} ToDo`),
+      text: __(error.message),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
   }
-  show.value = false
 }
 
 async function render() {
