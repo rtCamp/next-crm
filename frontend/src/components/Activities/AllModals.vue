@@ -32,6 +32,7 @@ import { call } from 'frappe-ui'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
+import { getMeta } from '@/stores/meta'
 
 const { getUser } = usersStore()
 
@@ -45,6 +46,12 @@ const doc = defineModel('doc')
 // ToDos
 const showToDoModal = ref(false)
 const showEventModal = ref(false)
+const { getFields } = getMeta('ToDo')
+
+const todoMeta = getFields()
+const fromTime = todoMeta?.some((item) => item.fieldname === 'custom_from_time')
+const toTime = todoMeta?.some((item) => item.fieldname === 'custom_to_time')
+
 const todo = ref({})
 const event = ref({})
 
@@ -56,6 +63,8 @@ function showToDo(t) {
     date: '',
     priority: 'Medium',
     status: 'Open',
+    ...(fromTime && { custom_from_time: '' }),
+    ...(toTime && { custom_to_time: '' }),
   }
   showToDoModal.value = true
 }

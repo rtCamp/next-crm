@@ -297,12 +297,14 @@ function showToDo(name) {
     name: t.name,
     custom_title: t.custom_title,
     description: t.description,
-    allocated_to: t.allocated_to?.email || '',
+    allocated_to: t.allocated_to?.name || '',
     date: t.date,
     status: t.status,
     priority: t.priority,
     reference_type: t.reference_type,
     reference_name: t.reference_name,
+    ...(t?.custom_from_time && { custom_from_time: t?.custom_from_time || '' }),
+    ...(t?.custom_from_time && { custom_to_time: t?.custom_to_time || '' }),
   }
   showToDoModal.value = true
 }
