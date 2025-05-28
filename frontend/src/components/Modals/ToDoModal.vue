@@ -233,7 +233,7 @@ async function updateToDo() {
     show.value = false
   } catch (error) {
     createToast({
-      title: __(`Error ${editMode ? 'updating' : 'adding'} ToDo`),
+      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
       text: __(error.message),
       icon: 'x',
       iconClasses: 'text-ink-red-4',

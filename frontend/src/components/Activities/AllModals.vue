@@ -162,9 +162,23 @@ function updateEventStatus(status, event) {
     name: event.name,
     fieldname: 'status',
     value: status,
-  }).then(() => {
-    activities.value.reload()
   })
+    .then(() => {
+      activities.value.reload()
+      createToast({
+        title: __('Event status updated successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    })
+    .catch((error) => {
+      createToast({
+        title: __(`Error updating Event status`),
+        text: __(error.message),
+        icon: 'x',
+        iconClasses: 'text-ink-red-4',
+      })
+    })
 }
 
 // Notes
