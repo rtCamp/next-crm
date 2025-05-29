@@ -1,9 +1,9 @@
 from collections.abc import Iterable
 
 import frappe
-from bs4 import BeautifulSoup
 from frappe import _
 
+from next_crm.api.notifications import extract_mentions
 from next_crm.ncrm.doctype.crm_notification.crm_notification import notify_user
 
 
@@ -43,18 +43,6 @@ def notify_mentions(doc):
                 "redirect_to_docname": doc.reference_name,
             }
         )
-
-
-def extract_mentions(html):
-    if not html:
-        return []
-    soup = BeautifulSoup(html, "html.parser")
-    mentions = []
-    for d in soup.find_all("span", attrs={"data-type": "mention"}):
-        mentions.append(
-            frappe._dict(full_name=d.get("data-label"), email=d.get("data-id"))
-        )
-    return mentions
 
 
 @frappe.whitelist()
