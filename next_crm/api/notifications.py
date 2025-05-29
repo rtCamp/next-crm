@@ -1,4 +1,5 @@
 import frappe
+from bs4 import BeautifulSoup
 from frappe.query_builder import Order
 
 
@@ -80,3 +81,15 @@ def get_hash(notification):
         if "has been removed by" in notification.message:
             _hash = ""
     return _hash
+
+
+def extract_mentions(html):
+    if not html:
+        return []
+    soup = BeautifulSoup(html, "html.parser")
+    mentions = []
+    for d in soup.find_all("span", attrs={"data-type": "mention"}):
+        mentions.append(
+            frappe._dict(full_name=d.get("data-label"), email=d.get("data-id"))
+        )
+    return mentions
