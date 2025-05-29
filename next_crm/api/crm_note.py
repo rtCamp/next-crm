@@ -34,6 +34,19 @@ def create_note(doctype, docname, title=None, note=None, parent_note=None):
     return new_note
 
 
+@frappe.whitelist()
+def update_note(doctype, docname, note_name, title=None, note=None):
+    """
+    Update a CRM Note.
+    """
+    if not note and not title:
+        raise frappe.ValidationError("Either note or title is required.")
+
+    frappe.set_value("CRM Note", note_name, "custom_title", title)
+    frappe.set_value("CRM Note", note_name, "note", note)
+    notify_mentions(note, note_name, docname, doctype)
+
+
 def notify_mentions(note, note_name, docname, doctype):
     mentions = extract_mentions(note)
 
