@@ -81,7 +81,9 @@ def delete_note(note_name):
             pluck="name",
         )
         for child_note in child_notes:
+            frappe.db.delete("CRM Notification", {"notification_type_doc": child_note})
             frappe.delete_doc("CRM Note", child_note)
 
+    frappe.db.delete("CRM Notification", {"notification_type_doc": note_name})
     note.delete()
     return True
