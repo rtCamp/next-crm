@@ -39,6 +39,7 @@
     </div>
     <div
       class="activity group flex max-h-64 cursor-pointer flex-col justify-between gap-2 rounded-md bg-surface-gray-1 px-4 py-3 hover:bg-surface-gray-2"
+      @click="props.modalRef.showNote(note)"
     >
       <div class="flex items-center justify-between">
         <div class="truncate text-lg font-medium text-ink-gray-8">
@@ -54,7 +55,7 @@
       />
     </div>
     <div v-if="note.noteReplies?.length" class="ml-6 mt-2 space-y-3 border-l border-gray-200 pl-4">
-      <NoteArea v-for="reply in note.noteReplies" :key="reply.name" :note="reply" v-model="notes" />
+      <NoteArea :modalRef="props.modalRef" v-for="reply in note.noteReplies" :note="reply" v-model="notes" />
     </div>
   </div>
 </template>
@@ -64,9 +65,11 @@ import { timeAgo, dateFormat, dateTooltipFormat } from '@/utils'
 import { Tooltip, Dropdown, TextEditor, call } from 'frappe-ui'
 import { usersStore } from '@/stores/users'
 import ReplyIcon from '@/components/Icons/ReplyIcon.vue'
+import { createToast } from '@/utils'
 
 const props = defineProps({
   note: Object,
+  modalRef: Object,
 })
 
 const notes = defineModel()
@@ -80,10 +83,23 @@ function replyNote() {
 }
 
 async function deleteNote(name) {
-  await call('frappe.client.delete', {
-    doctype: 'CRM Note',
-    name,
-  })
-  notes.value?.reload()
+  try {
+    await call('next_crm.api.crm_note.delete_note', {
+      note_name: name,
+    })
+    notes.value?.reload()
+    createToast({
+      title: __('Note deleted successfully'),
+      icon: 'check',
+      iconClasses: 'text-ink-green-3',
+    })
+  } catch (error) {
+    createToast({
+      title: __('Error deleting note'),
+      text: error.message,
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+  }
 }
 </script>

@@ -322,19 +322,12 @@ function toggleNoteBox() {
 async function submitNote() {
   if (noteEmpty.value) return
 
-  await call('frappe.client.insert', {
-    doc: {
-      doctype: 'CRM Note',
-      custom_title: newNoteTitle.value,
-      custom_parent_note: noteParent.value,
-      note: newNoteContent.value,
-      parenttype: props.doctype,
-      parent: doc.value.data.name || '',
-      parentfield: 'notes',
-      owner: getUser().name,
-      added_by: getUser().name,
-      added_on: dateFormat(new Date(), 'YYYY_MM_DD_HH_mm_ss'),
-    },
+  await call('next_crm.api.crm_note.create_note', {
+    doctype: props.doctype,
+    docname: doc.value.data.name || '',
+    title: newNoteTitle.value,
+    note: newNoteContent.value,
+    parent_note: noteParent.value,
   })
   showNoteBox.value = false
 
@@ -343,6 +336,11 @@ async function submitNote() {
   reload.value = true
   emit('scroll')
   capture('note_sent', { doctype: props.doctype })
+  createToast({
+    title: __('Note reply added.'),
+    icon: 'check',
+    iconClasses: 'text-ink-green-3',
+  })
 }
 
 watch(

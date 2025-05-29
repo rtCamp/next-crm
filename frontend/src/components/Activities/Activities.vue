@@ -28,10 +28,11 @@
         />
       </div>
       <div v-else-if="title == 'Notes'" class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-10 sm:pb-5">
-        <div v-for="note in activities" @click="modalRef.showNote(note)">
+        <div v-for="note in activities">
           <NoteArea
             :note="note"
             v-model="all_activities"
+            :modalRef="modalRef"
             @reply-note="
               (note) => {
                 emailBox.noteParent = note.name
@@ -129,9 +130,10 @@
           <CommentArea :activity="activity" />
         </div>
         <div v-else-if="activity.activity_type == 'note'" class="pb-3 sm:pb-5">
-          <div @click="modalRef.showNote(activity)">
+          <div>
             <NoteArea
               :note="activity"
+              :modalRef="modalRef"
               v-model="all_activities"
               @reply-note="
                 (note) => {
