@@ -13,6 +13,15 @@
             {{ __(timeAgo(note.added_on)) }}
           </div>
         </Tooltip>
+        <Tooltip :text="__('Reply')">
+          <div @click.stop="replyNote">
+            <Button variant="ghost" class="text-ink-gray-7 !h-6 !w-6 hover:bg-surface-gray-2">
+              <template #icon>
+                <ReplyIcon />
+              </template>
+            </Button>
+          </div>
+        </Tooltip>
         <Dropdown
           :options="[
             {
@@ -51,6 +60,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { timeAgo, dateFormat, dateTooltipFormat } from '@/utils'
 import { Tooltip, Dropdown, TextEditor, call } from 'frappe-ui'
 import { usersStore } from '@/stores/users'
+import ReplyIcon from '@/components/Icons/ReplyIcon.vue'
 
 const props = defineProps({
   note: Object,
@@ -59,6 +69,12 @@ const props = defineProps({
 const notes = defineModel()
 
 const { getUser } = usersStore()
+
+const emit = defineEmits(['reply-note'])
+
+function replyNote() {
+  emit('reply-note', props.note)
+}
 
 async function deleteNote(name) {
   await call('frappe.client.delete', {

@@ -29,7 +29,16 @@
       </div>
       <div v-else-if="title == 'Notes'" class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-10 sm:pb-5">
         <div v-for="note in activities" @click="modalRef.showNote(note)">
-          <NoteArea :note="note" v-model="all_activities" />
+          <NoteArea
+            :note="note"
+            v-model="all_activities"
+            @reply-note="
+              (note) => {
+                emailBox.noteParent = note.name
+                emailBox.showNote = true
+              }
+            "
+          />
         </div>
       </div>
       <div v-else-if="title == 'Comments'" class="pb-5">
@@ -121,7 +130,16 @@
         </div>
         <div v-else-if="activity.activity_type == 'note'" class="pb-3 sm:pb-5">
           <div @click="modalRef.showNote(activity)">
-            <NoteArea :note="activity" v-model="all_activities" />
+            <NoteArea
+              :note="activity"
+              v-model="all_activities"
+              @reply-note="
+                (note) => {
+                  emailBox.noteParent = note.name
+                  emailBox.showNote = true
+                }
+              "
+            />
           </div>
         </div>
         <div
@@ -266,7 +284,7 @@
   <div>
     <CommunicationArea
       ref="emailBox"
-      v-if="['Emails', 'Comments', 'Activity'].includes(title)"
+      v-if="['Emails', 'Comments', 'Activity', 'Notes'].includes(title)"
       v-model="doc"
       v-model:reload="reload_email"
       :doctype="doctype"

@@ -23,6 +23,17 @@
           <CommentIcon class="h-4" />
         </template>
       </Button>
+      <Button
+        v-if="showNoteBox"
+        variant="ghost"
+        :label="__('Note')"
+        :class="[showNoteBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
+        @click="toggleNoteBox()"
+      >
+        <template #prefix>
+          <NoteIcon class="h-4" />
+        </template>
+      </Button>
     </div>
   </div>
   <div
@@ -80,6 +91,26 @@
       :placeholder="__('@John, can you please check this?')"
     />
   </div>
+  <div v-show="showNoteBox">
+    <NoteEditor
+      ref="newNoteEditor"
+      v-model:title="newNoteTitle"
+      v-model:content="newNoteContent"
+      :submitButtonProps="{
+        variant: 'solid',
+        onClick: submitNote,
+        disabled: noteEmpty,
+      }"
+      :discardButtonProps="{
+        onClick: () => {
+          showNoteBox = false
+          newNoteTitle = ''
+          newNoteContent = ''
+        },
+      }"
+      :editable="showNoteBox"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -87,12 +118,14 @@ import EmailEditor from '@/components/EmailEditor.vue'
 import CommentBox from '@/components/CommentBox.vue'
 import CommentIcon from '@/components/Icons/CommentIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import { capture } from '@/telemetry'
 import { usersStore } from '@/stores/users'
 import { useStorage } from '@vueuse/core'
 import { call, createResource } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
 import { createToast } from '../utils'
+import NoteEditor from '@/components/NoteEditor.vue'
 
 const props = defineProps({
   doctype: {
@@ -257,6 +290,7 @@ function toggleEmailBox() {
   if (showCommentBox.value) {
     showCommentBox.value = false
   }
+  showNoteBox.value = false
   showEmailBox.value = !showEmailBox.value
 }
 
@@ -264,12 +298,66 @@ function toggleCommentBox() {
   if (showEmailBox.value) {
     showEmailBox.value = false
   }
+  showNoteBox.value = false
   showCommentBox.value = !showCommentBox.value
 }
+
+const showNoteBox = ref(false)
+const newNoteTitle = ref('')
+const newNoteContent = ref('')
+const newNoteEditor = ref(null)
+const noteParent = ref('')
+
+const noteEmpty = computed(() => {
+  return !newNoteContent.value || newNoteContent.value === '<p></p>'
+})
+
+function toggleNoteBox() {
+  showEmailBox.value = false
+  showCommentBox.value = false
+  showNoteBox.value = !showNoteBox.value
+}
+
+async function submitNote() {
+  if (noteEmpty.value) return
+  showNoteBox.value = false
+
+  await call('frappe.client.insert', {
+    doc: {
+      doctype: 'CRM Note',
+      custom_title: newNoteTitle.value,
+      custom_parent_note: '',
+      note: newNoteContent.value,
+      parenttype: props.doctype,
+      parent: doc.value.data.name || '',
+      parentfield: 'notes',
+      owner: getUser().name,
+      added_by: getUser().name,
+      added_on: dateFormat(new Date(), 'YYYY_MM_DD_HH_mm_ss'),
+    },
+  })
+
+  newNoteTitle.value = ''
+  newNoteContent.value = ''
+  reload.value = true
+  emit('scroll')
+  capture('note_sent', { doctype: props.doctype })
+}
+
+watch(
+  () => showNoteBox.value,
+  (value) => {
+    if (value) {
+      newNoteEditor.value.editor.commands.focus()
+    }
+  },
+)
 
 defineExpose({
   show: showEmailBox,
   showComment: showCommentBox,
+  showNote: showNoteBox,
+  noteParent: noteParent,
   editor: newEmailEditor,
 })
 </script>
