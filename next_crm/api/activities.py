@@ -481,9 +481,34 @@ def get_linked_notes(name):
     notes = frappe.db.get_all(
         "CRM Note",
         filters={"parent": name},
-        fields=["name", "custom_title", "note", "owner", "added_on"],
+        fields=[
+            "name",
+            "custom_title",
+            "note",
+            "owner",
+            "added_on",
+            "custom_parent_note",
+        ],
     )
-    return notes or []
+
+    if not notes:
+        return []
+
+    note_map = {
+        str(note["name"]).strip(): {**note, "noteReplies": []} for note in notes
+    }
+    root_notes = []
+
+    for note in notes:
+        note_id = str(note["name"]).strip()
+        parent_note_id = str(note.get("custom_parent_note") or "").strip()
+
+        if parent_note_id and parent_note_id in note_map:
+            note_map[parent_note_id]["noteReplies"].append(note_map[note_id])
+        else:
+            root_notes.append(note_map[note_id])
+
+    return root_notes
 
 
 def get_linked_todos(name):

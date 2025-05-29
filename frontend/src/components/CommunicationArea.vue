@@ -126,6 +126,7 @@ import { call, createResource } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
 import { createToast } from '../utils'
 import NoteEditor from '@/components/NoteEditor.vue'
+import { dateFormat } from '@/utils'
 
 const props = defineProps({
   doctype: {
@@ -320,13 +321,12 @@ function toggleNoteBox() {
 
 async function submitNote() {
   if (noteEmpty.value) return
-  showNoteBox.value = false
 
   await call('frappe.client.insert', {
     doc: {
       doctype: 'CRM Note',
       custom_title: newNoteTitle.value,
-      custom_parent_note: '',
+      custom_parent_note: noteParent.value,
       note: newNoteContent.value,
       parenttype: props.doctype,
       parent: doc.value.data.name || '',
@@ -336,6 +336,7 @@ async function submitNote() {
       added_on: dateFormat(new Date(), 'YYYY_MM_DD_HH_mm_ss'),
     },
   })
+  showNoteBox.value = false
 
   newNoteTitle.value = ''
   newNoteContent.value = ''

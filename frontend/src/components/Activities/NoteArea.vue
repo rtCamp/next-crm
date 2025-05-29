@@ -13,7 +13,7 @@
             {{ __(timeAgo(note.added_on)) }}
           </div>
         </Tooltip>
-        <Tooltip :text="__('Reply')">
+        <Tooltip v-if="!note.custom_parent_note" :text="__('Reply')">
           <div @click.stop="replyNote">
             <Button variant="ghost" class="text-ink-gray-7 !h-6 !w-6 hover:bg-surface-gray-2">
               <template #icon>
@@ -52,6 +52,9 @@
         editor-class="!prose-sm max-w-none !text-sm text-ink-gray-5 focus:outline-none"
         class="flex-1 overflow-hidden"
       />
+    </div>
+    <div v-if="note.noteReplies?.length" class="ml-6 mt-2 space-y-3 border-l border-gray-200 pl-4">
+      <NoteArea v-for="reply in note.noteReplies" :key="reply.name" :note="reply" v-model="notes" />
     </div>
   </div>
 </template>
