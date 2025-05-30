@@ -18,16 +18,36 @@
               <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
             </div>
             <div v-if="todo.date">
-              <Tooltip
-                :text="dateFormat(todo.date, 'ddd, MMM D, YYYY | hh:mm a')"
-              >
+              <Tooltip :text="dateFormat(todo.date, 'ddd, MMM D, YYYY')">
                 <div class="flex gap-2">
                   <CalendarIcon />
-                  <div>{{ dateFormat(todo.date, 'D MMM, hh:mm a') }}</div>
+                  <div>{{ dateFormat(todo.date, 'D MMM') }}</div>
                 </div>
               </Tooltip>
             </div>
             <div class="flex items-center justify-center">
+              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
+            </div>
+            <div v-if="todo?.custom_from_time">
+              <Tooltip :text="dateFormat(todo?.custom_from_time, 'ddd, MMM D, YYYY | hh:mm a')">
+                <div class="flex gap-2">
+                  <DurationIcon class="size-4 text-ink-gray-5" />
+                  <div>From {{ dateFormat(todo?.custom_from_time, 'D MMM , hh:mm a') }}</div>
+                </div>
+              </Tooltip>
+            </div>
+            <div v-if="todo?.custom_from_time" class="flex items-center justify-center">
+              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
+            </div>
+            <div v-if="todo?.custom_to_time">
+              <Tooltip :text="dateFormat(todo?.custom_to_time, 'ddd, MMM D, YYYY | hh:mm a')">
+                <div class="flex gap-2">
+                  <DurationIcon class="size-4 text-ink-gray-5" />
+                  <div>To {{ dateFormat(todo?.custom_to_time, 'D MMM , hh:mm a') }}</div>
+                </div>
+              </Tooltip>
+            </div>
+            <div v-if="todo?.custom_to_time" class="flex items-center justify-center">
               <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
             </div>
             <div class="flex gap-2">
@@ -37,10 +57,7 @@
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <Dropdown
-            :options="todoStatusOptions(modalRef.updateToDoStatus, todo)"
-            @click.stop
-          >
+          <Dropdown :options="todoStatusOptions(modalRef.updateToDoStatus, todo)" @click.stop>
             <Tooltip :text="__('Change Status')">
               <Button variant="ghosted" class="hover:bg-surface-gray-4">
                 <ToDoStatusIcon :status="todo.status" />
@@ -73,18 +90,11 @@
             ]"
             @click.stop
           >
-            <Button
-              icon="more-horizontal"
-              variant="ghosted"
-              class="hover:bg-surface-gray-4 text-ink-gray-9"
-            />
+            <Button icon="more-horizontal" variant="ghosted" class="hover:bg-surface-gray-4 text-ink-gray-9" />
           </Dropdown>
         </div>
       </div>
-      <div
-        v-if="i < todos.length - 1"
-        class="mx-2 h-px border-t border-gray-200"
-      />
+      <div v-if="i < todos.length - 1" class="mx-2 h-px border-t border-gray-200" />
     </div>
   </div>
 </template>
@@ -93,6 +103,7 @@ import CalendarIcon from '@/components/Icons/CalendarIcon.vue'
 import ToDoStatusIcon from '@/components/Icons/ToDoStatusIcon.vue'
 import ToDoPriorityIcon from '@/components/Icons/ToDoPriorityIcon.vue'
 import DotIcon from '@/components/Icons/DotIcon.vue'
+import DurationIcon from '@/components/Icons/DurationIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { dateFormat, todoStatusOptions } from '@/utils'
 import { usersStore } from '@/stores/users'

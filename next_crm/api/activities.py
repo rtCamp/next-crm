@@ -512,19 +512,26 @@ def get_linked_notes(name):
 
 
 def get_linked_todos(name):
+    meta = frappe.get_meta("ToDo")
+    fields = [
+        "name",
+        "custom_title",
+        "description",
+        "allocated_to",
+        "date",
+        "priority",
+        "status",
+        "modified",
+    ]
+    if meta.has_field("custom_from_time"):
+        fields.append("custom_from_time")
+    if meta.has_field("custom_to_time"):
+        fields.append("custom_to_time")
+
     todos = frappe.db.get_list(
         "ToDo",
         filters={"reference_name": name},
-        fields=[
-            "name",
-            "custom_title",
-            "description",
-            "allocated_to",
-            "date",
-            "priority",
-            "status",
-            "modified",
-        ],
+        fields=fields,
     )
     return todos or []
 

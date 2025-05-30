@@ -89,6 +89,20 @@
             :placeholder="__('01/04/2024')"
             input-class="border-none"
           />
+          <DateTimePicker
+            v-if="fromTime"
+            class="datepicker w-36"
+            v-model="_todo.custom_from_time"
+            :placeholder="__('From Time')"
+            input-class="border-none"
+          />
+          <DateTimePicker
+            v-if="toTime"
+            class="datepicker w-36"
+            v-model="_todo.custom_to_time"
+            :placeholder="__('To Time')"
+            input-class="border-none"
+          />
           <Dropdown :options="todoPriorityOptions(updateToDoPriority)">
             <Button :label="_todo.priority" class="w-full justify-between">
               <template #prefix>
@@ -111,9 +125,11 @@ import Link from '@/components/Controls/Link.vue'
 import { todoStatusOptions, todoPriorityOptions } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
-import { TextEditor, Dropdown, Tooltip, call, DatePicker } from 'frappe-ui'
+import { TextEditor, Dropdown, Tooltip, call, DatePicker, DateTimePicker } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getMeta } from '@/stores/meta'
+import { createToast } from '@/utils'
 
 const props = defineProps({
   todo: {
@@ -140,14 +156,17 @@ const { getUser } = usersStore()
 
 const custom_title = ref(null)
 const editMode = ref(false)
+const fromTime = ref(false)
+const toTime = ref(false)
+
 const _todo = ref({
   custom_title: '',
   description: '',
   allocated_to: '',
   assigned_by: '',
   date: '',
-  status: 'Backlog',
-  priority: 'Low',
+  status: 'Open',
+  priority: 'Medium',
   reference_type: props.doctype,
   reference_name: null,
 })
@@ -175,38 +194,74 @@ async function updateToDo() {
     _todo.value.allocated_to = getUser().name
   }
   _todo.value.assigned_by = getUser().name
-  if (_todo.value.name) {
-    let d = await call('frappe.client.set_value', {
-      doctype: 'ToDo',
-      name: _todo.value.name,
-      fieldname: _todo.value,
+
+  if (!_todo.value.description.trim() && !_todo.value.custom_title.trim()) {
+    createToast({
+      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
+      text: __('ToDo must have either a title or a description.'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
     })
-    if (d.name) {
-      todos.value.reload()
-    }
-  } else {
-    let d = await call('frappe.client.insert', {
-      doc: {
-        doctype: 'ToDo',
-        reference_type: props.doctype,
-        reference_name: props.doc || null,
-        ..._todo.value,
-      },
-    })
-    if (d.name) {
-      capture('todo_created')
-      todos.value.reload()
-      emit('after')
-    }
+    return
   }
-  show.value = false
+
+  try {
+    if (_todo.value.name) {
+      let d = await call('frappe.client.set_value', {
+        doctype: 'ToDo',
+        name: _todo.value.name,
+        fieldname: _todo.value,
+      })
+      if (d.name) {
+        todos.value.reload()
+      }
+      createToast({
+        title: __('Todo updated successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    } else {
+      let d = await call('frappe.client.insert', {
+        doc: {
+          doctype: 'ToDo',
+          reference_type: props.doctype,
+          reference_name: props.doc || null,
+          ..._todo.value,
+        },
+      })
+      if (d.name) {
+        capture('todo_created')
+        todos.value.reload()
+        emit('after')
+      }
+      createToast({
+        title: __('Todo created successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    }
+    show.value = false
+  } catch (error) {
+    createToast({
+      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
+      text: __(error.message),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+  }
 }
 
-function render() {
+async function render() {
   editMode.value = false
-  nextTick(() => {
+  nextTick(async () => {
     custom_title.value?.el?.focus?.()
     _todo.value = { ...props.todo }
+
+    const { getFields } = await getMeta('ToDo')
+    const todoFields = getFields()
+    fromTime.value = todoFields?.some((item) => item.fieldname === 'custom_from_time')
+    toTime.value = todoFields?.some((item) => item.fieldname === 'custom_to_time')
+
     if (_todo.value.description) {
       editMode.value = true
     }
