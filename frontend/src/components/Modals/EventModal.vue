@@ -240,55 +240,74 @@ async function updateEvent() {
     return
   }
   _event.value.assigned_by = getUser().name
-  if (_event.value.name) {
-    _event.value.event_participants = _event.value.event_participants.filter(
-      (participant) => participant.reference_doctype !== 'User' || participant.reference_docname !== 'Guest',
-    )
-    _event.value.event_participants = [
-      ..._event.value.event_participants,
-      ...event_participants.value.map((email) => ({
-        reference_doctype: 'User',
-        reference_docname: 'Guest',
-        email: email,
-      })),
-    ]
-
-    let d = await call('frappe.client.set_value', {
-      doctype: 'Event',
-      name: _event.value.name,
-      fieldname: _event.value,
-    })
-    if (d.name) {
-      events.value.reload()
-    }
-  } else {
-    let doc = {
-      doctype: 'Event',
-      reference_type: props.doctype,
-      reference_name: props.doc || null,
-      event_participants: [
-        {
-          reference_doctype: props.doctype,
-          reference_docname: props.doc || null,
-        },
+  try {
+    if (_event.value.name) {
+      _event.value.event_participants = _event.value.event_participants.filter(
+        (participant) => participant.reference_doctype !== 'User' || participant.reference_docname !== 'Guest',
+      )
+      _event.value.event_participants = [
+        ..._event.value.event_participants,
         ...event_participants.value.map((email) => ({
           reference_doctype: 'User',
           reference_docname: 'Guest',
           email: email,
         })),
-      ],
-      ..._event.value,
+      ]
+
+      let d = await call('frappe.client.set_value', {
+        doctype: 'Event',
+        name: _event.value.name,
+        fieldname: _event.value,
+      })
+      if (d.name) {
+        events.value.reload()
+      }
+      createToast({
+        title: __('Event updated successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    } else {
+      let doc = {
+        doctype: 'Event',
+        reference_type: props.doctype,
+        reference_name: props.doc || null,
+        event_participants: [
+          {
+            reference_doctype: props.doctype,
+            reference_docname: props.doc || null,
+          },
+          ...event_participants.value.map((email) => ({
+            reference_doctype: 'User',
+            reference_docname: 'Guest',
+            email: email,
+          })),
+        ],
+        ..._event.value,
+      }
+      let d = await call('frappe.client.insert', {
+        doc: doc,
+      })
+      if (d.name) {
+        capture('event_created')
+        events.value.reload()
+        emit('after')
+      }
+      createToast({
+        title: __('Event created successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
     }
-    let d = await call('frappe.client.insert', {
-      doc: doc,
+    show.value = false
+  } catch (error) {
+    createToast({
+      title: __(`Error ${editMode.value ? 'updating' : 'adding'} Event`),
+      text: __(error.message),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
     })
-    if (d.name) {
-      capture('event_created')
-      events.value.reload()
-      emit('after')
-    }
   }
-  show.value = false
 }
 
 function render() {
