@@ -98,10 +98,11 @@ async function updateNote() {
   if (props.note.custom_title === _note.value.custom_title && props.note.note === _note.value.note) return
   try {
     if (_note.value.name) {
-      let d = await call('frappe.client.set_value', {
-        doctype: 'CRM Note',
-        name: _note.value.name,
-        fieldname: _note.value,
+      let d = await call('next_crm.api.crm_note.update_note', {
+        doctype: props.doctype,
+        docname: props.doc || '',
+        note_name: _note.value.name,
+        note: { custom_title: _note.value.custom_title, note: _note.value.note },
       })
       if (d.name) {
         notes.value?.reload()
