@@ -28,8 +28,18 @@
         />
       </div>
       <div v-else-if="title == 'Notes'" class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-10 sm:pb-5">
-        <div v-for="note in activities" @click="modalRef.showNote(note)">
-          <NoteArea :note="note" v-model="all_activities" />
+        <div v-for="note in activities">
+          <NoteArea
+            :note="note"
+            v-model="all_activities"
+            :modalRef="modalRef"
+            @reply-note="
+              (note) => {
+                emailBox.noteParent = note.name
+                emailBox.showNote = true
+              }
+            "
+          />
         </div>
       </div>
       <div v-else-if="title == 'Comments'" class="pb-5">
@@ -119,37 +129,19 @@
         <div class="mb-4" :id="activity.name" v-else-if="activity.activity_type == 'comment'">
           <CommentArea :activity="activity" />
         </div>
-        <div v-else-if="activity.activity_type == 'note'">
-          <div class="mb-4 cursor-pointer text-base" @click="modalRef.showNote(activity)">
-            <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
-              <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
-                <UserAvatar :user="activity.owner" size="md" class="mr-1" />
-                <span class="font-medium text-ink-gray-8">{{ activity.owner_name }}</span>
-                <span>added a</span>
-                <span class="max-w-xs truncate font-medium text-ink-gray-8">note</span>
-              </div>
-              <div class="ml-auto whitespace-nowrap">
-                <Tooltip :text="dateFormat(activity.added_on, dateTooltipFormat)">
-                  <div class="text-sm text-ink-gray-5">
-                    {{ __(timeAgo(activity.added_on)) }}
-                  </div>
-                </Tooltip>
-              </div>
-            </div>
-            <div
-              class="activity group flex max-h-64 cursor-pointer flex-col justify-between gap-2 rounded-md bg-surface-gray-1 px-4 py-3 hover:bg-surface-gray-2"
-            >
-              <div v-if="activity.custom_title" class="flex items-center justify-between">
-                <div class="truncate text-lg font-medium text-ink-gray-8" v-html="activity.custom_title"></div>
-              </div>
-
-              <div class="relative w-full flex-1 overflow-hidden">
-                <div
-                  class="tiptap ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 !prose-sm max-w-none !text-sm text-ink-gray-5 focus:outline-none"
-                  v-html="activity.note"
-                ></div>
-              </div>
-            </div>
+        <div v-else-if="activity.activity_type == 'note'" class="pb-3 sm:pb-5">
+          <div>
+            <NoteArea
+              :note="activity"
+              :modalRef="modalRef"
+              v-model="all_activities"
+              @reply-note="
+                (note) => {
+                  emailBox.noteParent = note.name
+                  emailBox.showNote = true
+                }
+              "
+            />
           </div>
         </div>
         <div
@@ -294,7 +286,7 @@
   <div>
     <CommunicationArea
       ref="emailBox"
-      v-if="['Emails', 'Comments', 'Activity'].includes(title)"
+      v-if="['Emails', 'Comments', 'Activity', 'Notes'].includes(title)"
       v-model="doc"
       v-model:reload="reload_email"
       :doctype="doctype"

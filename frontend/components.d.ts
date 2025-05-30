@@ -144,6 +144,7 @@ declare module 'vue' {
     MuteIcon: typeof import('./src/components/Icons/MuteIcon.vue')['default']
     NestedPopover: typeof import('./src/components/NestedPopover.vue')['default']
     NoteArea: typeof import('./src/components/Activities/NoteArea.vue')['default']
+    NoteEditor: typeof import('./src/components/NoteEditor.vue')['default']
     NoteIcon: typeof import('./src/components/Icons/NoteIcon.vue')['default']
     NoteModal: typeof import('./src/components/Modals/NoteModal.vue')['default']
     Notifications: typeof import('./src/components/Notifications.vue')['default']
