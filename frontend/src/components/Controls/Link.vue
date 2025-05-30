@@ -184,32 +184,14 @@ function parse_filters(link_filters) {
   link_filters.forEach((filter) => {
     let [_, fieldname, operator, value] = filter
     if (value?.startsWith?.('eval:')) {
-      value = value.split('eval:')[1]
-      let context = {
-        doc: this.doc,
-        parent: this.doc.parenttype ? this.frm.doc : null,
-        frappe,
-      }
-      value = evalFilter(value, context)
+      return
     }
     filters[fieldname] = [operator, value]
   })
 
   return filters
 }
-function evalFilter(code, context = {}) {
-  let variable_names = Object.keys(context)
-  let variables = Object.values(context)
-  code = `let out = ${code}; return out`
-  try {
-    let expression_function = new Function(...variable_names, code)
-    return expression_function(...variables)
-  } catch (error) {
-    console.log('Error evaluating the following expression:')
-    console.error(code)
-    throw error
-  }
-}
+
 function reload(val) {
   if (!props.doctype) return
   if (options.data?.length && val === options.params?.txt && props.doctype === options.params?.doctype) return
