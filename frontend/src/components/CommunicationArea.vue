@@ -2,6 +2,7 @@
   <div class="flex justify-between gap-3 border-t px-4 py-2.5 sm:px-10">
     <div class="flex gap-1.5">
       <Button
+        v-if="!showNoteBox"
         ref="sendEmailRef"
         variant="ghost"
         :class="[showEmailBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
@@ -14,7 +15,7 @@
       </Button>
       <Button
         variant="ghost"
-        v-if="doc?.data.hide_comments_tab !== 1"
+        v-if="doc?.data.hide_comments_tab !== 1 && !showNoteBox"
         :label="__('Comment')"
         :class="[showCommentBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
         @click="toggleCommentBox()"
@@ -126,7 +127,6 @@ import { call, createResource } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
 import { createToast } from '../utils'
 import NoteEditor from '@/components/NoteEditor.vue'
-import { dateFormat } from '@/utils'
 
 const props = defineProps({
   doctype: {
