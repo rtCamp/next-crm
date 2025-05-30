@@ -2,8 +2,8 @@ from collections.abc import Iterable
 
 import frappe
 from frappe import _
+from frappe.desk.notifications import extract_mentions
 
-from next_crm.api.notifications import extract_mentions
 from next_crm.ncrm.doctype.crm_notification.crm_notification import notify_user
 
 
@@ -33,7 +33,7 @@ def notify_mentions(doc):
         notify_user(
             {
                 "owner": doc.owner,
-                "assigned_to": mention.email,
+                "assigned_to": mention,
                 "notification_type": "Mention",
                 "message": doc.content,
                 "notification_text": notification_text,
