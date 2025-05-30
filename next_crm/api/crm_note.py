@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.desk.notifications import notify_mentions
 from frappe.utils import now
 
 from next_crm.api.notifications import extract_mentions
@@ -30,7 +31,8 @@ def create_note(doctype, docname, title=None, note=None, parent_note=None):
     )
 
     new_note.insert()
-    notify_mentions(note, new_note.name, docname, doctype)
+    notify_mentions_ncrm(note, new_note.name, docname, doctype)
+    notify_mentions(doctype, docname, note)
     return new_note
 
 
@@ -43,13 +45,14 @@ def update_note(doctype, docname, note_name, note=None):
         raise frappe.ValidationError("Either note or title is required.")
 
     frappe.set_value("CRM Note", note_name, note)
-    notify_mentions(note.get("note"), note_name, docname, doctype)
+    notify_mentions_ncrm(note.get("note"), note_name, docname, doctype)
+    notify_mentions(doctype, docname, note)
 
     updated_doc = frappe.get_doc("CRM Note", note_name)
     return updated_doc
 
 
-def notify_mentions(note, note_name, docname, doctype):
+def notify_mentions_ncrm(note, note_name, docname, doctype):
     mentions = extract_mentions(note)
 
     for mention in mentions:
