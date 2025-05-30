@@ -195,10 +195,10 @@ async function updateToDo() {
   }
   _todo.value.assigned_by = getUser().name
 
-  if (!_todo.value.description.trim()) {
+  if (!_todo.value.description.trim() && !_todo.value.custom_title.trim()) {
     createToast({
       title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
-      text: __('ToDo description is mandatory'),
+      text: __('ToDo must have either a title or a description.'),
       icon: 'x',
       iconClasses: 'text-ink-red-4',
     })
