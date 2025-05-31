@@ -54,7 +54,7 @@ def update_note(doctype, docname, note_name, note=None):
 def notify_mentions_ncrm(note, note_name, docname, doctype):
     from frappe.desk.notifications import extract_mentions
 
-    mentions = extract_mentions(note)
+    mentions = set(extract_mentions(note))
 
     for mention in mentions:
         owner = frappe.get_cached_value("User", frappe.session.user, "full_name")
@@ -66,7 +66,7 @@ def notify_mentions_ncrm(note, note_name, docname, doctype):
             <span>{ _('mentioned you in a Note in {0}').format(doctype) }</span>
             <span class="font-medium text-ink-gray-9">{ name }</span>
         </div>
-    """
+        """
         notify_user(
             {
                 "owner": frappe.session.user,
