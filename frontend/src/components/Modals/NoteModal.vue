@@ -102,7 +102,7 @@ async function updateNote() {
         doctype: props.doctype,
         docname: props.doc || '',
         note_name: _note.value.name,
-        note: { custom_title: _note.value.custom_title, note: _note.value.note },
+        note: { custom_title: _note.value.custom_title, note: _note.value.note || '' },
       })
       if (d.name) {
         notes.value?.reload()
@@ -118,7 +118,7 @@ async function updateNote() {
         doctype: props.doctype,
         docname: props.doc || '',
         title: _note.value.custom_title,
-        note: _note.value.note,
+        note: _note.value.note || '',
       })
       if (d.name) {
         capture('note_created')
