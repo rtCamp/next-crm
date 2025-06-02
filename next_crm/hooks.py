@@ -173,6 +173,9 @@ doc_events = {
     "Notification Log": {
         "before_save": ["next_crm.doc_events.notification_log.before_save"],
     },
+    "Lead": {
+        "on_update": ["next_crm.doc_events.lead.on_update"],
+    },
 }
 
 # Scheduled Tasks
