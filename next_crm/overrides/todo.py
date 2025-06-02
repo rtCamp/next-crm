@@ -1,6 +1,6 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
+import frappe
 from frappe.desk.doctype.todo.todo import ToDo
 
 # from frappe.desk.form.assign_to import add as assign
@@ -88,6 +88,14 @@ class ToDo(ToDo):
             "reference_name",
             "modified",
         ]
+
+        todo_meta = frappe.get_meta("ToDo")
+
+        if todo_meta.has_field("custom_from_time"):
+            rows.append("custom_from_time")
+        if todo_meta.has_field("custom_to_time"):
+            rows.append("custom_to_time")
+
         return {"columns": columns, "rows": rows}
 
     @staticmethod

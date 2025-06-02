@@ -383,6 +383,7 @@ import {
 import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
+import { getMeta } from '@/stores/meta'
 
 const { $dialog, $socket, makeCall } = globalStore()
 const { statusOptions, getDealStatus } = statusesStore()
@@ -938,9 +939,15 @@ const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
 
 const createProject = async (projectData) => {
   try {
+    const { getFields } = await getMeta("Project");
+    const projectMeta = getFields();
+    const hasCustomOpportunity = projectMeta?.some(item => item.fieldname === 'custom_opportunity');
     const projectPayload = {
       project_name: projectData.title,
-      status: "Open"
+      status: "Open",
+      ...(hasCustomOpportunity && {
+        custom_opportunity: props.opportunityId
+      })
     };
 
     Object.entries(OPPORTUNITY_TO_PROJECT_KEY_MAP).forEach(([sourceKey, targetKey]) => {
@@ -959,8 +966,8 @@ const createProject = async (projectData) => {
     showCreateProjectModal.value = false;
   } catch{
     createToast({
-      title: __(projectResource.error.exc_type || 'Error creating project'),
-      text: __(projectResource.error.messages[0] || 'Something went wrong'),
+      title: __(projectResource?.error?.exc_type || 'Error creating project'),
+      text: __(projectResource?.error?.messages[0] || 'Something went wrong'),
       icon: 'x',
       iconClasses: 'text-ink-red-4',
     })

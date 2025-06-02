@@ -64,6 +64,7 @@ import { TextEditor, call } from 'frappe-ui'
 import { ref, computed, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
+import { createToast } from '@/utils'
 
 const props = defineProps({
   note: {
@@ -85,8 +86,7 @@ const notes = defineModel('reloadNotes')
 
 const emit = defineEmits(['after'])
 
-const { users: usersList, getUser } = usersStore()
-import { dateFormat } from '@/utils'
+const { users: usersList } = usersStore()
 
 const router = useRouter()
 
@@ -96,38 +96,50 @@ let _note = ref({})
 
 async function updateNote() {
   if (props.note.custom_title === _note.value.custom_title && props.note.note === _note.value.note) return
-
-  if (_note.value.name) {
-    let d = await call('frappe.client.set_value', {
-      doctype: 'CRM Note',
-      name: _note.value.name,
-      fieldname: _note.value,
-    })
-    if (d.name) {
-      notes.value?.reload()
-      emit('after', d)
+  try {
+    if (_note.value.name) {
+      let d = await call('next_crm.api.crm_note.update_note', {
+        doctype: props.doctype,
+        docname: props.doc || '',
+        note_name: _note.value.name,
+        note: { custom_title: _note.value.custom_title, note: _note.value.note || '' },
+      })
+      if (d.name) {
+        notes.value?.reload()
+        emit('after', d)
+      }
+      createToast({
+        title: __('Note updated successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+    } else {
+      let d = await call('next_crm.api.crm_note.create_note', {
+        doctype: props.doctype,
+        docname: props.doc || '',
+        title: _note.value.custom_title,
+        note: _note.value.note || '',
+      })
+      if (d.name) {
+        capture('note_created')
+        notes.value?.reload()
+        emit('after', d, true)
+      }
+      createToast({
+        title: __('Note created successfully'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
     }
-  } else {
-    let d = await call('frappe.client.insert', {
-      doc: {
-        doctype: 'CRM Note',
-        custom_title: _note.value.custom_title,
-        note: _note.value.note,
-        parenttype: props.doctype,
-        parent: props.doc || '',
-        parentfield: 'notes',
-        owner: getUser().name,
-        added_by: getUser().name,
-        added_on: dateFormat(new Date(), 'YYYY_MM_DD_HH_mm_ss'),
-      },
+    show.value = false
+  } catch (error) {
+    createToast({
+      title: __(`Error ${_note.value.name ? 'updating' : 'creating'} note`),
+      text: error.message,
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
     })
-    if (d.name) {
-      capture('note_created')
-      notes.value?.reload()
-      emit('after', d, true)
-    }
   }
-  show.value = false
 }
 
 function redirect() {
