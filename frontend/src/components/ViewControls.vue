@@ -257,7 +257,7 @@ import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
 import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
-import { isEmoji, createToast } from '@/utils'
+import { isEmoji, createToast, sanitizeCurrency } from '@/utils'
 import { setDefaultViewCache } from '@/utils/view'
 import { Tooltip, createResource, Dropdown, call, FeatherIcon, usePageMeta } from 'frappe-ui'
 import { computed, ref, onMounted, watch, h, markRaw } from 'vue'
@@ -1198,6 +1198,9 @@ function applyFilter({ event, idx, column, item, firstColumn }) {
   if (value) {
     if (column.type == 'Link') {
       filters[column.key] = ['in', Array.isArray(value) ? value : [value]]
+    } else if (column.type == 'Currency') {
+      const sanitizedCurrencyValue = sanitizeCurrency(value)
+      filters[column.key] = sanitizedCurrencyValue
     } else {
       filters[column.key] = value
     }
