@@ -310,7 +310,7 @@ const newNoteEditor = ref(null)
 const noteParent = ref('')
 
 const noteEmpty = computed(() => {
-  return !newNoteContent.value || newNoteContent.value === '<p></p>'
+  return !newNoteTitle.value && (!newNoteContent.value || newNoteContent.value === '<p></p>')
 })
 
 function toggleNoteBox() {
