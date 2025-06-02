@@ -162,7 +162,7 @@
             v-else-if="field.type === 'Table MultiSelect'"
             :defaultValue="data[field.name]"
             :doctype="field.doctype"
-            :read_only="field.read_only"
+            :read_only="Boolean(field.read_only)"
             @change="(data) => emit('update', field.name, data)"
           />
           <FormControl
