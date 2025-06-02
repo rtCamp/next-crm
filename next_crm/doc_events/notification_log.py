@@ -1,6 +1,9 @@
 import re
 import urllib.parse
 
+import frappe
+from frappe.utils.data import get_url_to_form
+
 PATH_REPLACEMENTS = {
     r"^/app/lead/": "/next-crm/leads/",
     r"^/app/opportunity/": "/next-crm/opportunities/",
@@ -15,6 +18,9 @@ FRAGMENT_REPLACEMENTS = {
 
 def before_save(doc, method):
     if not doc.link:
+        update_note_link(doc)
+
+    if not doc.link:
         return
     url = urllib.parse.urlparse(doc.link)
     path = url.path
@@ -28,3 +34,30 @@ def before_save(doc, method):
             fragment = re.sub(old_fragment, new_fragment, fragment)
             break
     doc.link = url._replace(path=path, fragment=fragment).geturl()
+
+
+def update_note_link(doc):
+    """
+    There is no direct link between the note and the notification log.
+    We determine the note id by using the content of the email and the most recently created note, as the note is created before the notification log.
+    """
+    notes = frappe.get_all(
+        "CRM Note",
+        filters={
+            "parenttype": doc.document_type,
+            "parent": doc.document_name,
+        },
+        fields=["name", "note"],
+        order_by="creation desc",
+        limit_page_length=5,
+    )
+
+    note_name = None
+
+    for note in notes:
+        if note.note in doc.email_content:
+            note_name = note.name
+            break
+
+    if note_name:
+        doc.link = get_url_to_form(doc.document_type, doc.document_name)
