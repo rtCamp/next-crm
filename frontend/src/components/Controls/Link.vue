@@ -161,6 +161,7 @@ const options = createResource({
     txt: text.value,
     doctype: props.doctype,
     filters: parse_filters(props.filters),
+    page_length: 20,
   },
   transform: (data) => {
     let allData = data
