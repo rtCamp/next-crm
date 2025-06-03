@@ -179,9 +179,13 @@ const options = createResource({
   },
 })
 function parse_filters(link_filters) {
-  if (!Array.isArray(link_filters)) return link_filters
+  let parsedLinkFilters = link_filters
+  if (typeof link_filters === 'string') {
+    parsedLinkFilters = JSON.parse(link_filters)
+  }
+  if (!Array.isArray(parsedLinkFilters)) return parsedLinkFilters
   let filters = {}
-  link_filters.forEach((filter) => {
+  parsedLinkFilters.forEach((filter) => {
     let [_, fieldname, operator, value] = filter
     if (value?.startsWith?.('eval:')) {
       return
