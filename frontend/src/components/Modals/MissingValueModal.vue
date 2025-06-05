@@ -35,7 +35,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import Fields from '@/components/Fields.vue'
 
 const props = defineProps({
   label: {
