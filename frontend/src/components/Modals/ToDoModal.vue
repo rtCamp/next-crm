@@ -84,6 +84,7 @@
             </template>
           </Link>
           <DatePicker
+            v-if="!(fromTime && toTime)"
             class="datepicker w-36"
             v-model="_todo.date"
             :placeholder="__('01/04/2024')"
@@ -207,6 +208,11 @@ async function updateToDo() {
 
   try {
     if (_todo.value.name) {
+      if (fromTime && toTime && _todo.value.custom_to_time) {
+        const datetimeStr = _todo.value.custom_to_time
+        const dateStr = new Date(datetimeStr)?.toISOString()?.split('T')[0]
+        _todo.value.date = dateStr
+      }
       let d = await call('frappe.client.set_value', {
         doctype: 'ToDo',
         name: _todo.value.name,
@@ -221,6 +227,22 @@ async function updateToDo() {
         iconClasses: 'text-ink-green-3',
       })
     } else {
+      if (fromTime && toTime) {
+        if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
+          createToast({
+            title: __('Validation error'),
+            text: __('From Time and To Time is required'),
+            icon: 'x',
+            iconClasses: 'text-ink-red-4',
+          })
+          return
+        }
+        if (_todo.value.custom_to_time) {
+          const datetimeStr = _todo.value.custom_to_time
+          const dateStr = new Date(datetimeStr)?.toISOString()?.split('T')[0]
+          _todo.value.date = dateStr
+        }
+      }
       let d = await call('frappe.client.insert', {
         doc: {
           doctype: 'ToDo',

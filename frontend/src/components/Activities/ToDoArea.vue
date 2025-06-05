@@ -14,10 +14,23 @@
               <UserAvatar :user="todo.allocated_to" size="xs" />
               {{ getUser(todo.allocated_to).full_name }}
             </div>
-            <div v-if="todo.date" class="flex items-center justify-center">
+            <div
+              v-if="
+                todo.date &&
+                !Object.keys(todo).includes('custom_from_time') &&
+                Object.keys(todo).includes('custom_to_time')
+              "
+              class="flex items-center justify-center"
+            >
               <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
             </div>
-            <div v-if="todo.date">
+            <div
+              v-if="
+                todo.date &&
+                !Object.keys(todo).includes('custom_from_time') &&
+                Object.keys(todo).includes('custom_to_time')
+              "
+            >
               <Tooltip :text="dateFormat(todo.date, 'ddd, MMM D, YYYY')">
                 <div class="flex gap-2">
                   <CalendarIcon />
@@ -31,8 +44,8 @@
             <div v-if="todo?.custom_from_time">
               <Tooltip :text="dateFormat(todo?.custom_from_time, 'ddd, MMM D, YYYY | hh:mm a')">
                 <div class="flex gap-2">
-                  <DurationIcon class="size-4 text-ink-gray-5" />
-                  <div>From {{ dateFormat(todo?.custom_from_time, 'D MMM , hh:mm a') }}</div>
+                  <CalendarIcon class="size-4 text-ink-gray-5" />
+                  <div>{{ dateFormat(todo?.custom_from_time, 'D MMM , hh:mm a') }}</div>
                 </div>
               </Tooltip>
             </div>
@@ -42,8 +55,8 @@
             <div v-if="todo?.custom_to_time">
               <Tooltip :text="dateFormat(todo?.custom_to_time, 'ddd, MMM D, YYYY | hh:mm a')">
                 <div class="flex gap-2">
-                  <DurationIcon class="size-4 text-ink-gray-5" />
-                  <div>To {{ dateFormat(todo?.custom_to_time, 'D MMM , hh:mm a') }}</div>
+                  <CalendarIcon class="size-4 text-ink-gray-5" />
+                  <div>{{ dateFormat(todo?.custom_to_time, 'D MMM , hh:mm a') }}</div>
                 </div>
               </Tooltip>
             </div>
@@ -103,7 +116,6 @@ import CalendarIcon from '@/components/Icons/CalendarIcon.vue'
 import ToDoStatusIcon from '@/components/Icons/ToDoStatusIcon.vue'
 import ToDoPriorityIcon from '@/components/Icons/ToDoPriorityIcon.vue'
 import DotIcon from '@/components/Icons/DotIcon.vue'
-import DurationIcon from '@/components/Icons/DurationIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { dateFormat, todoStatusOptions } from '@/utils'
 import { usersStore } from '@/stores/users'

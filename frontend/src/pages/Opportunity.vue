@@ -1005,8 +1005,8 @@ const fieldDefinitions = computed(() => {
 const filteredFields = computed(() => {
   return fieldDefinitions.value.filter(field =>
     Object.prototype.hasOwnProperty.call(missingFields.value, field.fieldname)
-  )
-})
+  ).map(({ depends_on,display_via_depends_on, ...rest }) => rest);
+});
 
 const createProjectFromOpportunity = async () => {
   const requiredFields = Object.keys(OPPORTUNITY_TO_PROJECT_KEY_MAP);
