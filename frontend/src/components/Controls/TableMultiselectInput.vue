@@ -9,7 +9,6 @@
       <Button
         ref="valuesRef"
         v-for="value in parsedValues"
-        v-if="value"
         :key="value"
         :label="value"
         theme="gray"
@@ -91,7 +90,7 @@ const parsedValues = computed(() => {
   error.value = ''
   getLinkField()
   if (!linkField.value) return []
-  return values.value?.map((row) => row?.[linkField.value?.fieldname])
+  return values.value?.map((row) => row?.[linkField.value?.fieldname]).filter((v) => v)
 })
 
 const getLinkField = () => {
