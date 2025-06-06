@@ -118,6 +118,13 @@ const routes = [
     props: true,
   },
   {
+    alias: '/reports',
+    path: '/reports/view/:viewType?',
+    name: 'Reports',
+    component: () => import('@/pages/Reports.vue'),
+    meta: { scrollPos: { top: 0, left: 0 } },
+  },
+  {
     path: '/:invalidpath',
     name: 'Invalid Page',
     component: () => import('@/pages/InvalidPage.vue'),

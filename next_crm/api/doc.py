@@ -282,6 +282,14 @@ def get_data(
         default_filters = frappe.parse_json(default_filters)
         filters.update(default_filters)
 
+    if doctype == "Report":
+        has_roles = frappe.get_all(
+            "Has Role",
+            filters={"role": ["in", ["Sales User", "Sales Manager"]]},
+            fields=["parent"],
+        )
+        filters["name"] = ["in", [d.get("parent") for d in has_roles]]
+
     is_default = True
     data = []
     _list = get_controller(doctype)
