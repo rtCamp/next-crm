@@ -919,7 +919,7 @@ const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
   "territory": "custom_territory",
   "custom_project_manager": "custom_project_manager",
   "custom_complexity_level": "custom_complexity",
-  "opportunity_amount": "total_sales_amount",
+  "opportunity_amount": "estimated_costing",
   "currency": "custom_currency",
   "custom__project_size": "custom_project_size",
   "source": "custom_source",
