@@ -384,10 +384,11 @@ import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'v
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 import { getMeta } from '@/stores/meta'
+import { replaceMeWithUser } from '../utils'
 
 const { $dialog, $socket, makeCall } = globalStore()
 const { statusOptions, getDealStatus } = statusesStore()
-const { isManager } = usersStore()
+const { isManager, getUser } = usersStore()
 const route = useRoute()
 const router = useRouter()
 const { getFields } = getMeta("Project");
@@ -522,12 +523,14 @@ const updateOpportunityFields = async (fields, callback) => {
   for (const [fieldname, value] of Object.entries(fields)) {
     if (validateRequired(fieldname, value)) return
   }
+  // The replaceMeWithUser utility replaces the value of any key containing @me with the currently logged-in user.
+  const meParsedFields = replaceMeWithUser(fields,getUser().email)
   createResource({
     url: 'frappe.client.set_value',
     params: {
       doctype: 'Opportunity',
       name: props.opportunityId,
-      fieldname: fields,
+      fieldname: meParsedFields,
     },
     auto: true,
     onSuccess: async (data) => {
