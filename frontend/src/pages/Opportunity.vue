@@ -530,7 +530,7 @@ const updateOpportunityFields = async (fields, callback) => {
       fieldname: fields,
     },
     auto: true,
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       opportunity.reload()
       reload.value = true
       createToast({
@@ -539,7 +539,7 @@ const updateOpportunityFields = async (fields, callback) => {
         iconClasses: 'text-ink-green-3',
       })
       callback?.()
-      await createProject(opportunity.data)
+      await createProject(data)
     },
     onError: (err) => {
       createToast({
