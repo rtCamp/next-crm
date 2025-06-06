@@ -68,6 +68,7 @@
             @change="(option) => (_todo.allocated_to = option)"
             :placeholder="__('John Doe')"
             :hideMe="true"
+            :filters="[['User', 'user_type', '=', 'System User']]"
           >
             <template #prefix>
               <UserAvatar class="mr-2 !h-4 !w-4" :user="_todo.allocated_to" />
