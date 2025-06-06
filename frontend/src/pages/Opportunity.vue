@@ -390,7 +390,7 @@ const { statusOptions, getDealStatus } = statusesStore()
 const { isManager } = usersStore()
 const route = useRoute()
 const router = useRouter()
-
+const { getFields } = getMeta("Project");
 const props = defineProps({
   opportunityId: {
     type: String,
@@ -939,7 +939,6 @@ const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
 
 const createProject = async (projectData) => {
   try {
-    const { getFields } = await getMeta("Project");
     const projectMeta = getFields();
     const hasCustomOpportunity = projectMeta?.some(item => item.fieldname === 'custom_opportunity');
     const projectPayload = {
