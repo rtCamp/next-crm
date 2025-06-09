@@ -112,6 +112,44 @@
             </Button>
           </Dropdown>
         </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <FormControl
+            class="form-control"
+            type="checkbox"
+            v-model="_event.sync_with_google_calendar"
+            @change="(e) => (_event.sync_with_google_calendar = e.target.checked)"
+          />
+          <label
+            class="text-sm text-ink-gray-5"
+            @click="_event.sync_with_google_calendar = !_event.sync_with_google_calendar"
+          >
+            {{ __('Sync with Google Calendar') }}
+          </label>
+          <Link
+            v-if="_event.sync_with_google_calendar"
+            class="form-control"
+            :value="_event.google_calendar"
+            doctype="Google Calendar"
+            @change="(option) => (_event.google_calendar = option)"
+            :placeholder="__('Google Calendar')"
+            :hideMe="true"
+            :filters="{ enable: 1 }"
+          >
+          </Link>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 w-full" v-if="_event.sync_with_google_calendar">
+          <!-- Multi input to enter email addresses for event participants. -->
+          <MultiValueInput
+            v-model="event_participants"
+            class="flex-grow"
+            :placeholder="__('Add participants')"
+            :errorMessage="(value) => __('Invalid email address: {0}', [value])"
+            :validate="validate"
+            :error="(value) => !validate(value)"
+            :hideMe="true"
+            :triggerKeys="['Enter', ',', 'Tab', ' ']"
+          ></MultiValueInput>
+        </div>
       </div>
     </template>
   </Dialog>
@@ -123,6 +161,7 @@ import ToDoPriorityIcon from '@/components/Icons/ToDoPriorityIcon.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import Link from '@/components/Controls/Link.vue'
+import MultiValueInput from '../Controls/MultiValueInput.vue'
 import { todoStatusOptions, todoPriorityOptions } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
@@ -170,7 +209,15 @@ const _todo = ref({
   priority: 'Medium',
   reference_type: props.doctype,
   reference_name: null,
+  custom_linked_event: '',
 })
+
+const _event = ref({
+  sync_with_google_calendar: getUser().google_calendar ? 1 : 0,
+  google_calendar: getUser().google_calendar,
+})
+
+const event_participants = ref([])
 
 function updateToDoStatus(status) {
   _todo.value.status = status
@@ -207,6 +254,8 @@ async function updateToDo() {
   }
 
   try {
+    let current_doc_link = new URL(window.location.href)
+    current_doc_link.hash = '#todos'
     if (_todo.value.name) {
       if (fromTime && toTime) {
         if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
@@ -237,6 +286,55 @@ async function updateToDo() {
           _todo.value.date = dateStr
         }
       }
+
+      if (!_event.value.sync_with_google_calendar) {
+        _event.value.google_calendar = null
+      } else if (!_event.value.google_calendar) {
+        createToast({
+          title: __('Error'),
+          text: __('Select Google Calendar to which event should be synced'),
+          icon: 'x',
+          iconClasses: 'text-ink-red-4',
+        })
+        return
+      }
+
+      try {
+        if (_event.value.name) {
+          _event.value.event_participants = _event.value.event_participants.filter(
+            (participant) => participant.reference_doctype !== 'User' || participant.reference_docname !== 'Guest',
+          )
+          _event.value.event_participants = [
+            ..._event.value.event_participants,
+            ...event_participants.value.map((email) => ({
+              reference_doctype: 'User',
+              reference_docname: 'Guest',
+              email: email,
+            })),
+          ]
+
+          await call('frappe.client.set_value', {
+            doctype: 'Event',
+            name: _event.value.name,
+            fieldname: {
+              ..._event.value,
+              subject: 'ToDo: ' + (_todo.value.custom_title || __('No Title')),
+              description: (_todo.value.description || '') + `\n\n${__('Created from {0}', [current_doc_link.href])}`,
+              starts_on: _todo.value.custom_from_time,
+              ends_on: _todo.value.custom_to_time,
+            },
+          })
+        }
+      } catch (error) {
+        createToast({
+          title: __('Error updating event'),
+          text: __(error.message),
+          icon: 'x',
+          iconClasses: 'text-ink-red-4',
+        })
+        return
+      }
+
       let d = await call('frappe.client.set_value', {
         doctype: 'ToDo',
         name: _todo.value.name,
@@ -280,6 +378,66 @@ async function updateToDo() {
           _todo.value.date = dateStr
         }
       }
+      _todo.value.custom_linked_event = ''
+
+      if (!_event.value.sync_with_google_calendar) {
+        _event.value.google_calendar = null
+      } else if (!_event.value.google_calendar) {
+        createToast({
+          title: __('Error'),
+          text: __('Select Google Calendar to which event should be synced'),
+          icon: 'x',
+          iconClasses: 'text-ink-red-4',
+        })
+        return
+      }
+
+      if (_event.value.sync_with_google_calendar) {
+        if (!_todo.value.custom_from_time || !_todo.value.custom_to_time) {
+          createToast({
+            title: __('Validation error'),
+            text: __('From Time and To Time is required to sync with Google Calendar'),
+            icon: 'x',
+            iconClasses: 'text-ink-red-4',
+          })
+          return
+        }
+
+        let doc = {
+          doctype: 'Event',
+          event_participants: [
+            ...event_participants.value.map((email) => ({
+              reference_doctype: 'User',
+              reference_docname: 'Guest',
+              email: email,
+            })),
+          ],
+          custom_create_free_event: 1,
+          subject: 'ToDo: ' + (_todo.value.custom_title || __('No Title')),
+          description: (_todo.value.description || '') + `\n\n${__('Created from {0}', [current_doc_link.href])}`,
+          starts_on: _todo.value.custom_from_time,
+          ends_on: _todo.value.custom_to_time,
+          status: 'Open',
+          event_type: 'Private',
+          event_category: 'Event',
+          ..._event.value,
+        }
+        let d = await call('frappe.client.insert', {
+          doc: doc,
+        })
+        if (d.name) {
+          _todo.value.custom_linked_event = d.name
+          capture('event_created')
+        } else {
+          createToast({
+            title: __('Error creating event'),
+            text: __('Please try again later.'),
+            icon: 'x',
+            iconClasses: 'text-ink-red-4',
+          })
+          return
+        }
+      }
       let d = await call('frappe.client.insert', {
         doc: {
           doctype: 'ToDo',
@@ -315,6 +473,27 @@ async function render() {
   nextTick(async () => {
     custom_title.value?.el?.focus?.()
     _todo.value = { ...props.todo }
+
+    if (_todo.value._event) {
+      _event.value = _todo.value._event
+
+      if (_event.value.name) {
+        // get event_participants from event, if any
+        event_participants.value = (_event.value.event_participants || [])
+          .filter(
+            (participant) => participant.reference_doctype === 'User' && participant.reference_docname === 'Guest',
+          )
+          .map((participant) => participant.email)
+      } else {
+        event_participants.value = [getUser().email]
+      }
+    } else {
+      _event.value = {
+        sync_with_google_calendar: getUser().google_calendar ? 1 : 0,
+        google_calendar: getUser().google_calendar,
+      }
+      event_participants.value = [getUser().email]
+    }
 
     const { getFields } = await getMeta('ToDo')
     const todoFields = getFields()

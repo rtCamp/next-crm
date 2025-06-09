@@ -522,6 +522,7 @@ def get_linked_todos(name):
         "priority",
         "status",
         "modified",
+        "custom_linked_event",
     ]
     if meta.has_field("custom_from_time"):
         fields.append("custom_from_time")
@@ -533,6 +534,36 @@ def get_linked_todos(name):
         filters={"reference_name": name},
         fields=fields,
     )
+
+    for todo in todos:
+        if todo.get("custom_linked_event"):
+            event = frappe.db.get_value(
+                "Event",
+                todo["custom_linked_event"],
+                ["name", "sync_with_google_calendar", "google_calendar"],
+            )
+            if not event:
+                continue
+            todo["_event"] = {
+                "name": event[0],
+                "sync_with_google_calendar": event[1],
+                "google_calendar": event[2],
+            }
+            event_participants = frappe.db.get_all(
+                "Event Participants",
+                filters={"parent": todo["_event"]["name"]},
+                fields=["reference_doctype", "reference_docname", "email"],
+            )
+            event_participants = [
+                {
+                    "reference_doctype": participant["reference_doctype"],
+                    "reference_docname": participant["reference_docname"],
+                    "email": participant["email"],
+                }
+                for participant in event_participants
+            ]
+            todo["_event"]["event_participants"] = event_participants
+
     return todos or []
 
 
