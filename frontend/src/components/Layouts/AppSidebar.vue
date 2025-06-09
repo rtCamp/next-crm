@@ -92,6 +92,7 @@ import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
 import ToDoIcon from '@/components/Icons/ToDoIcon.vue'
+import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import ProspectsIcon from '@/components/Icons/ProspectsIcon.vue'
 import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
@@ -139,6 +140,11 @@ const links = [
     label: 'Customers',
     icon: CustomersIcon,
     to: 'Customers',
+  },
+  {
+    label: 'Reports',
+    icon: FileTextIcon,
+    to: 'Reports',
   },
   // {
   //   label: 'ToDos',
@@ -216,6 +222,8 @@ function getIcon(routeName, icon) {
       return NoteIcon
     case 'Call Logs':
       return PhoneIcon
+    case 'Reports':
+      return FileTextIcon
     default:
       return PinIcon
   }
