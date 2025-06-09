@@ -9,6 +9,16 @@ class CRMNotification(Document):
     def on_update(self):
         frappe.publish_realtime("crm_notification")
 
+    @staticmethod
+    def clear_old_logs(days=15):
+        from frappe.query_builder import Interval
+        from frappe.query_builder.functions import Now
+
+        table = frappe.qb.DocType("CRM Notification")
+        frappe.db.delete(
+            table, filters={"modified": ("<", (Now() - Interval(days=days))), "read": 1}
+        )
+
 
 def notify_user(args):
     """

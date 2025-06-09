@@ -384,13 +384,14 @@ import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'v
 import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 import { getMeta } from '@/stores/meta'
+import { replaceMeWithUser } from '../utils'
 
 const { $dialog, $socket, makeCall } = globalStore()
 const { statusOptions, getDealStatus } = statusesStore()
-const { isManager } = usersStore()
+const { isManager, getUser } = usersStore()
 const route = useRoute()
 const router = useRouter()
-
+const { getFields } = getMeta("Project");
 const props = defineProps({
   opportunityId: {
     type: String,
@@ -522,15 +523,17 @@ const updateOpportunityFields = async (fields, callback) => {
   for (const [fieldname, value] of Object.entries(fields)) {
     if (validateRequired(fieldname, value)) return
   }
+  // The replaceMeWithUser utility replaces the value of any key containing @me with the currently logged-in user.
+  const meParsedFields = replaceMeWithUser(fields,getUser().name)
   createResource({
     url: 'frappe.client.set_value',
     params: {
       doctype: 'Opportunity',
       name: props.opportunityId,
-      fieldname: fields,
+      fieldname: meParsedFields,
     },
     auto: true,
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       opportunity.reload()
       reload.value = true
       createToast({
@@ -539,7 +542,7 @@ const updateOpportunityFields = async (fields, callback) => {
         iconClasses: 'text-ink-green-3',
       })
       callback?.()
-      await createProject(opportunity.data)
+      await createProject(data)
     },
     onError: (err) => {
       createToast({
@@ -919,7 +922,7 @@ const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
   "territory": "custom_territory",
   "custom_project_manager": "custom_project_manager",
   "custom_complexity_level": "custom_complexity",
-  "opportunity_amount": "total_sales_amount",
+  "opportunity_amount": "estimated_costing",
   "currency": "custom_currency",
   "custom__project_size": "custom_project_size",
   "source": "custom_source",
@@ -939,7 +942,6 @@ const OPPORTUNITY_TO_PROJECT_KEY_MAP = {
 
 const createProject = async (projectData) => {
   try {
-    const { getFields } = await getMeta("Project");
     const projectMeta = getFields();
     const hasCustomOpportunity = projectMeta?.some(item => item.fieldname === 'custom_opportunity');
     const projectPayload = {
@@ -1005,8 +1007,8 @@ const fieldDefinitions = computed(() => {
 const filteredFields = computed(() => {
   return fieldDefinitions.value.filter(field =>
     Object.prototype.hasOwnProperty.call(missingFields.value, field.fieldname)
-  )
-})
+  ).map(({ depends_on,display_via_depends_on, ...rest }) => rest);
+});
 
 const createProjectFromOpportunity = async () => {
   const requiredFields = Object.keys(OPPORTUNITY_TO_PROJECT_KEY_MAP);

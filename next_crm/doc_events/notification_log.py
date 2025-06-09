@@ -41,6 +41,8 @@ def update_note_link(doc):
     There is no direct link between the note and the notification log.
     We determine the note id by using the content of the email and the most recently created note, as the note is created before the notification log.
     """
+    if not doc.document_type and not doc.document_name:
+        return
     notes = frappe.get_all(
         "CRM Note",
         filters={

@@ -52,3 +52,13 @@ def on_update(doc, method=None):
         and doc.allocated_to
     ):
         notify_assigned_user(doc, is_cancelled=True)
+
+
+def on_trash(doc, method=None):
+    if doc.custom_linked_event:
+        frappe.delete_doc(
+            "Event",
+            doc.custom_linked_event,
+            ignore_permissions=True,
+            force=True,
+        )
