@@ -524,7 +524,7 @@ const updateOpportunityFields = async (fields, callback) => {
     if (validateRequired(fieldname, value)) return
   }
   // The replaceMeWithUser utility replaces the value of any key containing @me with the currently logged-in user.
-  const meParsedFields = replaceMeWithUser(fields,getUser().email)
+  const meParsedFields = replaceMeWithUser(fields,getUser().name)
   createResource({
     url: 'frappe.client.set_value',
     params: {
