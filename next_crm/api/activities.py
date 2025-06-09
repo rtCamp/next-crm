@@ -522,12 +522,13 @@ def get_linked_todos(name):
         "priority",
         "status",
         "modified",
-        "custom_linked_event",
     ]
     if meta.has_field("custom_from_time"):
         fields.append("custom_from_time")
     if meta.has_field("custom_to_time"):
         fields.append("custom_to_time")
+    if meta.has_field("custom_linked_event"):
+        fields.append("custom_linked_event")
 
     todos = frappe.db.get_list(
         "ToDo",
@@ -536,7 +537,7 @@ def get_linked_todos(name):
     )
 
     for todo in todos:
-        if todo.get("custom_linked_event"):
+        if todo.get("custom_linked_event", None):
             event = frappe.db.get_value(
                 "Event",
                 todo["custom_linked_event"],
@@ -563,6 +564,8 @@ def get_linked_todos(name):
                 for participant in event_participants
             ]
             todo["_event"]["event_participants"] = event_participants
+        else:
+            todo["_event"] = None
 
     return todos or []
 
