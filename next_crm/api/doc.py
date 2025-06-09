@@ -287,8 +287,9 @@ def get_data(
             "Has Role",
             filters={"role": ["in", ["Sales User", "Sales Manager"]]},
             fields=["parent"],
+            pluck="parent",
         )
-        filters["name"] = ["in", [d.get("parent") for d in has_roles]]
+        filters["name"] = ["in", has_roles]
 
     is_default = True
     data = []
