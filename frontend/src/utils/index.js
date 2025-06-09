@@ -327,3 +327,5 @@ export const debounce = (fn, delay) => {
 export const sanitizeCurrency = (str) => {
   return str.replace(/[^\d.-]/g, '');
 }
+
+export const replaceMeWithUser = (obj, user) => ({ ...obj, ...Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v === "@me" ? user : v])) });
