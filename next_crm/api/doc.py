@@ -290,6 +290,8 @@ def get_data(
             pluck="parent",
         )
         filters["name"] = ["in", has_roles]
+        if not filters.get("disabled"):
+            filters["disabled"] = 0
 
     is_default = True
     data = []
