@@ -180,7 +180,7 @@ def get_quick_filters(doctype: str):
                 "fieldtype": field.get("fieldtype"),
                 "options": options,
                 "filters": (
-                    [["name", "in", ["Customer", "Lead", "Prospect"]]]
+                    [["DocType", "name", "in", ["Customer", "Lead", "Prospect"]]]
                     if field.fieldname == "opportunity_from"
                     else []
                 ),
@@ -281,6 +281,17 @@ def get_data(
     if default_filters:
         default_filters = frappe.parse_json(default_filters)
         filters.update(default_filters)
+
+    if doctype == "Report":
+        has_roles = frappe.get_all(
+            "Has Role",
+            filters={"role": ["in", ["Sales User", "Sales Manager"]]},
+            fields=["parent"],
+            pluck="parent",
+        )
+        filters["name"] = ["in", has_roles]
+        if not filters.get("disabled"):
+            filters["disabled"] = 0
 
     is_default = True
     data = []
@@ -397,10 +408,7 @@ def get_data(
             and isinstance(filters.get(column_field), list)
             and filters.get(column_field)[0] == "in"
         ):
-            selected_columns = [
-                enabled_column.strip()
-                for enabled_column in filters.get(column_field)[1].split(",")
-            ]
+            selected_columns = filters.get(column_field)[1]
             for kc in kanban_columns:
                 if kc.get("name") not in selected_columns:
                     continue
@@ -547,6 +555,14 @@ def get_data(
                     "type": field.get("type"),
                     "options": get_options(field.get("type"), field.get("options")),
                 }
+
+    # Explicitly adding "Link Type" to Link fields if empty
+    field_map = {f["value"]: f for f in fields}
+
+    for column in columns:
+        key = column.get("key")
+        if key in field_map:
+            column["type"] = field_map[key]["type"]
 
     return {
         "data": data,
@@ -734,7 +750,7 @@ def get_field_obj(field):
 
     obj["placeholder"] = field.get("placeholder") or "Add " + field.label + "..."
 
-    if field.fieldtype == "Link":
+    if field.fieldtype == "Link" or field.fieldtype == "Table MultiSelect":
         obj["placeholder"] = field.get("placeholder") or "Select " + field.label + "..."
         obj["doctype"] = field.options
     elif field.fieldtype == "Select" and field.options:
@@ -760,6 +776,8 @@ def get_type(field):
         return "number"
     elif field.fieldtype in ["Small Text", "Text", "Long Text", "Text Editor"]:
         return "textarea"
+    elif field.fieldtype == "Table MultiSelect":
+        return "Table MultiSelect"
     elif field.read_only:
         return "read_only"
     return field.fieldtype.lower()

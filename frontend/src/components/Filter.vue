@@ -2,10 +2,7 @@
   <NestedPopover>
     <template #target>
       <div class="flex items-center">
-        <Button
-          :label="__('Filter')"
-          :class="filters?.size ? 'rounded-r-none' : ''"
-        >
+        <Button :label="__('Filter')" :class="filters?.size ? 'rounded-r-none' : ''">
           <template #prefix><FilterIcon class="h-4" /></template>
           <template v-if="filters?.size" #suffix>
             <div
@@ -17,11 +14,7 @@
         </Button>
         <Tooltip v-if="filters?.size" :text="__('Clear all Filter')">
           <div>
-            <Button
-              class="rounded-l-none border-l"
-              icon="x"
-              @click.stop="clearfilter(false)"
-            />
+            <Button class="rounded-l-none border-l" icon="x" @click.stop="clearfilter(false)" />
           </div>
         </Tooltip>
       </div>
@@ -31,24 +24,13 @@
         class="my-2 min-w-40 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
         <div class="min-w-72 p-2 sm:min-w-[400px]">
-          <div
-            v-if="filters?.size"
-            v-for="(f, i) in filters"
-            :key="i"
-            id="filter-list"
-            class="mb-4 sm:mb-3"
-          >
+          <div v-if="filters?.size" v-for="(f, i) in filters" :key="i" id="filter-list" class="mb-4 sm:mb-3">
             <div v-if="isMobileView" class="flex flex-col gap-2">
               <div class="-mb-2 flex w-full items-center justify-between">
                 <div class="text-base text-ink-gray-5">
                   {{ i == 0 ? __('Where') : __('And') }}
                 </div>
-                <Button
-                  class="flex"
-                  variant="ghost"
-                  icon="x"
-                  @click="removeFilter(i)"
-                />
+                <Button class="flex" variant="ghost" icon="x" @click="removeFilter(i)" />
               </div>
               <div id="fieldname" class="w-full">
                 <Autocomplete
@@ -94,9 +76,7 @@
                     type="select"
                     v-model="f.operator"
                     @change="(e) => updateOperator(e, f)"
-                    :options="
-                      getOperators(f.field.fieldtype, f.field.fieldname)
-                    "
+                    :options="getOperators(f.field.fieldtype, f.field.fieldname)"
                     :placeholder="__('Equals')"
                   />
                 </div>
@@ -109,18 +89,10 @@
                   />
                 </div>
               </div>
-              <Button
-                class="flex"
-                variant="ghost"
-                icon="x"
-                @click="removeFilter(i)"
-              />
+              <Button class="flex" variant="ghost" icon="x" @click="removeFilter(i)" />
             </div>
           </div>
-          <div
-            v-else
-            class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5"
-          >
+          <div v-else class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5">
             {{ __('Empty - Choose a field to filter by') }}
           </div>
           <div class="flex items-center justify-between gap-2">
@@ -131,12 +103,7 @@
               :placeholder="__('First name')"
             >
               <template #target="{ togglePopover }">
-                <Button
-                  class="!text-ink-gray-5"
-                  variant="ghost"
-                  @click="togglePopover()"
-                  :label="__('Add Filter')"
-                >
+                <Button class="!text-ink-gray-5" variant="ghost" @click="togglePopover()" :label="__('Add Filter')">
                   <template #prefix>
                     <FeatherIcon name="plus" class="h-4" />
                   </template>
@@ -161,14 +128,7 @@ import NestedPopover from '@/components/NestedPopover.vue'
 import FilterIcon from '@/components/Icons/FilterIcon.vue'
 import Link from '@/components/Controls/Link.vue'
 import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
-import {
-  FormControl,
-  createResource,
-  Tooltip,
-  DatePicker,
-  DateTimePicker,
-  DateRangePicker,
-} from 'frappe-ui'
+import { FormControl, createResource, Tooltip, DatePicker, DateTimePicker, DateRangePicker } from 'frappe-ui'
 import { h, computed, onMounted } from 'vue'
 import { isMobileView } from '@/composables/settings'
 
@@ -219,8 +179,7 @@ onMounted(() => {
 
 const filters = computed(() => {
   if (!list.value?.data) return new Set()
-  let allFilters =
-    list.value?.params?.filters || list.value.data?.params?.filters
+  let allFilters = list.value?.params?.filters || list.value.data?.params?.filters
   if (!allFilters || !filterableFields.data) return new Set()
   // remove default filters
   if (props.default_filters) {
@@ -381,11 +340,28 @@ function getValueControl(f) {
       type: 'select',
       options: timespanOptions,
     })
-  } else if (['like', 'not like', 'in', 'not in'].includes(operator)) {
+  } else if (['in', 'not in'].includes(operator)) {
+    if (typeSelect.includes(fieldtype)) {
+      const _options = getSelectOptions(options)
+      return h(FormControl, {
+        type: 'select',
+        options: _options.map((o) => ({
+          label: o,
+          value: o,
+        })),
+      })
+    } else if (fieldtype == 'Link') {
+      f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(
+        (v) => v !== undefined && v !== '' && v !== null,
+      )
+      return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
+    } else {
+      return h(FormControl, { type: 'text' })
+    }
+  } else if (['like', 'not like'].includes(operator)) {
     return h(FormControl, { type: 'text' })
   } else if (typeSelect.includes(fieldtype) || typeCheck.includes(fieldtype)) {
-    const _options =
-      fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
+    const _options = fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
     return h(FormControl, {
       type: 'select',
       options: _options.map((o) => ({
@@ -393,6 +369,14 @@ function getValueControl(f) {
         value: o,
       })),
     })
+  } else if (operator === 'equals' || operator === 'not equals') {
+    if (fieldtype == 'Link') {
+      f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(
+        (v) => v !== undefined && v !== '' && v !== null,
+      )
+      return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
+    }
+    return h(FormControl, { type: 'text' })
   } else if (typeLink.includes(fieldtype)) {
     if (fieldtype == 'Dynamic Link') {
       return h(FormControl, { type: 'text' })
@@ -509,21 +493,8 @@ function updateOperator(event, filter) {
 }
 
 function isSameTypeOperator(oldOperator, newOperator) {
-  let textOperators = [
-    'equals',
-    'not equals',
-    'in',
-    'not in',
-    '>',
-    '<',
-    '>=',
-    '<=',
-  ]
-  if (
-    textOperators.includes(oldOperator) &&
-    textOperators.includes(newOperator)
-  )
-    return true
+  let textOperators = ['equals', 'not equals', 'in', 'not in', '>', '<', '>=', '<=']
+  if (textOperators.includes(oldOperator) && textOperators.includes(newOperator)) return true
   return false
 }
 
@@ -544,7 +515,22 @@ function parseFilters(filters) {
   const obj = filtersArray.map(transformIn).reduce((p, c) => {
     if (['equals', '='].includes(c.operator)) {
       p[c.fieldname] =
-        c.value == 'Yes' ? true : c.value == 'No' ? false : c.value
+        c.value == 'Yes'
+          ? true
+          : c.value == 'No'
+            ? false
+            : Array.isArray(c.value)
+              ? ['=', c.value[c.value.length - 1]]
+              : c.value
+    } else if (['not equals', '!='].includes(c.operator)) {
+      p[c.fieldname] =
+        c.value == 'Yes'
+          ? true
+          : c.value == 'No'
+            ? false
+            : Array.isArray(c.value)
+              ? ['!=', c.value[c.value.length - 1]]
+              : ['!=', c.value]
     } else {
       p[c.fieldname] = [operatorMap[c.operator.toLowerCase()], c.value]
     }

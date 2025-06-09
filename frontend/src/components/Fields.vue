@@ -104,7 +104,11 @@
                 </template>
               </Button>
             </div>
-
+            <TableMultiselectInput
+              v-else-if="field.type === 'Table MultiSelect'"
+              :doctype="field.options"
+              @change="(v) => (data[field.name] = v)"
+            />
             <Link
               v-else-if="field.type === 'User'"
               class="form-control"
@@ -174,7 +178,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import Link from '@/components/Controls/Link.vue'
 import { usersStore } from '@/stores/users'
 import { Tooltip, DatePicker, DateTimePicker } from 'frappe-ui'
-
+import TableMultiselectInput from '@/components/Controls/TableMultiselectInput.vue'
 const { getUser } = usersStore()
 
 const props = defineProps({

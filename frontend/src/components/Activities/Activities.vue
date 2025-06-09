@@ -28,8 +28,18 @@
         />
       </div>
       <div v-else-if="title == 'Notes'" class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-10 sm:pb-5">
-        <div v-for="note in activities" @click="modalRef.showNote(note)">
-          <NoteArea :note="note" v-model="all_activities" />
+        <div v-for="note in activities">
+          <NoteArea
+            :note="note"
+            v-model="all_activities"
+            :modalRef="modalRef"
+            @reply-note="
+              (note) => {
+                emailBox.noteParent = note.name
+                emailBox.showNote = true
+              }
+            "
+          />
         </div>
       </div>
       <div v-else-if="title == 'Comments'" class="pb-5">
@@ -118,6 +128,21 @@
         </div>
         <div class="mb-4" :id="activity.name" v-else-if="activity.activity_type == 'comment'">
           <CommentArea :activity="activity" />
+        </div>
+        <div v-else-if="activity.activity_type == 'note'" class="pb-3 sm:pb-5">
+          <div>
+            <NoteArea
+              :note="activity"
+              :modalRef="modalRef"
+              v-model="all_activities"
+              @reply-note="
+                (note) => {
+                  emailBox.noteParent = note.name
+                  emailBox.showNote = true
+                }
+              "
+            />
+          </div>
         </div>
         <div
           class="mb-4 flex flex-col gap-2 py-1.5"
@@ -261,7 +286,7 @@
   <div>
     <CommunicationArea
       ref="emailBox"
-      v-if="['Emails', 'Comments', 'Activity'].includes(title)"
+      v-if="['Emails', 'Comments', 'Activity', 'Notes'].includes(title)"
       v-model="doc"
       v-model:reload="reload_email"
       :doctype="doctype"
@@ -380,12 +405,6 @@ const all_activities = createResource({
   cache: ['activity', doc.value.data.name],
   auto: true,
   transform: ([versions, calls, notes, todos, events, attachments]) => {
-    props.tabs[1].count.value = versions.filter((activity) => activity.activity_type === 'communication').length
-    props.tabs[2].count.value = versions.filter((activity) => activity.activity_type === 'comment').length
-    props.tabs[3].count.value = todos.length
-    props.tabs[4].count.value = events.length
-    props.tabs[5].count.value = notes.length
-    props.tabs[6].count.value = attachments.length
     return { versions, calls, notes, todos, events, attachments }
   },
 })
@@ -442,6 +461,27 @@ const activities = computed(() => {
   let _activities = []
   if (title.value == 'Activity') {
     _activities = get_activities()
+
+    if (Boolean(doc?.value?.data?.hide_comments_tab)) {
+      _activities = _activities.filter((activity) => activity.activity_type !== 'comment')
+    }
+
+    const notesAsActivities = (all_activities.data?.notes || []).map((note) => ({
+      ...note,
+      activity_type: 'note',
+      icon: NoteIcon,
+      creation: note.added_on,
+      content: note.note,
+      custom_title: note.custom_title,
+      owner: note.owner,
+      owner_name: note.owner_name,
+      name: note.name,
+      type: 'note',
+      value: 'added a note',
+      attachments: [],
+    }))
+
+    _activities = [..._activities, ...notesAsActivities]
   } else if (title.value == 'Emails') {
     if (!all_activities.data?.versions) return []
     _activities = all_activities.data.versions.filter((activity) => activity.activity_type === 'communication')
@@ -577,6 +617,9 @@ function timelineIcon(activity_type, is_lead) {
     case 'attachment_log':
       icon = AttachmentIcon
       break
+    case 'note':
+      icon = NoteIcon
+      break
     default:
       icon = DotIcon
   }
@@ -594,6 +637,30 @@ watch([reload, reload_email], ([reload_value, reload_email_value]) => {
     reload_email.value = false
   }
 })
+
+watch(
+  () => all_activities.data,
+  (value) => {
+    const getActivityCount = (type) =>
+      value?.versions?.filter((activity) => activity.activity_type === type).length || 0
+
+    const tabCounts = {
+      Emails: getActivityCount('communication'),
+      Comments: getActivityCount('comment'),
+      ToDos: value?.todos?.length || 0,
+      Events: value?.events?.length || 0,
+      Notes: value?.notes?.length || 0,
+      Attachments: value?.attachments?.length || 0,
+    }
+
+    for (const [name, count] of Object.entries(tabCounts)) {
+      const tab = props.tabs.find((t) => t.name === name)
+      if (tab) {
+        tab.count.value = count
+      }
+    }
+  },
+)
 
 defineExpose({ emailBox, all_activities })
 </script>

@@ -128,6 +128,18 @@ def get_opportunity_activities(name):
         }
         activities.append(activity)
 
+    for info_log in docinfo.info_logs:
+        activity = {
+            "name": info_log.name,
+            "activity_type": "comment",
+            "creation": info_log.creation,
+            "owner": info_log.owner,
+            "content": info_log.content,
+            "attachments": get_attachments("Comment", info_log.name),
+            "is_lead": False,
+        }
+        activities.append(activity)
+
     for communication in docinfo.communications + docinfo.automated_messages:
         activity = {
             "activity_type": "communication",
@@ -469,26 +481,92 @@ def get_linked_notes(name):
     notes = frappe.db.get_all(
         "CRM Note",
         filters={"parent": name},
-        fields=["name", "custom_title", "note", "owner", "added_on"],
-    )
-    return notes or []
-
-
-def get_linked_todos(name):
-    todos = frappe.db.get_list(
-        "ToDo",
-        filters={"reference_name": name},
         fields=[
             "name",
             "custom_title",
-            "description",
-            "allocated_to",
-            "date",
-            "priority",
-            "status",
-            "modified",
+            "note",
+            "owner",
+            "added_on",
+            "custom_parent_note",
         ],
     )
+
+    if not notes:
+        return []
+
+    note_map = {
+        str(note["name"]).strip(): {**note, "noteReplies": []} for note in notes
+    }
+    root_notes = []
+
+    for note in notes:
+        note_id = str(note["name"]).strip()
+        parent_note_id = str(note.get("custom_parent_note") or "").strip()
+
+        if parent_note_id and parent_note_id in note_map:
+            note_map[parent_note_id]["noteReplies"].append(note_map[note_id])
+        else:
+            root_notes.append(note_map[note_id])
+
+    return root_notes
+
+
+def get_linked_todos(name):
+    meta = frappe.get_meta("ToDo")
+    fields = [
+        "name",
+        "custom_title",
+        "description",
+        "allocated_to",
+        "date",
+        "priority",
+        "status",
+        "modified",
+    ]
+    if meta.has_field("custom_from_time"):
+        fields.append("custom_from_time")
+    if meta.has_field("custom_to_time"):
+        fields.append("custom_to_time")
+    if meta.has_field("custom_linked_event"):
+        fields.append("custom_linked_event")
+
+    todos = frappe.db.get_list(
+        "ToDo",
+        filters={"reference_name": name},
+        fields=fields,
+    )
+
+    for todo in todos:
+        if todo.get("custom_linked_event", None):
+            event = frappe.db.get_value(
+                "Event",
+                todo["custom_linked_event"],
+                ["name", "sync_with_google_calendar", "google_calendar"],
+            )
+            if not event:
+                continue
+            todo["_event"] = {
+                "name": event[0],
+                "sync_with_google_calendar": event[1],
+                "google_calendar": event[2],
+            }
+            event_participants = frappe.db.get_all(
+                "Event Participants",
+                filters={"parent": todo["_event"]["name"]},
+                fields=["reference_doctype", "reference_docname", "email"],
+            )
+            event_participants = [
+                {
+                    "reference_doctype": participant["reference_doctype"],
+                    "reference_docname": participant["reference_docname"],
+                    "email": participant["email"],
+                }
+                for participant in event_participants
+            ]
+            todo["_event"]["event_participants"] = event_participants
+        else:
+            todo["_event"] = None
+
     return todos or []
 
 

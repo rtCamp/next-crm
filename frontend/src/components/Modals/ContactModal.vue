@@ -33,10 +33,7 @@
                 <component :is="field.icon" />
               </div>
               <div v-if="field.type == 'dropdown'">
-                <Dropdown
-                  :options="field.options"
-                  class="form-control -ml-2 mr-2 w-full flex-1"
-                >
+                <Dropdown :options="field.options" class="form-control -ml-2 mr-2 w-full flex-1">
                   <template #default="{ open }">
                     <Button
                       variant="ghost"
@@ -45,10 +42,7 @@
                     >
                       <div class="truncate">{{ contact.data[field.name] }}</div>
                       <template #suffix>
-                        <FeatherIcon
-                          :name="open ? 'chevron-up' : 'chevron-down'"
-                          class="h-4 text-ink-gray-5"
-                        />
+                        <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4 text-ink-gray-5" />
                       </template>
                     </Button>
                   </template>
@@ -57,21 +51,12 @@
               <div v-else>{{ field.value }}</div>
             </div>
           </div>
-          <Fields
-            v-else-if="filteredSections"
-            :sections="filteredSections"
-            :data="_contact"
-          />
+          <Fields v-else-if="filteredSections" :sections="filteredSections" :data="_contact" />
         </div>
       </div>
       <div v-if="!detailMode" class="px-4 pb-7 pt-4 sm:px-6">
         <div class="space-y-2">
-          <Button
-            class="w-full"
-            v-for="action in dialogOptions.actions"
-            :key="action.label"
-            v-bind="action"
-          >
+          <Button class="w-full" v-for="action in dialogOptions.actions" :key="action.label" v-bind="action">
             {{ __(action.label) }}
           </Button>
         </div>
@@ -79,6 +64,7 @@
     </template>
   </Dialog>
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <QuickEntryModal v-if="showQuickEntryModal" v-model="showQuickEntryModal" doctype="Contact" />
 </template>
 
 <script setup>
@@ -98,6 +84,7 @@ import { capture } from '@/telemetry'
 import { call, createResource } from 'frappe-ui'
 import { ref, nextTick, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import QuickEntryModal from '@/components/Modals/QuickEntryModal.vue'
 
 const props = defineProps({
   contact: {
@@ -206,9 +193,7 @@ const detailFields = computed(() => {
     {
       icon: ContactIcon,
       name: 'full_name',
-      value:
-        (_contact.value.salutation ? _contact.value.salutation + '. ' : '') +
-        _contact.value.full_name,
+      value: (_contact.value.salutation ? _contact.value.salutation + '. ' : '') + _contact.value.full_name,
     },
     {
       icon: GenderIcon,
@@ -298,7 +283,7 @@ watch(
   },
 )
 
-const showQuickEntryModal = defineModel('quickEntry')
+const showQuickEntryModal = ref(false)
 
 function openQuickEntryModal() {
   showQuickEntryModal.value = true

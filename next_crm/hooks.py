@@ -11,7 +11,7 @@ app_icon_route = "/next-crm"
 # Apps
 # ------------------
 
-required_apps = ["erpnext"]
+required_apps = ["frappe/erpnext"]
 
 add_to_apps_screen = [
     {
@@ -144,6 +144,7 @@ override_doctype_class = {
     "ToDo": "next_crm.overrides.todo.ToDo",
     "Prospect": "next_crm.overrides.prospect.Prospect",
     "Address": "next_crm.overrides.address.CustomAddress",
+    "Report": "next_crm.overrides.report.OverrideReport",
 }
 
 # Document Events
@@ -158,6 +159,7 @@ doc_events = {
         "after_insert": ["next_crm.doc_events.todo.after_insert"],
         "on_update": ["next_crm.doc_events.todo.on_update"],
         "before_insert": ["next_crm.doc_events.todo.before_insert"],
+        "on_trash": ["next_crm.doc_events.todo.on_trash"],
     },
     "Comment": {
         "on_update": ["next_crm.doc_events.comment.on_update"],
@@ -170,6 +172,12 @@ doc_events = {
         "before_validate": ["next_crm.doc_events.user.before_validate"],
     },
     "Opportunity": {"on_trash": ["next_crm.doc_events.opportunity.on_trash"]},
+    "Notification Log": {
+        "before_save": ["next_crm.doc_events.notification_log.before_save"],
+    },
+    "Lead": {
+        "on_update": ["next_crm.doc_events.lead.on_update"],
+    },
 }
 
 # Scheduled Tasks

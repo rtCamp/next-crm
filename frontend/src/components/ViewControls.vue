@@ -257,7 +257,7 @@ import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
 import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
-import { isEmoji, createToast } from '@/utils'
+import { isEmoji, createToast, sanitizeCurrency } from '@/utils'
 import { setDefaultViewCache } from '@/utils/view'
 import { Tooltip, createResource, Dropdown, call, FeatherIcon, usePageMeta } from 'frappe-ui'
 import { computed, ref, onMounted, watch, h, markRaw } from 'vue'
@@ -702,29 +702,28 @@ const quickFilterOptions = computed(() => {
 })
 
 const quickFilterList = computed(() => {
-  let filters = quickFilters.data || []
+  if (!quickFilters.data) return []
 
-  filters.forEach((filter) => {
-    filter['value'] = filter.fieldtype == 'Check' ? false : ''
-    if (list.value.params?.filters[filter.fieldname]) {
-      let value = list.value.params.filters[filter.fieldname]
-      if (Array.isArray(value)) {
-        if (
-          (['Check', 'Select', 'Link', 'Date', 'Datetime'].includes(filter.fieldtype) &&
-            value[0]?.toLowerCase() == 'like') ||
-          value[0]?.toLowerCase() != 'like'
-        )
-          return
-        filter['value'] = value[1]?.replace(/%/g, '')
-      } else if (typeof value == 'boolean') {
-        filter['value'] = value
-      } else {
-        filter['value'] = value?.replace(/%/g, '')
+  return quickFilters.data.map((filter) => {
+    const newFilter = { ...filter }
+
+    newFilter.value = filter.fieldtype === 'Check' ? false : ''
+
+    if (list.value.params?.filters?.[newFilter.fieldname]) {
+      const filterValue = list.value.params.filters[newFilter.fieldname]
+
+      if (Array.isArray(filterValue)) {
+        if (filterValue[0]?.toLowerCase() === 'in') {
+          newFilter.value = filterValue[1]
+        } else if (filterValue[0]?.toLowerCase() === 'like' && filterValue[1]) {
+          newFilter.value = filterValue[1].replace(/%/g, '')
+        }
+      } else if (typeof filterValue === 'boolean' || filterValue) {
+        newFilter.value = filterValue
       }
     }
+    return newFilter
   })
-
-  return filters
 })
 
 const quickFilters = createResource({
@@ -750,8 +749,10 @@ function applyQuickFilter(filter, value) {
   let filters = { ...list.value.params.filters }
   let field = filter.fieldname
   if (value) {
-    if (['Check', 'Select', 'Link', 'Date', 'Datetime'].includes(filter.fieldtype)) {
+    if (['Check', 'Select', 'Date', 'Datetime'].includes(filter.fieldtype)) {
       filters[field] = value
+    } else if (filter.fieldtype === 'Link') {
+      filters[field] = ['in', value]
     } else {
       filters[field] = ['LIKE', `%${value}%`]
     }
@@ -1194,9 +1195,15 @@ function applyFilter({ event, idx, column, item, firstColumn }) {
   let filters = { ...list.value.params.filters }
 
   let value = item.name || item.label || item
-
   if (value) {
-    filters[column.key] = value
+    if (column.type == 'Link') {
+      filters[column.key] = ['in', Array.isArray(value) ? value : [value]]
+    } else if (column.type == 'Currency') {
+      const sanitizedCurrencyValue = sanitizeCurrency(value)
+      filters[column.key] = sanitizedCurrencyValue
+    } else {
+      filters[column.key] = value
+    }
   } else {
     delete filters[column.key]
   }

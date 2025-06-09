@@ -2,6 +2,7 @@
   <div class="flex justify-between gap-3 border-t px-4 py-2.5 sm:px-10">
     <div class="flex gap-1.5">
       <Button
+        v-if="!showNoteBox"
         ref="sendEmailRef"
         variant="ghost"
         :class="[showEmailBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
@@ -14,12 +15,24 @@
       </Button>
       <Button
         variant="ghost"
+        v-if="doc?.data.hide_comments_tab !== 1 && !showNoteBox"
         :label="__('Comment')"
         :class="[showCommentBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
         @click="toggleCommentBox()"
       >
         <template #prefix>
           <CommentIcon class="h-4" />
+        </template>
+      </Button>
+      <Button
+        v-if="showNoteBox"
+        variant="ghost"
+        :label="__('Note')"
+        :class="[showNoteBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '']"
+        @click="toggleNoteBox()"
+      >
+        <template #prefix>
+          <NoteIcon class="h-4" />
         </template>
       </Button>
     </div>
@@ -79,6 +92,26 @@
       :placeholder="__('@John, can you please check this?')"
     />
   </div>
+  <div v-show="showNoteBox">
+    <NoteEditor
+      ref="newNoteEditor"
+      v-model:title="newNoteTitle"
+      v-model:content="newNoteContent"
+      :submitButtonProps="{
+        variant: 'solid',
+        onClick: submitNote,
+        disabled: noteEmpty,
+      }"
+      :discardButtonProps="{
+        onClick: () => {
+          showNoteBox = false
+          newNoteTitle = ''
+          newNoteContent = ''
+        },
+      }"
+      :editable="showNoteBox"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -86,12 +119,14 @@ import EmailEditor from '@/components/EmailEditor.vue'
 import CommentBox from '@/components/CommentBox.vue'
 import CommentIcon from '@/components/Icons/CommentIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import { capture } from '@/telemetry'
 import { usersStore } from '@/stores/users'
 import { useStorage } from '@vueuse/core'
 import { call, createResource } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
 import { createToast } from '../utils'
+import NoteEditor from '@/components/NoteEditor.vue'
 
 const props = defineProps({
   doctype: {
@@ -256,6 +291,7 @@ function toggleEmailBox() {
   if (showCommentBox.value) {
     showCommentBox.value = false
   }
+  showNoteBox.value = false
   showEmailBox.value = !showEmailBox.value
 }
 
@@ -263,12 +299,64 @@ function toggleCommentBox() {
   if (showEmailBox.value) {
     showEmailBox.value = false
   }
+  showNoteBox.value = false
   showCommentBox.value = !showCommentBox.value
 }
+
+const showNoteBox = ref(false)
+const newNoteTitle = ref('')
+const newNoteContent = ref('')
+const newNoteEditor = ref(null)
+const noteParent = ref('')
+
+const noteEmpty = computed(() => {
+  return !newNoteTitle.value && (!newNoteContent.value || newNoteContent.value === '<p></p>')
+})
+
+function toggleNoteBox() {
+  showEmailBox.value = false
+  showCommentBox.value = false
+  showNoteBox.value = !showNoteBox.value
+}
+
+async function submitNote() {
+  if (noteEmpty.value) return
+
+  await call('next_crm.api.crm_note.create_note', {
+    doctype: props.doctype,
+    docname: doc.value.data.name || '',
+    title: newNoteTitle.value,
+    note: newNoteContent.value,
+    parent_note: noteParent.value,
+  })
+  showNoteBox.value = false
+
+  newNoteTitle.value = ''
+  newNoteContent.value = ''
+  reload.value = true
+  emit('scroll')
+  capture('note_sent', { doctype: props.doctype })
+  createToast({
+    title: __('Note reply added.'),
+    icon: 'check',
+    iconClasses: 'text-ink-green-3',
+  })
+}
+
+watch(
+  () => showNoteBox.value,
+  (value) => {
+    if (value) {
+      newNoteEditor.value.editor.commands.focus()
+    }
+  },
+)
 
 defineExpose({
   show: showEmailBox,
   showComment: showCommentBox,
+  showNote: showNoteBox,
+  noteParent: noteParent,
   editor: newEmailEditor,
 })
 </script>
