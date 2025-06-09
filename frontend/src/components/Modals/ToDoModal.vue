@@ -209,10 +209,34 @@ async function updateToDo() {
 
   try {
     if (_todo.value.name) {
-      if (fromTime && toTime && _todo.value.custom_to_time) {
-        const datetimeStr = _todo.value.custom_to_time
-        const dateStr = new Date(datetimeStr)?.toISOString()?.split('T')[0]
-        _todo.value.date = dateStr
+      if (fromTime && toTime) {
+        if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
+          createToast({
+            title: __('Validation error'),
+            text: __('From Time and To Time is required'),
+            icon: 'x',
+            iconClasses: 'text-ink-red-4',
+          })
+          return
+        }
+        const fromDateTime = new Date(_todo.value.custom_from_time).getTime()
+        const toDateTime = new Date(_todo.value.custom_to_time).getTime()
+
+        if (toDateTime < fromDateTime) {
+          createToast({
+            title: __('Validation error'),
+            text: __('To Time cannot be earlier than From Time'),
+            icon: 'x',
+            iconClasses: 'text-ink-red-4',
+          })
+          return
+        }
+
+        if (_todo.value.custom_to_time) {
+          const datetimeStr = _todo.value.custom_to_time
+          const dateStr = new Date(datetimeStr)?.toISOString()?.split('T')[0]
+          _todo.value.date = dateStr
+        }
       }
       let d = await call('frappe.client.set_value', {
         doctype: 'ToDo',
@@ -238,6 +262,19 @@ async function updateToDo() {
           })
           return
         }
+        const fromDateTime = new Date(_todo.value.custom_from_time).getTime()
+        const toDateTime = new Date(_todo.value.custom_to_time).getTime()
+
+        if (toDateTime < fromDateTime) {
+          createToast({
+            title: __('Validation error'),
+            text: __('To Time cannot be earlier than From Time'),
+            icon: 'x',
+            iconClasses: 'text-ink-red-4',
+          })
+          return
+        }
+
         if (_todo.value.custom_to_time) {
           const datetimeStr = _todo.value.custom_to_time
           const dateStr = new Date(datetimeStr)?.toISOString()?.split('T')[0]
