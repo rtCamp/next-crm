@@ -29,7 +29,7 @@
               :label="__('Delete')"
               theme="red"
               size="sm"
-              @click="deleteAddress"
+              @click="showDeleteModal = true"
             >
               <template #prefix>
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -130,6 +130,12 @@
     doctype="Address"
   />
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <DeleteModal
+    v-model="showDeleteModal"
+    doctype="Address"
+    :docname="props.addressId"
+    :redirect-to="'Addresses'"
+  />
 </template>
   
 <script setup>
@@ -137,6 +143,7 @@ import Resizer from '@/components/Resizer.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import Icon from '@/components/Icon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import QuickEntryModal from '@/components/Modals/QuickEntryModal.vue'
@@ -146,7 +153,6 @@ import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
 import ProspectsIcon from '@/components/Icons/ProspectsIcon.vue'
 import CustomersListView from '@/components/ListViews/CustomersListView.vue'
 import ProspectsListView from '@/components/ListViews/ProspectsListView.vue'
-import { globalStore } from '@/stores/global'
 import { usersStore } from '@/stores/users'
 import { getView } from '@/utils/view'
 import {
@@ -175,9 +181,9 @@ const props = defineProps({
 })
   
 const { isManager } = usersStore()
-const { $dialog } = globalStore()
 const showSidePanelModal = ref(false)
 const showQuickEntryModal = ref(false)
+const showDeleteModal = ref(false)
 
 const route = useRoute()
 const router = useRouter()
@@ -367,41 +373,6 @@ usePageMeta(() => {
     title: props.addressId,
   }
 })
-
-async function deleteAddress() {
-  $dialog({
-    title: __('Delete address'),
-    message: __('Are you sure you want to delete this address?'),
-    actions: [
-      {
-        label: __('Delete'),
-        theme: 'red',
-        variant: 'solid',
-        async onClick(close) {
-          try {
-            await call('frappe.client.delete', {
-              doctype: 'Address',
-              name: props.addressId,
-            })
-            close()
-            router.push({ name: 'Addresses' })
-          } catch (error) {
-            const errorMessage = 
-              error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
-                ? __('Cannot delete this address because it is linked to other records.')
-                : __('Failed to delete the address. Please try again later.');
-            createToast({
-              title: __('Error'),
-              text: errorMessage,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
-          }
-        },
-      },
-    ],
-  })
-}
 
 const showAddressModal = ref(false)
 const _address = ref({})
