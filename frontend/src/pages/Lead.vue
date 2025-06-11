@@ -173,6 +173,11 @@
                     <AttachmentIcon class="h-4 w-4" />
                   </Button>
                 </Tooltip>
+                <Tooltip :text="__('Delete Lead')">
+                  <Button theme="red" class="h-7 w-7" @click="deleteLead">
+                    <FeatherIcon name="trash-2" class="h-4 w-4" />
+                  </Button>
+                </Tooltip>
               </div>
               <ErrorMessage :message="__(error)" />
             </div>
@@ -576,6 +581,7 @@
         afterRename: afterRename
       }"
   />
+  <DeleteModal v-model="showDeleteModal" doctype="Lead" :docname="props.leadId" :redirectTo="'Leads'"/>
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -609,6 +615,7 @@ import AddressModal from '@/components/Modals/AddressModal.vue'
 import ContactModal from '@/components/Modals/ContactModal.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import RenameModal from '@/components/Modals/RenameModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -662,6 +669,8 @@ const props = defineProps({
 const customActions = ref([])
 const customStatuses = ref([])
 const showAssignmentModal = ref(false)
+const showDeleteModal = ref(false)
+
 const _address = ref({})
 const lead = createResource({
   url: '/api/method/next_crm.api.lead.get_lead',
@@ -1033,12 +1042,8 @@ function updateField(name, value, callback) {
   })
 }
 
-async function deleteLead(name) {
-  await call('frappe.client.delete', {
-    doctype: 'Lead',
-    name,
-  })
-  router.push({ name: 'Leads' })
+async function deleteLead() {
+  showDeleteModal.value = true;
 }
 
 // Convert to Opportunity

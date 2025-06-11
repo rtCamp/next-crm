@@ -81,7 +81,7 @@
                   :label="__('Delete')"
                   theme="red"
                   size="sm"
-                  @click="deleteContact"
+                  @click="showDeleteModal = true"
                 >
                   <template #prefix>
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -168,6 +168,12 @@
     </Tabs>
   </div>
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <DeleteModal
+    v-model="showDeleteModal"
+    doctype="Contact"
+    :docname="props.contactId"
+    redirect-to="Contacts"
+  />
 </template>
 
 <script setup>
@@ -181,6 +187,7 @@ import CameraIcon from '@/components/Icons/CameraIcon.vue'
 import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import OpportunitiesListView from '@/components/ListViews/OpportunitiesListView.vue'
 import AddressModal from '@/components/Modals/AddressModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import {
   dateFormat,
   dateTooltipFormat,
@@ -226,6 +233,7 @@ const route = useRoute()
 const router = useRouter()
 
 const showAddressModal = ref(false)
+const showDeleteModal = ref(false)
 const _contact = ref({})
 const _address = ref({})
 

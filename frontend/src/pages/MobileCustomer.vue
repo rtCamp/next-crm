@@ -72,7 +72,7 @@
                   :label="__('Delete')"
                   theme="red"
                   size="sm"
-                  @click="deleteCustomer"
+                  @click="showDeleteModal = true"
                 >
                   <template #prefix>
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -164,6 +164,12 @@
     </Tabs>
   </div>
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <DeleteModal
+    v-model="showDeleteModal"
+    doctype="Customer"
+    :docname="props.customerId"
+    redirect-to="Customers"
+  />
 </template>
 
 <script setup>
@@ -172,6 +178,7 @@ import SectionFields from '@/components/SectionFields.vue'
 import Icon from '@/components/Icon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import AddressModal from '@/components/Modals/AddressModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import AddressesListView from '@/components/ListViews/AddressesListView.vue'
 import OpportunitiesListView from '@/components/ListViews/OpportunitiesListView.vue'
 import ContactsListView from '@/components/ListViews/ContactsListView.vue'
@@ -180,7 +187,6 @@ import CameraIcon from '@/components/Icons/CameraIcon.vue'
 import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import AddressIcon from '@/components/Icons/AddressIcon.vue'
-import { globalStore } from '@/stores/global'
 import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'
 import { getView } from '@/utils/view'
@@ -216,11 +222,10 @@ const props = defineProps({
 })
 
 const { getUser } = usersStore()
-const { $dialog } = globalStore()
 const { getDealStatus } = statusesStore()
 
 const route = useRoute()
-const router = useRouter()
+const showDeleteModal = ref(false)
 
 const customer = createDocumentResource({
   doctype: 'Customer',
@@ -294,41 +299,6 @@ async function changeCustomerImage(file) {
     value: file?.file_url || '',
   })
   customer.reload()
-}
-
-async function deleteCustomer() {
-  $dialog({
-    title: __('Delete customer'),
-    message: __('Are you sure you want to delete this customer?'),
-    actions: [
-      {
-        label: __('Delete'),
-        theme: 'red',
-        variant: 'solid',
-        async onClick(close) {
-          try {
-            await call('frappe.client.delete', {
-              doctype: 'Customer',
-              name: props.customerId,
-            })
-            close()
-            router.push({ name: 'Customers' })
-          } catch (error) {
-            const errorMessage = 
-              error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
-                ? __('Cannot delete this customer because it is linked to other records.')
-                : __('Failed to delete the customer. Please try again later.');
-            createToast({
-              title: __('Error'),
-              text: errorMessage,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
-          }
-        },
-      },
-    ],
-  })
 }
 
 function openWebsite() {

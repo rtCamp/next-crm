@@ -91,6 +91,11 @@
                 <AttachmentIcon class="size-4" />
               </Button>
             </Tooltip>
+            <Tooltip :text="__('Delete Opportunity')">
+              <Button theme="red" class="h-7 w-7" @click="deleteOpportunity">
+                <FeatherIcon name="trash-2" class="h-4 w-4" />
+              </Button>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -319,6 +324,7 @@
       },
     ],
   }" v-model="showCreateProjectModal" />
+  <DeleteModal v-model="showDeleteModal" doctype="Opportunity" :docname="props.opportunityId" :redirectTo="'Opportunities'"/>
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -352,6 +358,7 @@ import RenameModal from '@/components/Modals/RenameModal.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import OpportunityFromSetModal from '../components/Modals/OpportunityFromSetModal.vue'
 import MissingValueModal from '@/components/Modals/MissingValueModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
@@ -475,6 +482,7 @@ const _customer = ref({})
 const showLostReasonModal = ref(false)
 const showMissingValueModal = ref(false)
 const showCreateProjectModal = ref(false)
+const showDeleteModal = ref(false)
 
 function updateOpportunity(fieldname, value, callback) {
   value = Array.isArray(fieldname) ? '' : value
@@ -1027,12 +1035,8 @@ const createProjectFromOpportunity = async () => {
 
 }
 
-async function deleteOpportunity(name) {
-  await call('frappe.client.delete', {
-    doctype: 'Opportunity',
-    name,
-  })
-  router.push({ name: 'Opportunities' })
+async function deleteOpportunity() {
+  showDeleteModal.value = true;
 }
 
 const activities = ref(null)
