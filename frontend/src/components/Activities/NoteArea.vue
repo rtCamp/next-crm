@@ -51,7 +51,7 @@
         :content="note.note"
         :editable="false"
         editor-class="!prose-sm max-w-none !text-sm text-ink-gray-5 focus:outline-none"
-        class="flex-1 overflow-hidden"
+        class="flex-1 overflow-x-hidden"
       />
     </div>
     <div v-if="note.noteReplies?.length" class="ml-6 mt-2 space-y-3 border-l border-gray-200 pl-4">
