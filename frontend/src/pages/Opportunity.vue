@@ -905,11 +905,9 @@ function triggerCall() {
 function updateField(name, value, callback) {
   const isStatusField = name === "status";
 
-  if (opportunity.data[name] === value && value != "Won") {
+  if (isStatusField && opportunity.data[name] === value && value != "Won") {
     return;
-  }
-
-  if (isStatusField && value === "Lost") {
+  } else if (isStatusField && value === "Lost") {
     showLostReasonModal.value = true;
     return;
   }
@@ -919,7 +917,7 @@ function updateField(name, value, callback) {
     callback?.();
   });
 
-  if (value === "Won") {
+  if (isStatusField && value === "Won") {
     showCreateProjectModal.value = true;
   }
 }
