@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { Autocomplete } from 'frappe-ui'
+import Autocomplete from './Autocomplete.vue'
 import { watchDebounced } from '@vueuse/core'
 import { createResource } from 'frappe-ui'
 import { useAttrs, computed, ref } from 'vue'
