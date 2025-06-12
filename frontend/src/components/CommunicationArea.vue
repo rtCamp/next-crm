@@ -101,6 +101,7 @@
         variant: 'solid',
         onClick: submitNote,
         disabled: noteEmpty,
+        loading: submittingNoteReply,
       }"
       :discardButtonProps="{
         onClick: () => {
@@ -308,6 +309,7 @@ const newNoteTitle = ref('')
 const newNoteContent = ref('')
 const newNoteEditor = ref(null)
 const noteParent = ref('')
+const submittingNoteReply = ref(false)
 
 const noteEmpty = computed(() => {
   return !newNoteTitle.value && (!newNoteContent.value || newNoteContent.value === '<p></p>')
@@ -321,7 +323,7 @@ function toggleNoteBox() {
 
 async function submitNote() {
   if (noteEmpty.value) return
-
+  submittingNoteReply.value = true
   await call('next_crm.api.crm_note.create_note', {
     doctype: props.doctype,
     docname: doc.value.data.name || '',
@@ -330,7 +332,7 @@ async function submitNote() {
     parent_note: noteParent.value,
   })
   showNoteBox.value = false
-
+  submittingNoteReply.value = false
   newNoteTitle.value = ''
   newNoteContent.value = ''
   reload.value = true

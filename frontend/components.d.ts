@@ -177,6 +177,7 @@ declare module 'vue' {
     RenameModal: typeof import('./src/components/Modals/RenameModal.vue')['default']
     ReplyAllIcon: typeof import('./src/components/Icons/ReplyAllIcon.vue')['default']
     ReplyIcon: typeof import('./src/components/Icons/ReplyIcon.vue')['default']
+    ReportsListView: typeof import('./src/components/ListViews/ReportsListView.vue')['default']
     Resizer: typeof import('./src/components/Resizer.vue')['default']
     RightSideLayoutIcon: typeof import('./src/components/Icons/RightSideLayoutIcon.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
