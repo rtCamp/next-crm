@@ -22,7 +22,7 @@
               :label="__('Delete')"
               theme="red"
               size="sm"
-              @click="deleteAddress"
+              @click="showDeleteModal = true"
             >
               <template #prefix>
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -98,6 +98,12 @@
     </Tabs>
   </div>
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <DeleteModal
+    v-model="showDeleteModal"
+    doctype="Address"
+    :docname="props.addressId"
+    redirect-to="Addresses"
+  />
 </template>
 
 <script setup>
@@ -109,6 +115,7 @@ import DetailsIcon from '@/components/Icons/DetailsIcon.vue'
 import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
 import CustomersListView from '@/components/ListViews/CustomersListView.vue'
 import AddressModal from '@/components/Modals/AddressModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import {
   dateFormat,
   dateTooltipFormat,
@@ -116,7 +123,6 @@ import {
   createToast,
 } from '@/utils'
 import { getView } from '@/utils/view'
-import { globalStore } from '@/stores/global.js'
 import {
   Breadcrumbs,
   Tabs,
@@ -128,9 +134,7 @@ import {
   usePageMeta,
 } from 'frappe-ui'
 import { ref, computed, h } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-
-const { $dialog } = globalStore()
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   addressId: {
@@ -140,9 +144,9 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const router = useRouter()
 
 const showAddressModal = ref(false)
+const showDeleteModal = ref(false)
 const _address = ref({})
 
 const address = createResource({
@@ -198,41 +202,6 @@ usePageMeta(() => {
     title: props.addressId,
   }
 })
-
-async function deleteAddress() {
-  $dialog({
-    title: __('Delete address'),
-    message: __('Are you sure you want to delete this address?'),
-    actions: [
-      {
-        label: __('Delete'),
-        theme: 'red',
-        variant: 'solid',
-        async onClick(close) {
-          try {
-            await call('frappe.client.delete', {
-              doctype: 'Address',
-              name: props.addressId,
-            })
-            close()
-            router.push({ name: 'Addresses' })
-          } catch (error) {
-            const errorMessage = 
-              error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
-                ? __('Cannot delete this address because it is linked to other records.')
-                : __('Failed to delete the address. Please try again later.');
-            createToast({
-              title: __('Error'),
-              text: errorMessage,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
-          }
-        },
-      },
-    ],
-  })
-}
 
 const tabIndex = ref(0)
 const tabs = [

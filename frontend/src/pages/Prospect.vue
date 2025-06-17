@@ -77,7 +77,7 @@
                   :label="__('Delete')"
                   theme="red"
                   size="sm"
-                  @click="deleteProspect"
+                  @click="showDeleteModal = true"
                 >
                   <template #prefix>
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -212,6 +212,12 @@
     v-model="showCustomerModal"
     :customer="_customer"
   />
+  <DeleteModal
+    v-model="showDeleteModal"
+    doctype="Prospect"
+    :docname="props.prospectId"
+    :redirectTo="'Prospects'"
+  />
 </template>
   
 <script setup>
@@ -221,6 +227,7 @@
   import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
   import LinkAddressModal from '@/components/Modals/LinkAddressModal.vue'
   import LinkContactModal from '@/components/Modals/LinkContactModal.vue'
+  import DeleteModal from '@/components/Modals/DeleteModal.vue'
   import Icon from '@/components/Icon.vue'
   import LayoutHeader from '@/components/LayoutHeader.vue'
   import QuickEntryModal from '@/components/Modals/QuickEntryModal.vue'
@@ -233,7 +240,6 @@
   import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
   import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
   import AddressIcon from '@/components/Icons/AddressIcon.vue'
-  import { globalStore } from '@/stores/global'
   import { usersStore } from '@/stores/users'
   import { statusesStore } from '@/stores/statuses'
   import { getView } from '@/utils/view'
@@ -268,13 +274,13 @@
   })
   
   const { getUser, isManager } = usersStore()
-  const { $dialog } = globalStore()
   const { getDealStatus } = statusesStore()
   const showSidePanelModal = ref(false)
   const showQuickEntryModal = ref(false)
   const showAddContactModal = ref(false)
   const showAddAddressModal = ref(false)
   const showCustomerModal = ref(false)
+  const showDeleteModal = ref(false)
   const _customer = ref({})
 
   const route = useRoute()
@@ -336,41 +342,6 @@
       title: props.prospectId,
     }
   })
-  
-  async function deleteProspect() {
-    $dialog({
-      title: __('Delete prospect'),
-      message: __('Are you sure you want to delete this prospect?'),
-      actions: [
-        {
-          label: __('Delete'),
-          theme: 'red',
-          variant: 'solid',
-          async onClick(close) {
-            try {
-              await call('frappe.client.delete', {
-                doctype: 'Prospect',
-                name: props.prospectId,
-              })
-              close()
-              router.push({ name: 'Prospects' })
-            } catch (error) {
-              const errorMessage = 
-                error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
-                  ? __('Cannot delete this prospect because it is linked to other records.')
-                  : __('Failed to delete the prospect. Please try again later.');
-              createToast({
-                title: __('Error'),
-                text: errorMessage,
-                icon: 'x',
-                iconClasses: 'text-ink-red-4',
-              });
-            }
-          },
-        },
-      ],
-    })
-  }
   
   function website(url) {
     return url && url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '')

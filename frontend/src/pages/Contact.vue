@@ -105,7 +105,7 @@
                   :label="__('Delete')"
                   theme="red"
                   size="sm"
-                  @click="deleteContact"
+                  @click="showDeleteModal = true"
                 >
                   <template #prefix>
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -196,6 +196,12 @@
     @reload="() => fieldsLayout.reload()"
   />
   <AddressModal v-model="showAddressModal" v-model:address="_address" />
+  <DeleteModal
+    v-model="showDeleteModal"
+    doctype="Contact"
+    :docname="props.contactId"
+    redirect-to="Contacts"
+  />
 </template>
 
 <script setup>
@@ -211,6 +217,7 @@ import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import OpportunitiesListView from '@/components/ListViews/OpportunitiesListView.vue'
 import SidePanelModal from '@/components/Settings/SidePanelModal.vue'
 import AddressModal from '@/components/Modals/AddressModal.vue'
+import DeleteModal from '@/components/Modals/DeleteModal.vue'
 import {
   dateFormat,
   dateTooltipFormat,
@@ -237,7 +244,7 @@ import {
 import { ref, computed, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-const { $dialog, makeCall } = globalStore()
+const { makeCall } = globalStore()
 
 const { getUser, isManager } = usersStore()
 const { getCustomer } = customersStore()
@@ -255,6 +262,7 @@ const router = useRouter()
 
 const showAddressModal = ref(false)
 const showSidePanelModal = ref(false)
+const showDeleteModal = ref(false)
 const _contact = ref({})
 const _address = ref({})
 
@@ -320,41 +328,6 @@ async function changeContactImage(file) {
     value: file?.file_url || '',
   })
   contact.reload()
-}
-
-async function deleteContact() {
-  $dialog({
-    title: __('Delete contact'),
-    message: __('Are you sure you want to delete this contact?'),
-    actions: [
-      {
-        label: __('Delete'),
-        theme: 'red',
-        variant: 'solid',
-        async onClick(close) {
-          try {
-            await call('frappe.client.delete', {
-              doctype: 'Contact',
-              name: props.contactId,
-            })
-            close()
-            router.push({ name: 'Contacts' })
-          } catch (error) {
-            const errorMessage = 
-              error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
-                ? __('Cannot delete this contact because it is linked to other records.')
-                : __('Failed to delete the contact. Please try again later.');
-            createToast({
-              title: __('Error'),
-              text: errorMessage,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
-          }
-        },
-      },
-    ],
-  })
 }
 
 const tabIndex = ref(0)
