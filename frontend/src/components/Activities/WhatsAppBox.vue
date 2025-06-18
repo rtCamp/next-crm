@@ -109,7 +109,7 @@ async function sendWhatsAppMessage() {
     reference_doctype: props.doctype,
     reference_name: doc.value.data.name,
     message: content.value,
-    to: doc.value.data.mobile_no,
+    to: doc.value.data.whatsapp || doc.value.data.mobile_no || doc.value.data.contact_mobile || doc.value.data.phone,
     attach: whatsapp.value.attach || '',
     reply_to: reply.value?.name || '',
     content_type: whatsapp.value.content_type,
