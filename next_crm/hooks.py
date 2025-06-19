@@ -297,4 +297,4 @@ fixtures = [
 
 
 
-boot_session = "next_crm.boot.boot_session"
+boot_session = "next_crm.boot.boot_session" 

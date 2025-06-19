@@ -6,7 +6,7 @@ var onload_script = function() {
 	if (frappe.boot.twilio_enabled){
 		frappe.run_serially([
 			() => setup_device(),
-			() => dialer_screen()
+			() => dialer_screen() 
 		]);
 	}
 

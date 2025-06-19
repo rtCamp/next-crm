@@ -9,7 +9,7 @@ from next_crm.integrations.twilio.custom_twilio_handler import Twilio, IncomingC
 from next_crm.ncrm.doctype.whatsapp_message.whatsapp_message import incoming_message_callback
 # from twilio.twiml.messaging_response import MessagingResponse
 
-@frappe.whitelist()
+@frappe.whitelist() 
 def get_twilio_phone_numbers():
 	twilio = Twilio.connect()
 	return (twilio and twilio.get_phone_numbers()) or []

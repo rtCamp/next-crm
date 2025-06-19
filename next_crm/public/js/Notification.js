@@ -7,7 +7,7 @@ frappe.ui.form.on('Notification', {
 					communication_medium_type: "WhatsApp"
 				}
 			};
-		});
+		}); 
 	},
 
 	refresh: function(frm) {

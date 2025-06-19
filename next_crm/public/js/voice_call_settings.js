@@ -4,7 +4,7 @@ frappe.ui.form.on('Voice Call Settings', {
 		if (!frappe.user_roles.includes('System Manager')){
 			frm.set_value('user', frappe.session.user)
 		}
-	},
+	}, 
 	refresh: function(frm) {
 		frappe.call({
 			method: "twilio_integration.twilio_integration.api.get_twilio_phone_numbers",
