@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "creation": "2025-06-18 23:48:13.141609",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "id",
+  "sent_received",
+  "from_",
+  "to",
+  "message",
+  "media_link",
+  "status",
+  "send_on",
+  "reference_doctype",
+  "reference_document_name",
+  "profile_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "ID"
+  },
+  {
+   "fieldname": "sent_received",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sent/Received",
+   "options": "Sent\nReceived"
+  },
+  {
+   "fieldname": "from_",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "From"
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "To"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Long Text",
+   "label": "Message"
+  },
+  {
+   "description": "Must be public.",
+   "fieldname": "media_link",
+   "fieldtype": "Data",
+   "label": "Media Link",
+   "options": "URL"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nQueued\nSent\nReceived\nDelivered\nRead\nUndelivered\nError"
+  },
+  {
+   "fieldname": "send_on",
+   "fieldtype": "Datetime",
+   "label": "Send On"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_document_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "profile_name",
+   "fieldtype": "Data",
+   "label": "Profile Name"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "max_attachments": 1,
+ "modified": "2025-06-18 23:48:13.141609",
+ "modified_by": "Administrator",
+ "module": "NCRM",
+ "name": "Whatsapp Message",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
