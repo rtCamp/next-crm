@@ -167,6 +167,7 @@
           />
           <CurrencyInput
             v-else-if="field.type === 'currency'"
+            :disabled="Boolean(field.read_only)"
             v-model="data[field.name]"
             :placeholder="field.placeholder"
             :debounce="500"
