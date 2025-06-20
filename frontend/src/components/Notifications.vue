@@ -11,9 +11,7 @@
     }"
   >
     <div class="flex h-screen flex-col text-ink-gray-9">
-      <div
-        class="z-20 flex items-center justify-between border-b bg-surface-white px-5 py-2.5"
-      >
+      <div class="z-20 flex items-center justify-between border-b bg-surface-white px-5 py-2.5">
         <div class="text-base font-medium">{{ __('Notifications') }}</div>
         <div class="flex gap-1">
           <Tooltip :text="__('Mark all as read')">
@@ -36,10 +34,7 @@
           </Tooltip>
         </div>
       </div>
-      <div
-        v-if="notifications.data?.length"
-        class="divide-y divide-outline-gray-modals overflow-auto text-base"
-      >
+      <div v-if="notifications.data?.length" class="divide-y divide-outline-gray-modals overflow-auto text-base">
         <RouterLink
           v-for="n in notifications.data"
           :key="n.comment"
@@ -48,10 +43,7 @@
           @click="markAsRead(n.comment || n.notification_type_doc)"
         >
           <div class="mt-1 flex items-center gap-2.5">
-            <div
-              class="size-[5px] rounded-full"
-              :class="[n.read ? 'bg-transparent' : 'bg-surface-gray-7']"
-            />
+            <div class="size-[5px] rounded-full" :class="[n.read ? 'bg-transparent' : 'bg-surface-gray-7']" />
             <WhatsAppIcon v-if="n.type == 'WhatsApp'" class="size-7" />
             <UserAvatar v-else :user="n.from_user.name" size="lg" />
           </div>
@@ -74,10 +66,7 @@
           </div>
         </RouterLink>
       </div>
-      <div
-        v-else
-        class="flex flex-1 flex-col items-center justify-center gap-2"
-      >
+      <div v-else class="flex flex-1 flex-col items-center justify-center gap-2">
         <NotificationsIcon class="h-20 w-20 text-ink-gray-2" />
         <div class="text-lg font-medium text-ink-gray-4">
           {{ __('No new notifications') }}
@@ -91,11 +80,7 @@ import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import MarkAsDoneIcon from '@/components/Icons/MarkAsDoneIcon.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import {
-  visible,
-  notifications,
-  notificationsStore,
-} from '@/stores/notifications'
+import { visible, notifications, notificationsStore } from '@/stores/notifications'
 import { globalStore } from '@/stores/global'
 import { timeAgo } from '@/utils'
 import { onClickOutside } from '@vueuse/core'
@@ -138,17 +123,26 @@ onMounted(() => {
 })
 
 function getRoute(notification) {
-  let params = {
-    leadId: notification.reference_name,
-  }
-  if (notification.route_name === 'Opportunity') {
+  const permittedDoctypes = ['Lead', 'Opportunity']
+
+  let params
+  if (notification.route_name === 'Lead') {
+    params = {
+      leadId: notification.reference_name,
+    }
+  } else if (notification.route_name === 'Opportunity') {
     params = {
       opportunityId: notification.reference_name,
+    }
+  } else {
+    params = {
+      doc: notification.reference_doctype.trim().replaceAll(' ', '-').toLowerCase(),
+      docname: notification.reference_name,
     }
   }
 
   return {
-    name: notification.route_name,
+    name: permittedDoctypes.includes(notification.reference_doctype) ? notification.route_name : 'App',
     params: params,
     hash: notification.hash,
   }
