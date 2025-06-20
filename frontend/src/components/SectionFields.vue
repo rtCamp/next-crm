@@ -165,6 +165,15 @@
             :read_only="Boolean(field.read_only)"
             @change="(data) => emit('update', field.name, data)"
           />
+          <CurrencyInput
+            v-else-if="field.type === 'currency'"
+            v-model="data[field.name]"
+            :placeholder="field.placeholder"
+            :debounce="500"
+            class="form-control"
+            :currency="data.currency"
+            @change="(val) => emit('update', field.name, val)"
+          />
           <FormControl
             v-else
             class="form-control"
@@ -204,6 +213,7 @@ import { usersStore } from '@/stores/users'
 import { Tooltip } from 'frappe-ui'
 import { computed } from 'vue'
 import TableMultiselectInput from '@/components/Controls/TableMultiselectInput.vue'
+import CurrencyInput from './Controls/CurrencyInput.vue'
 
 const props = defineProps({
   fields: {
