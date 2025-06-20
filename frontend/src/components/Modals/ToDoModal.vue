@@ -91,19 +91,25 @@
             :placeholder="__('01/04/2024')"
             input-class="border-none"
           />
-          <DateTimePicker
+          <TextInput
             v-if="fromTime"
-            class="datepicker w-36"
-            v-model="_todo.custom_from_time"
+            type="datetime-local"
+            :ref_for="true"
+            size="sm"
+            variant="subtle"
             :placeholder="__('From Time')"
-            input-class="border-none"
+            v-model="_todo.custom_from_time"
+            class="datepicker w-fit border-none"
           />
-          <DateTimePicker
+          <TextInput
             v-if="toTime"
-            class="datepicker w-36"
-            v-model="_todo.custom_to_time"
+            type="datetime-local"
+            :ref_for="true"
+            size="sm"
+            variant="subtle"
             :placeholder="__('To Time')"
-            input-class="border-none"
+            v-model="_todo.custom_to_time"
+            class="datepicker w-fit border-none"
           />
           <Dropdown :options="todoPriorityOptions(updateToDoPriority)">
             <Button :label="_todo.priority" class="w-full justify-between">
@@ -166,7 +172,7 @@ import MultiValueInput from '../Controls/MultiValueInput.vue'
 import { todoStatusOptions, todoPriorityOptions } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
-import { TextEditor, Dropdown, Tooltip, call, DatePicker, DateTimePicker } from 'frappe-ui'
+import { TextEditor, Dropdown, Tooltip, call, DatePicker, TextInput } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMeta } from '@/stores/meta'
