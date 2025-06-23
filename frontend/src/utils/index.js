@@ -115,14 +115,50 @@ export function secondsToDuration(seconds) {
 }
 
 export function formatNumberIntoCurrency(value, currency = 'INR') {
-  if (value) {
-    return value.toLocaleString('en-IN', {
-      maximumFractionDigits: 0,
-      style: 'currency',
-      currency: currency ? currency : 'INR',
-    })
+  if (value === null || value === undefined || value === '') return '';
+  
+  const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+  
+  if (isNaN(numericValue)) return '';
+
+  // Currency-specific locale settings
+  const localeSettings = {
+    'AED': 'ar-AE',    // UAE Dirham
+    'AUD': 'en-AU',    // Australian Dollar
+    'CHF': 'de-CH',    // Swiss Franc
+    'CNY': 'zh-CN',    // Chinese Yuan
+    'EUR': 'de-DE',    // Euro (German format)
+    'GBP': 'en-GB',    // British Pound
+    'INR': 'en-IN',    // Indian Rupee
+    'JPY': 'ja-JP',    // Japanese Yen
+    'USD': 'en-US',    // US Dollar
+  };
+
+  const locale = localeSettings[currency] || 'en-IN';
+
+  const options = {
+    style: 'currency',
+    currency: currency || 'INR',
+    currencyDisplay: 'symbol'
+  };
+
+  const zeroDecimalCurrencies = ['JPY', 'KRW', 'VND', 'IDR'];
+  if (zeroDecimalCurrencies.includes(currency)) {
+    options.maximumFractionDigits = 0;
+    options.minimumFractionDigits = 0;
+  } else {
+    // Default to 2 decimal places
+    options.minimumFractionDigits = 2;
+    options.maximumFractionDigits = 2;
   }
-  return ''
+
+  try {
+    return new Intl.NumberFormat(locale, options).format(numericValue).replace(/^(\D+)/, '$1 ');
+  } catch (e) {
+    console.error(`Error formatting currency (${currency}):`, e);
+    // Fallback to basic formatting
+    return `${currency} ${numericValue.toFixed(2)}`;
+  }
 }
 
 export function startCase(str) {
