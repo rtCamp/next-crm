@@ -153,7 +153,7 @@ export function formatNumberIntoCurrency(value, currency = 'INR') {
   }
 
   try {
-    return new Intl.NumberFormat(locale, options).format(numericValue);
+    return new Intl.NumberFormat(locale, options).format(numericValue).replace(/^(\D+)/, '$1 ');
   } catch (e) {
     console.error(`Error formatting currency (${currency}):`, e);
     // Fallback to basic formatting
