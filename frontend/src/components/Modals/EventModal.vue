@@ -158,7 +158,7 @@ import MultiValueInput from '../Controls/MultiValueInput.vue'
 import { eventStatusOptions, createToast } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
-import { TextEditor, Dropdown, FormControl, Tooltip, call, createResource } from 'frappe-ui'
+import { TextEditor, Dropdown, FormControl, Tooltip, call, TextInput, createResource } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
 
 function validate(value) {
