@@ -1,6 +1,9 @@
 import frappe
 from frappe import _
-from frappe.desk.notifications import notify_mentions
+from frappe.desk.doctype.notification_log.notification_log import (
+    enqueue_create_notification,
+    get_title_html,
+)
 from frappe.utils import now
 
 from next_crm.ncrm.doctype.crm_notification.crm_notification import notify_user
@@ -31,7 +34,6 @@ def create_note(doctype, docname, title=None, note=None, parent_note=None):
 
     new_note.insert()
     notify_mentions_ncrm(note, new_note.name, docname, doctype)
-    notify_mentions(doctype, docname, note)
     return new_note
 
 
@@ -45,7 +47,6 @@ def update_note(doctype, docname, note_name, note=None):
 
     frappe.set_value("CRM Note", note_name, note)
     notify_mentions_ncrm(note.get("note"), note_name, docname, doctype)
-    notify_mentions(doctype, docname, note.get("note"))
 
     updated_doc = frappe.get_doc("CRM Note", note_name)
     return updated_doc
@@ -55,6 +56,9 @@ def notify_mentions_ncrm(note, note_name, docname, doctype):
     from frappe.desk.notifications import extract_mentions
 
     mentions = set(extract_mentions(note))
+
+    if not mentions:
+        return
 
     for mention in mentions:
         owner = frappe.get_cached_value("User", frappe.session.user, "full_name")
@@ -80,6 +84,35 @@ def notify_mentions_ncrm(note, note_name, docname, doctype):
                 "redirect_to_docname": docname,
             }
         )
+
+    email_notification_message = _(
+        """[Next CRM] {0} mentioned you in a Note in {1} {2}"""
+    ).format(frappe.bold(owner), frappe.bold(doctype), get_title_html(title))
+
+    recipients = [
+        frappe.db.get_value(
+            "User",
+            {
+                "enabled": 1,
+                "name": name,
+                "user_type": "System User",
+                "allowed_in_mentions": 1,
+            },
+            "email",
+        )
+        for name in mentions
+    ]
+
+    notification_doc = {
+        "type": "Mention",
+        "document_type": doctype,
+        "document_name": docname,
+        "subject": email_notification_message,
+        "from_user": frappe.session.user,
+        "email_content": note,
+    }
+
+    enqueue_create_notification(recipients, notification_doc)
 
 
 @frappe.whitelist()
