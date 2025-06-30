@@ -88,17 +88,23 @@
           />
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <DateTimePicker
-            class="datepicker w-36"
-            v-model="_event.starts_on"
+          <TextInput
+            type="datetime-local"
+            :ref_for="true"
+            size="sm"
+            variant="subtle"
             :placeholder="__('01/04/2024')"
-            input-class="border-none"
+            v-model="_event.starts_on"
+            class="datepicker border-none"
           />
-          <DateTimePicker
-            class="datepicker w-36"
+          <TextInput
+            type="datetime-local"
+            :ref_for="true"
+            size="sm"
+            variant="subtle"
             v-model="_event.ends_on"
             :placeholder="__('01/04/2024')"
-            input-class="border-none"
+            class="datepicker border-none"
           />
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -152,7 +158,7 @@ import MultiValueInput from '../Controls/MultiValueInput.vue'
 import { eventStatusOptions, createToast } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
-import { TextEditor, Dropdown, FormControl, Tooltip, call, DateTimePicker, createResource } from 'frappe-ui'
+import { TextEditor, Dropdown, FormControl, Tooltip, call, TextInput, createResource } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
 
 function validate(value) {
