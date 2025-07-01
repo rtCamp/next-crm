@@ -119,6 +119,37 @@
                     </Button>
                   </div>
                 </Tooltip>
+
+               <div class="relative">
+  <Button
+    label="Add Activity"
+    theme="blue"
+    size="sm"
+    @click="showDropdown = !showDropdown"
+  >
+    <template #prefix>
+      <FeatherIcon name="plus" class="h-4 w-4" />
+    </template>
+  </Button>
+
+  <div
+    v-if="showDropdown"
+    class="absolute z-10 mt-1 w-40 bg-white border border-gray-200 rounded shadow"
+  >
+    <ul>
+      <li
+        v-for="option in activityOptions"
+        :key="option"
+        @click="selectActivity(option)"
+        class="cursor-pointer px-4 py-2 hover:bg-gray-100 text-sm"
+      >
+        {{ option }}
+      </li>
+    </ul>
+  </div>
+</div>
+
+                
               </div>
             </div>
           </template>
@@ -245,6 +276,59 @@
     :docname="props.customerId"
     :redirectTo="'Customers'"
   />
+
+  <template>
+    <Dialog
+      v-model="showActivityModal"
+      :options="{
+        title: `Create Event`,
+        size: 'md',
+        actions: [
+          {
+            label: 'Create',
+            variant: 'solid',
+            onClick: createActivity,
+          },
+        ],
+      }"
+    >
+      <template #body-title>
+        <h3 class="text-xl font-semibold text-ink-gray-9">
+          Create Event
+        </h3>
+      </template>
+  
+      <template #body-content>
+        <div class="flex flex-col gap-4">
+          <Input
+            label="Date"
+            type="date"
+            v-model="activityForm.date"
+            required
+          />
+  
+         
+  
+          <Input
+            label="Subject"
+            v-model="activityForm.subject"
+            required
+          />
+  
+          <Textarea
+            label="Description"
+            v-model="activityForm.description"
+          />
+        </div>
+      </template>
+    </Dialog>
+  </template>
+  
+
+
+
+
+
 </template>
 
 <script setup>
@@ -290,8 +374,12 @@ import {
   createDocumentResource,
   usePageMeta,
   createResource,
+  Dialog,
+  Input,
+  Textarea,
+  Select
 } from 'frappe-ui'
-import { h, computed, ref } from 'vue'
+import { h, computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -306,9 +394,90 @@ const { getDealStatus } = statusesStore()
 const showSidePanelModal = ref(false)
 const showQuickEntryModal = ref(false)
 const showDeleteModal = ref(false)
+const showEventModel = ref(false)
 
 const route = useRoute()
 const router = useRouter()
+const showDropdown = ref(false)
+const showActivityModal = ref(false)
+const selectedActivity = ref('')
+const activityOptions = ['Event', 'Call', 'Meeting', 'Sent/Received Email', 'Follow Up', 'Demo', 'Other']
+const userList = createListResource({
+  doctype: 'User',
+  fields: ['name', 'full_name'],
+  filters: [['enabled', '=', 1], ['user_type', '=', 'System User']],
+  limit: 100,
+  auto: true,
+})
+
+const activityForm = ref({
+  date: '',
+  assigned_to: '',
+  subject: '',
+  description: '',
+})
+
+// Close dropdown and show modal
+function selectActivity(option) {
+  selectedActivity.value = option
+  showDropdown.value = false
+  showActivityModal.value = true
+}
+
+async function createActivity() {
+  try {
+    const opportunity = await call('frappe.client.insert', {
+      doc: {
+        doctype: 'Opportunity',
+        customer: customer.doc.name,
+        opportunity_from: 'Customer',
+        party_name:customer.doc.name,
+        status: 'Open',
+      },
+    })
+console.log("opportunity", opportunity.name)
+    const event = await call('frappe.client.insert', {
+      doc: {
+        doctype: 'Event',
+        subject: activityForm.value.subject,
+        event_category: selectedActivity.value,
+        description: activityForm.value.description,
+
+        starts_on: activityForm.value.date,
+       event_participants: [
+  {
+    reference_doctype: 'Opportunity',
+    reference_docname: opportunity.name,
+  }
+]
+      },
+    })
+
+    createToast({
+      title: 'Activity Created',
+      icon: 'check',
+      variant: 'success',
+    })
+    showActivityModal.value = false
+  } catch (error) {
+    createToast({
+      title: 'Error',
+      icon: 'x',
+      variant: 'error',
+      message: error.message,
+    })
+  }
+}
+
+
+onMounted(() => {
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.relative')) {
+      showDropdown.value = false
+    }
+  })
+})
+
 
 const customer = createDocumentResource({
   doctype: 'Customer',
