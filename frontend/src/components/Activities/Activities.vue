@@ -289,6 +289,7 @@
       v-if="['Emails', 'Comments', 'Activity', 'Notes'].includes(title)"
       v-model="doc"
       v-model:reload="reload_email"
+      v-model:activities="all_activities"
       :doctype="doctype"
     />
     <WhatsAppBox

@@ -22,6 +22,9 @@
         </template>
 
         <template v-slot:bottom>
+          <div class="my-3">
+            <AttachmentArea :attachments="filteredAttachments" @reload="updateAttachments()" />
+          </div>
           <div v-if="editable" class="flex justify-between items-center py-2 border-t">
             <div class="flex gap-2 items-center">
               <TextEditorBubbleMenu :buttons="textEditorMenuButtons" />
@@ -30,6 +33,9 @@
                   <SmileIcon class="h-4" />
                 </Button>
               </IconPicker>
+              <Button v-if="props.doctype" variant="ghost" @click="showFilesUploader = true">
+                <AttachmentIcon />
+              </Button>
             </div>
             <div class="flex gap-2">
               <Button v-bind="discardButtonProps || {}" :label="__('Discard')" />
@@ -38,18 +44,32 @@
           </div>
         </template>
       </TextEditor>
+      <FilesUploader
+        v-if="props.doctype"
+        v-model="showFilesUploader"
+        :doctype="props.doctype"
+        :docname="props.docname"
+        @after="
+          (files) => {
+            updateAttachments(files)
+          }
+        "
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, defineModel } from 'vue'
+import { ref, computed, defineModel, watch } from 'vue'
 import { EditorContent } from '@tiptap/vue-3'
 import { TextEditor, TextEditorBubbleMenu } from 'frappe-ui'
 import IconPicker from '@/components/IconPicker.vue'
 import SmileIcon from '@/components/Icons/SmileIcon.vue'
+import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
+import AttachmentArea from './Activities/AttachmentArea.vue'
+import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
 
 const props = defineProps({
   editable: {
@@ -58,14 +78,43 @@ const props = defineProps({
   },
   submitButtonProps: Object,
   discardButtonProps: Object,
+  doctype: String,
+  docname: String,
+  attachments: Array,
+  reload: Function,
 })
 
 const title = defineModel('title')
 const content = defineModel('content')
+const fileAttachments = defineModel('fileAttachments')
 
 const textEditor = ref(null)
 const emoji = ref('')
 const editor = computed(() => textEditor.value?.editor)
+const showFilesUploader = ref(false)
+
+const emit = defineEmits(['reload'])
+
+const filteredAttachments = ref([])
+
+const updateAttachments = (files) => {
+  if (files?.length > 0) {
+    fileAttachments.value = [...files, ...fileAttachments.value]
+  }
+  emit('reload')
+}
+
+watch(
+  [() => props.attachments, fileAttachments],
+  ([attachments, fileNames]) => {
+    if (!attachments || !fileNames?.length) {
+      filteredAttachments.value = []
+      return
+    }
+    filteredAttachments.value = attachments?.filter((att) => fileNames?.includes(att.name))
+  },
+  { immediate: true },
+)
 
 function appendEmoji() {
   editor.value?.commands.insertContent(emoji.value)
