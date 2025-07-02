@@ -117,7 +117,7 @@ function deleteAttachment(fileName) {
           } catch (error) {
             const errorMessage =
               error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
-                ? __('Cannot delete this doc because it is linked to other records.')
+                ? __('Cannot delete this attachment because it is linked to other records.')
                 : __('Failed to delete the doc. Please try again later.')
             createToast({
               title: __('Error'),

@@ -176,7 +176,7 @@ async function updateNote() {
         docname: props.doc || '',
         title: _note.value.custom_title,
         note: _note.value.note || '',
-        attachments: attachedFileNames.value,
+        attachments: filteredAttachments.value.map((att) => att.name),
       })
       if (d.name) {
         capture('note_created')
