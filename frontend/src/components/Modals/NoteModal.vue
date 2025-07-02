@@ -159,7 +159,7 @@ async function updateNote() {
         docname: props.doc || '',
         note_name: _note.value.name,
         note: { custom_title: _note.value.custom_title, note: _note.value.note || '' },
-        attachments: [props.note?.attachments?.map((item) => item.filename), ...attachedFileNames.value],
+        attachments: filteredAttachments.value.map((att) => att.name),
       })
       if (d.name) {
         notes.value?.reload()
@@ -229,7 +229,7 @@ watch(
       return
     }
 
-    editMode.value = false
+    editMode.value = Boolean(props.note?.name)
     nextTick(() => {
       _note.value = { ...props.note }
       const fileNames = (props.note?.attachments || []).map((item) => item.filename)
