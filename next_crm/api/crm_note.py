@@ -7,7 +7,9 @@ from next_crm.ncrm.doctype.crm_notification.crm_notification import notify_user
 
 
 @frappe.whitelist()
-def create_note(doctype, docname, title=None, note=None, parent_note=None):
+def create_note(
+    doctype, docname, title=None, note=None, parent_note=None, attachments=None
+):
     """
     Create a new CRM Note.
     """
@@ -28,7 +30,14 @@ def create_note(doctype, docname, title=None, note=None, parent_note=None):
             "custom_parent_note": parent_note,
         }
     )
-
+    if attachments:
+        new_note.set(
+            "custom_note_attachments",
+            [
+                {"filename": file} if isinstance(file, str) else file
+                for file in attachments
+            ],
+        )
     new_note.insert()
     notify_mentions_ncrm(note, new_note.name, docname, doctype)
     notify_mentions(doctype, docname, note)
@@ -36,19 +45,40 @@ def create_note(doctype, docname, title=None, note=None, parent_note=None):
 
 
 @frappe.whitelist()
-def update_note(doctype, docname, note_name, note=None):
+def update_note(doctype, docname, note_name, note=None, attachments=None):
     """
     Update a CRM Note.
     """
     if not note.get("custom_title") and not note.get("note"):
         raise frappe.ValidationError("Either note or title is required.")
 
-    frappe.set_value("CRM Note", note_name, note)
+    note_doc = frappe.get_doc("CRM Note", note_name)
+
+    note_doc.custom_title = note.get("custom_title")
+    note_doc.note = note.get("note")
+
+    if attachments:
+        existing_filenames = {row.filename for row in note_doc.custom_note_attachments}
+
+        for file in attachments:
+            if isinstance(file, str):
+                filename = file
+                attachment_row = {"filename": filename}
+            elif isinstance(file, dict):
+                filename = file.get("filename")
+                attachment_row = file
+            else:
+                continue
+
+            if filename and filename not in existing_filenames:
+                note_doc.append("custom_note_attachments", attachment_row)
+
+    note_doc.save()
+
     notify_mentions_ncrm(note.get("note"), note_name, docname, doctype)
     notify_mentions(doctype, docname, note.get("note"))
 
-    updated_doc = frappe.get_doc("CRM Note", note_name)
-    return updated_doc
+    return note_doc
 
 
 def notify_mentions_ncrm(note, note_name, docname, doctype):
@@ -91,6 +121,8 @@ def delete_note(note_name):
     if not note:
         raise frappe.ValidationError(_("Note not found."))
 
+    filenames_to_delete = [row.filename for row in note.custom_note_attachments]
+
     parent_note = note.custom_parent_note
     if not parent_note:
         child_notes = frappe.get_all(
@@ -100,9 +132,54 @@ def delete_note(note_name):
             pluck="name",
         )
         for child_note in child_notes:
+            child_note_doc = frappe.get_doc("CRM Note", child_note)
+            child_filenames = [
+                row.filename for row in child_note_doc.custom_note_attachments
+            ]
+            filenames_to_delete.extend(child_filenames)
             frappe.db.delete("CRM Notification", {"notification_type_doc": child_note})
             frappe.delete_doc("CRM Note", child_note)
 
     frappe.db.delete("CRM Notification", {"notification_type_doc": note_name})
     note.delete()
+    for filename in filenames_to_delete:
+        try:
+            frappe.delete_doc("File", filename)
+        except frappe.DoesNotExistError:
+            pass
+
     return True
+
+
+@frappe.whitelist()
+def delete_note_attachments(file_name, note_name=None):
+    """
+    Deletes a file from the 'NCRM Attachments' child table of a CRM Note
+    and deletes the file from the File doctype.
+    """
+    if not file_name:
+        raise frappe.ValidationError("File name is required.")
+
+    if note_name:
+        note_doc = frappe.get_doc("CRM Note", note_name)
+        removed = False
+
+        new_attachments = []
+        for row in note_doc.custom_note_attachments:
+            if row.filename == file_name:
+                removed = True
+                continue
+            new_attachments.append(row)
+
+        if not removed:
+            frappe.throw("Attachment not found in CRM Note.")
+
+        note_doc.set("custom_note_attachments", new_attachments)
+        note_doc.save()
+
+    try:
+        frappe.delete_doc("File", file_name)
+    except frappe.DoesNotExistError:
+        pass
+
+    return {"status": "success", "message": "Attachment deleted successfully."}

@@ -495,8 +495,22 @@ def get_linked_notes(name):
         return []
 
     note_map = {
-        str(note["name"]).strip(): {**note, "noteReplies": []} for note in notes
+        str(note["name"]).strip(): {**note, "noteReplies": [], "attachments": []}
+        for note in notes
     }
+
+    note_names = [note["name"] for note in notes]
+    attachments = frappe.get_all(
+        "NCRM Attachments",
+        filters={"parent": ["in", note_names], "parenttype": "CRM Note"},
+        fields=["parent", "filename"],
+    )
+
+    for attachment in attachments:
+        parent = attachment["parent"]
+        if parent in note_map:
+            note_map[parent]["attachments"].append(attachment)
+
     root_notes = []
 
     for note in notes:

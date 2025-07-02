@@ -7,12 +7,7 @@
     }"
   >
     <template #body-content>
-      <FilesUploaderArea
-        ref="filesUploaderArea"
-        v-model="files"
-        :doctype="doctype"
-        :options="options"
-      />
+      <FilesUploaderArea ref="filesUploaderArea" v-model="files" :doctype="doctype" :options="options" />
     </template>
     <template #actions>
       <div class="flex justify-between">
@@ -25,9 +20,7 @@
             @click="removeAllFiles"
           />
           <Button
-            v-if="
-              filesUploaderArea?.showWebLink || filesUploaderArea?.showCamera
-            "
+            v-if="filesUploaderArea?.showWebLink || filesUploaderArea?.showCamera"
             :label="isMobileView ? __('Back') : __('Back to file upload')"
             @click="
               () => {
@@ -43,9 +36,7 @@
             </template>
           </Button>
           <Button
-            v-if="
-              filesUploaderArea?.showCamera && !filesUploaderArea?.cameraImage
-            "
+            v-if="filesUploaderArea?.showCamera && !filesUploaderArea?.cameraImage"
             :label="__('Switch camera')"
             @click="() => filesUploaderArea.switchCamera()"
           />
@@ -79,17 +70,13 @@
             @click="attachFiles"
           />
           <Button
-            v-if="
-              filesUploaderArea?.showCamera && filesUploaderArea?.cameraImage
-            "
+            v-if="filesUploaderArea?.showCamera && filesUploaderArea?.cameraImage"
             variant="solid"
             :label="__('Upload')"
             @click="() => filesUploaderArea.uploadViaCamera()"
           />
           <Button
-            v-if="
-              filesUploaderArea?.showCamera && !filesUploaderArea?.cameraImage
-            "
+            v-if="filesUploaderArea?.showCamera && !filesUploaderArea?.cameraImage"
             variant="solid"
             :label="__('Capture')"
             @click="() => filesUploaderArea.captureImage()"
@@ -159,6 +146,8 @@ function attachFiles() {
   if (filesUploaderArea.value.showWebLink) {
     return uploadViaWebLink()
   }
+  completedUploads.value = 0
+  uploadedFileNames.value = []
   files.value.forEach((file, i) => attachFile(file, i))
 }
 
@@ -182,6 +171,9 @@ function uploadViaWebLink() {
 
 const uploader = ref(null)
 const fileUploadStarted = ref(false)
+
+const uploadedFileNames = ref([])
+const completedUploads = ref(0)
 
 function attachFile(file, i) {
   const args = {
@@ -214,12 +206,15 @@ function attachFile(file, i) {
 
   uploader.value
     .upload(file, args || {})
-    .then(() => {
-      if (i === files.value.length - 1) {
+    .then((res) => {
+      uploadedFileNames.value.push(res.name)
+      completedUploads.value++
+
+      if (completedUploads.value === files.value.length) {
         files.value = []
         show.value = false
         fileUploadStarted.value = false
-        emit('after')
+        emit('after', uploadedFileNames.value)
       }
     })
     .catch((error) => {

@@ -7,6 +7,7 @@
         {
           label: editMode ? __('Update') : __('Create'),
           variant: 'solid',
+          disabled: !Boolean(hasChanged),
           onClick: () => updateNote(),
         },
       ],
@@ -59,8 +60,18 @@
         :doctype="props.doctype"
         :docname="props.doc"
         @after="
+          (files) => {
+            updateAttachments(files)
+          }
+        "
+      />
+      <NoteAttachments
+        :note_name="note?.name"
+        :editMode="true"
+        :attachments="filteredAttachments"
+        @reload="
           () => {
-            // console.log('hello')
+            updateAttachments()
           }
         "
       />
@@ -72,11 +83,13 @@
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import { capture } from '@/telemetry'
 import { TextEditor, call } from 'frappe-ui'
-import { ref, computed, nextTick, watch, h } from 'vue'
+import { ref, computed, nextTick, watch, h, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
 import { createToast } from '@/utils'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
+import NoteAttachments from '../Activities/NoteAttachments.vue'
+import { isEqual, sortBy } from 'lodash'
 
 const props = defineProps({
   note: {
@@ -95,6 +108,26 @@ const props = defineProps({
 
 const show = defineModel()
 const notes = defineModel('reloadNotes')
+const attachedFileNames = ref([])
+
+const filteredAttachments = ref([])
+const updateAttachments = (files) => {
+  if (files?.length > 0) attachedFileNames.value = [...files, ...attachedFileNames.value]
+  notes.value?.reload()
+}
+
+watch(
+  [() => notes?.value?.data?.attachments, attachedFileNames],
+  ([attachments, fileNames]) => {
+    if (!attachments || !fileNames.length) {
+      filteredAttachments.value = []
+      return
+    }
+
+    filteredAttachments.value = attachments.filter((att) => fileNames.includes(att.name))
+  },
+  { immediate: true },
+)
 
 const emit = defineEmits(['after'])
 
@@ -107,7 +140,18 @@ const editMode = ref(false)
 let _note = ref({})
 
 async function updateNote() {
-  if (props.note.custom_title === _note.value.custom_title && props.note.note === _note.value.note) return
+  if (!hasChanged.value) return
+
+  if (!_note.value.custom_title?.trim() && isRichTextEmpty(_note.value.note)) {
+    createToast({
+      title: __('Cannot save empty note'),
+      text: __('Please add a title or description before saving.'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+    return
+  }
+
   try {
     if (_note.value.name) {
       let d = await call('next_crm.api.crm_note.update_note', {
@@ -115,6 +159,7 @@ async function updateNote() {
         docname: props.doc || '',
         note_name: _note.value.name,
         note: { custom_title: _note.value.custom_title, note: _note.value.note || '' },
+        attachments: [props.note?.attachments?.map((item) => item.filename), ...attachedFileNames.value],
       })
       if (d.name) {
         notes.value?.reload()
@@ -131,6 +176,7 @@ async function updateNote() {
         docname: props.doc || '',
         title: _note.value.custom_title,
         note: _note.value.note || '',
+        attachments: attachedFileNames.value,
       })
       if (d.name) {
         capture('note_created')
@@ -178,17 +224,20 @@ const users = computed(() => {
 watch(
   () => show.value,
   (value) => {
-    if (!value) return
+    if (!value) {
+      attachedFileNames.value = []
+      return
+    }
+
     editMode.value = false
     nextTick(() => {
-      title.value?.el?.focus()
       _note.value = { ...props.note }
-      if (_note.value.custom_title || _note.value.note) {
-        editMode.value = true
-      }
+      const fileNames = (props.note?.attachments || []).map((item) => item.filename)
+      attachedFileNames.value = fileNames
     })
   },
 )
+
 const AttachmentIcon = h(
   'svg',
   {
@@ -258,4 +307,41 @@ const editorMenu = ref([
     },
   },
 ])
+
+const hasChanged = ref(false)
+
+function isRichTextEmpty(content) {
+  if (!content) return true
+  const stripped = content
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, '')
+    .trim()
+  return stripped.length === 0
+}
+
+watchEffect(() => {
+  const noteVal = _note.value || {}
+  const isEdit = editMode.value
+
+  const title = noteVal.custom_title?.trim() || ''
+  const note = noteVal.note || ''
+
+  const originalTitle = props.note.custom_title?.trim() || ''
+  const originalNote = props.note.note || ''
+
+  const titleChanged = title !== originalTitle
+  const noteChanged = note !== originalNote
+
+  const noteHasContent = !isRichTextEmpty(note)
+  const titleHasContent = title.length > 0
+
+  const initialAttachmentNames = (props.note.attachments || []).map((a) => a.filename).sort()
+  const currentAttachmentNames = attachedFileNames.value.slice().sort()
+  const attachmentsChanged = !isEqual(sortBy(initialAttachmentNames), sortBy(currentAttachmentNames))
+  if (!isEdit) {
+    hasChanged.value = titleHasContent || noteHasContent || attachedFileNames.value.length > 0
+  } else {
+    hasChanged.value = (titleChanged && titleHasContent) || (noteChanged && noteHasContent) || attachmentsChanged
+  }
+})
 </script>
