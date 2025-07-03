@@ -10,11 +10,14 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@ionic/core": "^8.6.2",
+    "@ionic/vue": "^8.6.2",
     "@twilio/voice-sdk": "^2.10.2",
     "@vueuse/core": "^10.3.0",
     "@vueuse/integrations": "^10.3.0",
     "frappe-ui": "^0.1.123",
     "gemoji": "^8.1.0",
+    "highlight.js": "^11.0.0",
     "lodash": "^4.17.21",
     "mime": "^4.0.1",
     "pinia": "^2.0.33",
@@ -22,16 +25,15 @@
     "sortablejs": "^1.15.0",
     "vue": "^3.5.13",
     "vue-router": "^4.2.2",
-    "vuedraggable": "^4.1.0",
-    "highlight.js": "^11.0.0"
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
     "@vitejs/plugin-vue-jsx": "^4.1.2",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.5",
-    "vite": "^6.1.1",
     "tailwindcss": "^3.4.15",
+    "vite": "^6.1.1",
     "vite-plugin-pwa": "^1.0.0",
     "workbox-build": "^7.3.0",
     "workbox-window": "^7.3.0"

@@ -147,3 +147,65 @@ def whatsapp_message_status_callback(**kwargs):
 	if frappe.db.exists({'doctype': 'WhatsApp Message', 'id': args.MessageSid, 'from_': args.From, 'to': args.To}):
 		message = frappe.get_doc('WhatsApp Message', {'id': args.MessageSid, 'from_': args.From, 'to': args.To})
 		message.db_set('status', args.MessageStatus.title())
+
+
+@frappe.whitelist()
+def get_hr_settings() -> dict:
+	settings = frappe.db.get_singles_dict("HR Settings", cast=True)
+	print("settingss-------------->", settings)
+	return frappe._dict(
+		allow_employee_checkin_from_mobile_app=settings.allow_employee_checkin_from_mobile_app,
+		allow_geolocation_tracking=settings.allow_geolocation_tracking,
+	)
+@frappe.whitelist()
+def get_employeecheckin_data():
+    get_data = frappe.db.get_list(
+        "Employee Checkin", 
+        fields=['*'], 
+        order_by="creation DESC",
+        ignore_permissions=False  # Sorting latest records first
+    )
+    return get_data	
+
+@frappe.whitelist(allow_guest=True)
+def get_attendance_list():
+    doc = frappe.db.get_all("Attendance", fields=['*'])
+    return doc  
+
+
+@frappe.whitelist()
+def get_customer_name(search=None):
+    """
+    Fetch industries based on the search input.
+
+    Args:
+        search (str): Optional input string to filter industries by name.
+
+    Returns:
+        list: List of industry names.
+    """
+    try:
+        # Fetch records from Industry doctype
+        filters = {}
+        if search:
+            filters["employee"] = ["like", f"%{search}%"]
+        
+        industries = frappe.get_all(
+            "Employee Checkin",
+            fields=["*"],
+            filters=filters,
+            limit_page_length=10  # Limit results to 10 for search
+        )
+        
+        return industries
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("Failed to fetch industries"))
+        frappe.throw(_("Unable to fetch industries. Please try again later."))  
+
+
+
+@frappe.whitelist(allow_guest=True)
+def get_all_customers():
+    get_doc = frappe.db.get_all("Customer", fields=['name', 'represents_company'])
+
+    return get_doc

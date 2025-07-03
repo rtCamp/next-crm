@@ -167,6 +167,7 @@ const groups = computed(() => {
   if (!props.options || props.options.length == 0) return []
 
   let groups = props.options[0]?.group ? props.options : [{ group: '', items: props.options }]
+  console.log("groupsss==", groups)
 
   return groups
     .map((group, i) => {
