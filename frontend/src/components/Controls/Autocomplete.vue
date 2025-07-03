@@ -134,8 +134,8 @@
 
 <script setup lang="ts">
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
-import { computed, nextTick, ref, watch } from 'vue'
-import { Popover, Button, FeatherIcon, LoadingIndicator } from 'frappe-ui'
+import { computed, nextTick, ref, watch, onMounted } from 'vue'
+import { Popover, Button, FeatherIcon, LoadingIndicator, createResource, call } from 'frappe-ui'
 
 type Option = {
   label: string
@@ -182,6 +182,24 @@ const props = withDefaults(defineProps<AutocompleteProps>(), {
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
+const fetchCustomerName = async (customerId: string): Promise<string> => {
+  try {
+    const res = await call('frappe.client.get_value', {
+      doctype: 'Customer',
+      filters: { name: customerId },
+      fieldname: 'customer_name',
+    })
+    // console.log('customer_name', res.customer_name) 
+    return res?.customer_name || customerId
+  } catch (err) {
+    console.error('Failed to fetch customer_name:', err)
+    return customerId
+  }
+}
+
+
+
+
 const searchInput = ref()
 const showOptions = ref(false)
 const query = ref('')
@@ -217,14 +235,30 @@ const groups = computed(() => {
 const allOptions = computed(() => {
   return groups.value.flatMap((group) => group.items)
 })
-
 const sanitizeOptions = (options: AutocompleteOption[]) => {
   if (!options) return []
-  // in case the options are just values, convert them to objects
+
   return options.map((option) => {
-    return isOption(option) ? option : { label: option.toString(), value: option }
+    if (isOption(option)) {
+      // if label and value are the same, assume it's a customer id
+      if (option.label === option.value) {
+        enrichCustomerLabel(option)
+      }
+      return option
+    }
+    return { label: option.toString(), value: option }
   })
 }
+
+
+
+const enrichCustomerLabel = async (option: Option) => {
+  const name = await fetchCustomerName(option.value as string)
+  option.label = name
+}
+
+
+
 
 const filterOptions = (options: Option[]) => {
   if (!query.value) return options
@@ -274,10 +308,13 @@ const makeOption = (option: AutocompleteOption) => {
 
 const getLabel = (option: AutocompleteOption) => {
   if (isOption(option)) {
-    return option?.label || option?.value || props?.placeholder || ''
+    return option.label || option.value || props?.placeholder || ''
   }
   return option
 }
+
+// console.log('Sample option:', option)
+// console.log('Sample get:', makeOption)
 
 const displayValue = computed(() => {
   if (!selectedValue.value) return ''

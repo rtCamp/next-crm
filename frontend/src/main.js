@@ -8,7 +8,14 @@ import router from './router'
 import translationPlugin from './translation'
 import { posthogPlugin } from './telemetry'
 import App from './App.vue'
+import { IonicVue } from "@ionic/vue";
 
+import { session } from "@/data/session";
+import { userResource } from "@/data/user";
+import { employeeResource } from "@/data/employee";
+
+import dayjs from "@/utils/dayjs";
+import getIonicConfig from "@/utils/ionicConfig";
 import {
   FrappeUI,
   Button,
@@ -35,7 +42,6 @@ let globalComponents = {
   Badge,
   FeatherIcon,
 }
-
 // create a pinia instance
 let pinia = createPinia()
 
@@ -47,6 +53,8 @@ app.use(pinia)
 app.use(router)
 app.use(translationPlugin)
 app.use(posthogPlugin)
+app.provide("$dayjs", dayjs);
+
 for (let key in globalComponents) {
   app.component(key, globalComponents[key])
 }
@@ -74,3 +82,7 @@ if (import.meta.env.DEV) {
 if (import.meta.env.DEV) {
   window.$dialog = createDialog
 }
+app.provide("$session", session);
+app.provide("$user", userResource);
+app.provide("$employee", employeeResource);
+app.provide("$socket", socket);

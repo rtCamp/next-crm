@@ -435,7 +435,7 @@ async function createActivity() {
         status: 'Open',
       },
     })
-console.log("opportunity", opportunity.name)
+// console.log("opportunity", opportunity.name)
     const event = await call('frappe.client.insert', {
       doc: {
         doctype: 'Event',
