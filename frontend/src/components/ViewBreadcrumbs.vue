@@ -51,20 +51,21 @@
             v-if="item.name"
             class="flex flex-row-reverse gap-2 items-center min-w-11"
           >
-            <Dropdown
-              :class="active ? 'block' : 'hidden'"
-              placement="right-start"
-              :options="viewControls.viewActions(item)"
-            >
-              <template #default="{ togglePopover }">
-                <Button
-                  variant="ghost"
-                  class="!size-5"
-                  icon="more-horizontal"
-                  @click.stop="togglePopover()"
-                />
-              </template>
-            </Dropdown>
+          <Dropdown
+          class="block"
+          placement="right-start"
+          :options="viewControls.viewActions(item)"
+        >
+          <template #default="{ togglePopover }">
+            <Button
+              variant="ghost"
+              class="!size-5"
+              icon="more-horizontal"
+              @click.stop="togglePopover()"
+            />
+          </template>
+        </Dropdown>
+        
             <FeatherIcon
               v-if="isCurrentView(item)"
               name="check"
