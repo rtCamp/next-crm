@@ -8,14 +8,14 @@ import router from './router'
 import translationPlugin from './translation'
 import { posthogPlugin } from './telemetry'
 import App from './App.vue'
-import { IonicVue } from "@ionic/vue";
+// import { IonicVue } from "@ionic/vue";
 
 import { session } from "@/data/session";
 import { userResource } from "@/data/user";
 import { employeeResource } from "@/data/employee";
 
 import dayjs from "@/utils/dayjs";
-import getIonicConfig from "@/utils/ionicConfig";
+// import getIonicConfig from "@/utils/ionicConfig";
 import {
   FrappeUI,
   Button,
