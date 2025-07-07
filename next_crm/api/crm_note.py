@@ -157,11 +157,6 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
         order_by="creation asc",
     )
 
-    frappe.log_error(
-        f"Migrating CRM Notes from Lead {lead} to Opportunity {opportunity}",
-        f"{notes}",
-    )
-
     for note in notes:
         new_parent_note = frappe.new_doc("CRM Note")
         new_parent_note.custom_title = note.custom_title or ""
