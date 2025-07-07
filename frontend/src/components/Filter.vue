@@ -354,7 +354,7 @@ function getValueControl(f) {
       f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(
         (v) => v !== undefined && v !== '' && v !== null,
       )
-      return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
+      return h(Link, { class: 'border-none', doctype: options, value: f.value.flat(), multiple: true })
     } else {
       return h(FormControl, { type: 'text' })
     }
@@ -374,7 +374,7 @@ function getValueControl(f) {
       f.value = (Array.isArray(f.value) && f.value.length ? f.value : [f.value]).filter(
         (v) => v !== undefined && v !== '' && v !== null,
       )
-      return h(Link, { class: 'border-none', doctype: options, value: f.value, multiple: true })
+      return h(Link, { class: 'border-none', doctype: options, value: f.value.flat(), multiple: true })
     }
     return h(FormControl, { type: 'text' })
   } else if (typeLink.includes(fieldtype)) {
