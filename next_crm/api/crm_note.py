@@ -225,9 +225,7 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
 
         new_parent_note.insert(ignore_permissions=True)
 
-        note_doc = frappe.get_doc("CRM Note", note.name)
-        note_doc.custom_note_attachments = []
-        note_doc.save(ignore_permissions=True)
+        # ToDo : Duplicate file from oldnote to new parent note
 
         frappe.db.set_value(
             "CRM Note",
@@ -269,9 +267,7 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
 
             new_child_note.insert(ignore_permissions=True)
 
-            child_note_doc = frappe.get_doc("CRM Note", child_note.name)
-            child_note_doc.custom_note_attachments = []
-            child_note_doc.save(ignore_permissions=True)
+            # ToDo : Duplicate file from oldnote to new child note
 
             frappe.db.set_value(
                 "CRM Note",
