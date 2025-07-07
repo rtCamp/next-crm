@@ -378,6 +378,15 @@ def convert_to_opportunity(lead, prospect, existing_contact=None, doc=None):
     else:
         customer_or_prospect = lead.create_prospect()
     opportunity = lead.create_opportunity(contact, customer_or_prospect)
+
+    frappe.enqueue(
+        "next_crm.api.crm_note.copy_crm_notes_to_opportunity",
+        job_name=f"Copy CRM Notes from {lead} to {opportunity}",
+        queue="short",
+        enqueue_after_commit=True,
+        lead=lead.name,
+        opportunity=opportunity,
+    )
     return opportunity
 
 
