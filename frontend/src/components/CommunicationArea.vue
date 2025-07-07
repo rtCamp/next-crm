@@ -95,8 +95,13 @@
   <div v-show="showNoteBox">
     <NoteEditor
       ref="newNoteEditor"
+      :doctype="props.doctype"
+      :docname="doc?.data?.name"
+      :attachments="all_activities?.data?.attachments"
+      @reload="reload = true"
       v-model:title="newNoteTitle"
       v-model:content="newNoteContent"
+      v-model:fileAttachments="newAttachments"
       :submitButtonProps="{
         variant: 'solid',
         onClick: submitNote,
@@ -108,6 +113,7 @@
           showNoteBox = false
           newNoteTitle = ''
           newNoteContent = ''
+          newAttachments = []
         },
       }"
       :editable="showNoteBox"
@@ -137,6 +143,7 @@ const props = defineProps({
 })
 
 const doc = defineModel()
+const all_activities = defineModel('activities')
 const reload = defineModel('reload')
 
 const emit = defineEmits(['scroll'])
@@ -307,6 +314,7 @@ function toggleCommentBox() {
 const showNoteBox = ref(false)
 const newNoteTitle = ref('')
 const newNoteContent = ref('')
+const newAttachments = ref([])
 const newNoteEditor = ref(null)
 const noteParent = ref('')
 const submittingNoteReply = ref(false)
@@ -330,11 +338,13 @@ async function submitNote() {
     title: newNoteTitle.value,
     note: newNoteContent.value,
     parent_note: noteParent.value,
+    attachments: newAttachments.value,
   })
   showNoteBox.value = false
   submittingNoteReply.value = false
   newNoteTitle.value = ''
   newNoteContent.value = ''
+  newAttachments.value = []
   reload.value = true
   emit('scroll')
   capture('note_sent', { doctype: props.doctype })

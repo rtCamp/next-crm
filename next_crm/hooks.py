@@ -177,6 +177,7 @@ doc_events = {
     },
     "Lead": {
         "on_update": ["next_crm.doc_events.lead.on_update"],
+        "on_trash": ["next_crm.doc_events.lead.on_trash"],
     },
 }
 

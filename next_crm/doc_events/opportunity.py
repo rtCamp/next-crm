@@ -1,5 +1,7 @@
 import frappe
 
+from next_crm.doc_events.utils import delete_attachments_from_crm_notes
+
 
 def on_trash(doc, method=None):
     frappe.db.delete("Prospect Opportunity", filters={"opportunity": doc.name})
@@ -11,6 +13,7 @@ def on_trash(doc, method=None):
     frappe.db.delete("CRM Notification", {"reference_name": doc.name})
     if "frappe_gmail_thread" in frappe.get_installed_apps():
         unlink_gmail_thread(doc.name)
+    delete_attachments_from_crm_notes(doc.doctype, doc.name)
 
 
 def delete_linked_event(docname):

@@ -16,11 +16,7 @@
               :src="attachment.file_url"
               :alt="attachment.file_name"
             />
-            <component
-              v-else
-              class="size-4 text-ink-gray-7"
-              :is="fileIcon(attachment.file_type)"
-            />
+            <component v-else class="size-4 text-ink-gray-7" :is="fileIcon(attachment.file_type)" />
           </div>
           <div class="flex flex-col justify-center gap-1 truncate">
             <div class="text-base text-ink-gray-8 truncate">
@@ -38,38 +34,20 @@
             </div>
           </Tooltip>
           <div class="flex gap-1">
-            <Tooltip
-              :text="
-                attachment.is_private ? __('Make public') : __('Make private')
-              "
-            >
-              <Button
-                class="!size-5"
-                @click.stop="
-                  togglePrivate(attachment.name, attachment.is_private)
-                "
-              >
-                <FeatherIcon
-                  :name="attachment.is_private ? 'lock' : 'unlock'"
-                  class="size-3 text-ink-gray-7"
-                />
+            <Tooltip :text="attachment.is_private ? __('Make public') : __('Make private')">
+              <Button class="!size-5" @click.stop="togglePrivate(attachment.name, attachment.is_private)">
+                <FeatherIcon :name="attachment.is_private ? 'lock' : 'unlock'" class="size-3 text-ink-gray-7" />
               </Button>
             </Tooltip>
             <Tooltip :text="__('Delete attachment')">
-              <Button
-                class="!size-5"
-                @click.stop="() => deleteAttachment(attachment.name)"
-              >
+              <Button class="!size-5" @click.stop="() => deleteAttachment(attachment.name)">
                 <FeatherIcon name="trash-2" class="size-3 text-ink-gray-7" />
               </Button>
             </Tooltip>
           </div>
         </div>
       </div>
-      <div
-        v-if="i < attachments.length - 1"
-        class="mx-2 h-px border-t border-gray-200"
-      />
+      <div v-if="i < attachments.length - 1" class="mx-2 h-px border-t border-gray-200" />
     </div>
   </div>
 </template>
@@ -79,16 +57,12 @@ import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
 import FileVideoIcon from '@/components/Icons/FileVideoIcon.vue'
 import { globalStore } from '@/stores/global'
 import { call, Tooltip } from 'frappe-ui'
-import {
-  dateFormat,
-  timeAgo,
-  dateTooltipFormat,
-  convertSize,
-  isImage,
-} from '@/utils'
+import { dateFormat, timeAgo, dateTooltipFormat, convertSize, isImage, createToast } from '@/utils'
 
 const props = defineProps({
   attachments: Array,
+  docname: String,
+  doctype: String,
 })
 
 const emit = defineEmits(['reload'])
@@ -102,9 +76,7 @@ function openFile(attachment) {
 function togglePrivate(fileName, isPrivate) {
   let changeTo = isPrivate ? __('public') : __('private')
   let title = __('Make attachment {0}', [changeTo])
-  let message = __('Are you sure you want to make this attachment {0}?', [
-    changeTo,
-  ])
+  let message = __('Are you sure you want to make this attachment {0}?', [changeTo])
   $dialog({
     title,
     message,
@@ -138,12 +110,27 @@ function deleteAttachment(fileName) {
         variant: 'solid',
         theme: 'red',
         onClick: async (close) => {
-          await call('frappe.client.delete', {
-            doctype: 'File',
-            name: fileName,
-          })
-          emit('reload')
-          close()
+          try {
+            await call('next_crm.api.activities.delete_attachment', {
+              filename: fileName,
+              doctype: props.doctype,
+              docname: props.docname,
+            })
+            emit('reload')
+          } catch (error) {
+            const errorMessage =
+              error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
+                ? __('Cannot delete this attachment because it is linked to other records.')
+                : __('Failed to delete the doc. Please try again later.')
+            createToast({
+              title: __('Error'),
+              text: errorMessage,
+              icon: 'x',
+              iconClasses: 'text-ink-red-4',
+            })
+          } finally {
+            close()
+          }
         },
       },
     ],
