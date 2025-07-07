@@ -210,7 +210,24 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
         new_parent_note.added_by = note.added_by
         new_parent_note.added_on = note.added_on or now()
 
+        attachments = frappe.get_all(
+            "NCRM Attachments",
+            filters={"parent": note.name, "parenttype": "CRM Note"},
+            fields=["filename"],
+        )
+        for row in attachments:
+            new_parent_note.append(
+                "custom_note_attachments",
+                {
+                    "filename": row.filename,
+                },
+            )
+
         new_parent_note.insert(ignore_permissions=True)
+
+        note_doc = frappe.get_doc("CRM Note", note.name)
+        note_doc.custom_note_attachments = []
+        note_doc.save(ignore_permissions=True)
 
         frappe.db.set_value(
             "CRM Note",
@@ -237,7 +254,24 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
             new_child_note.added_on = child_note.added_on or now()
             new_child_note.custom_parent_note = new_parent_note.name
 
+            child_attachments = frappe.get_all(
+                "NCRM Attachments",
+                filters={"parent": child_note.name, "parenttype": "CRM Note"},
+                fields=["filename"],
+            )
+            for row in child_attachments:
+                new_child_note.append(
+                    "custom_note_attachments",
+                    {
+                        "filename": row.filename,
+                    },
+                )
+
             new_child_note.insert(ignore_permissions=True)
+
+            child_note_doc = frappe.get_doc("CRM Note", child_note.name)
+            child_note_doc.custom_note_attachments = []
+            child_note_doc.save(ignore_permissions=True)
 
             frappe.db.set_value(
                 "CRM Note",
