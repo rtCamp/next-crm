@@ -61,6 +61,8 @@ import { dateFormat, timeAgo, dateTooltipFormat, convertSize, isImage, createToa
 
 const props = defineProps({
   attachments: Array,
+  docname: String,
+  doctype: String,
 })
 
 const emit = defineEmits(['reload'])
@@ -109,9 +111,10 @@ function deleteAttachment(fileName) {
         theme: 'red',
         onClick: async (close) => {
           try {
-            await call('frappe.client.delete', {
-              doctype: 'File',
-              name: fileName,
+            await call('next_crm.api.activities.delete_attachment', {
+              filename: fileName,
+              doctype: props.doctype,
+              docname: props.docname,
             })
             emit('reload')
           } catch (error) {

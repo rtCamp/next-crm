@@ -636,3 +636,59 @@ def parse_attachment_log(html, type):
         "file_url": a_tag["href"],
         "is_private": is_private,
     }
+
+
+@frappe.whitelist()
+def delete_attachment(filename, doctype=None, docname=None):
+    """
+    Delete a file attachment by its File.name. If doctype & docname are provided,
+    also remove its reference from CRM Notes' custom_note_attachments child_table.
+
+    Args:
+        filename (str): File Doc's `name` (not file_url or file_name)
+        doctype (str, optional): Parent DocType like "Opportunity"
+        docname (str, optional): Parent docname like "OPTY-0001"
+    """
+    deleted = False
+
+    if doctype and docname:
+        notes = frappe.get_all(
+            "CRM Note",
+            filters={"parenttype": doctype, "parent": docname},
+            fields=["name"],
+        )
+
+        for note in notes:
+            note_doc = frappe.get_doc("CRM Note", note.name)
+            original_count = len(note_doc.custom_note_attachments)
+
+            updated_attachments = [
+                row
+                for row in note_doc.custom_note_attachments
+                if row.filename != filename
+            ]
+
+            if len(updated_attachments) != original_count:
+                note_doc.set("custom_note_attachments", updated_attachments)
+                note_doc.save()
+                deleted = True
+
+    try:
+        frappe.delete_doc("File", filename)
+        deleted = True
+    except frappe.DoesNotExistError:
+        frappe.throw(_("File with ID '{0}' not found.").format(filename))
+    except frappe.LinkExistsError:
+        frappe.throw(
+            _("Cannot delete file because it's still linked with another document.")
+        )
+    except Exception as e:
+        frappe.log_error(f"Failed to delete file: {e}", "Delete Attachment Error")
+        frappe.throw(_("An unexpected error occurred while deleting the file."))
+
+    if deleted:
+        return {"message": _("File deleted successfully.")}
+    else:
+        frappe.throw(
+            _("File was not deleted. Possibly already removed or not linked correctly.")
+        )

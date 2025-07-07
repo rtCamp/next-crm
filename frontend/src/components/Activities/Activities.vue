@@ -81,7 +81,12 @@
         </div>
       </div>
       <div v-else-if="title == 'Attachments'" class="px-3 pb-3 sm:px-10 sm:pb-5">
-        <AttachmentArea :attachments="activities" @reload="all_activities.reload()" />
+        <AttachmentArea
+          :docname="doc?.data?.name"
+          :doctype="doc?.data?.doctype"
+          :attachments="activities"
+          @reload="all_activities.reload()"
+        />
       </div>
       <div
         v-else
