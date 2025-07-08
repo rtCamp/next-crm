@@ -1,5 +1,5 @@
 <template>
-  <div class="activity group">
+  <div class="activity group overflow-hidden">
     <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
       <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
         <UserAvatar class="mr-1" :user="note.owner" size="md" />
