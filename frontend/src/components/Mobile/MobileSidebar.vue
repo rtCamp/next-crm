@@ -81,7 +81,7 @@ import PinIcon from '@/components/Icons/PinIcon.vue'
 import UserDropdown from '@/components/UserDropdown.vue'
 import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
 import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
-// import CheckInIcon from '@/components/Icons/CheckIcon.vue' 
+import CheckInIcon from '@/components/Icons/CheckIcon.vue' 
 
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import CustomersIcon from '@/components/Icons/CustomersIcon.vue'
@@ -137,11 +137,11 @@ const links = [
     icon: Email2Icon,
     to: 'Email Templates',
   },
-//   {
-//   label: 'Check In',
-//   icon: CheckInIcon,
-//   to: 'CheckIn',
-// },
+  {
+  label: 'Check In',
+  icon: CheckInIcon,
+  to: 'CheckIn',
+},
 
 ]
 

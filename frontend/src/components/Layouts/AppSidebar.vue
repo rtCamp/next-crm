@@ -104,7 +104,7 @@ import { unreadNotificationsCount, notificationsStore } from '@/stores/notificat
 import { FeatherIcon } from 'frappe-ui'
 import { useStorage } from '@vueuse/core'
 import { computed, h } from 'vue'
-// import CheckInIcon from '@/components/Icons/CheckIcon.vue' 
+import CheckInIcon from '@/components/Icons/CheckIcon.vue' 
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 const { toggle: toggleNotificationPanel } = notificationsStore()
@@ -162,11 +162,11 @@ const links = [
     icon: Email2Icon,
     to: 'Email Templates',
   },
-//   {
-//   label: 'Check In',
-//   icon: CheckInIcon,
-//   to: 'CheckIn',
-// },
+  {
+  label: 'Check In',
+  icon: CheckInIcon,
+  to: 'CheckIn',
+},
 ]
 
 const allViews = computed(() => {

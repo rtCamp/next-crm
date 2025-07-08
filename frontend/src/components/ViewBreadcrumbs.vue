@@ -9,6 +9,7 @@
     <span class="mx-0.5 text-base text-ink-gray-4" aria-hidden="true"> / </span>
     <Dropdown v-if="viewControls" :options="viewControls.viewsDropdownOptions">
       <template #default="{ open }">
+        
         <Button
           variant="ghost"
           class="text-lg font-medium text-nowrap"

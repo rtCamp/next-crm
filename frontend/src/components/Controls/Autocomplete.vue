@@ -240,7 +240,6 @@ const sanitizeOptions = (options: AutocompleteOption[]) => {
 
   return options.map((option) => {
     if (isOption(option)) {
-      // if label and value are the same, assume it's a customer id
       if (option.label === option.value) {
         enrichCustomerLabel(option)
       }
@@ -308,6 +307,7 @@ const makeOption = (option: AutocompleteOption) => {
 
 const getLabel = (option: AutocompleteOption) => {
   if (isOption(option)) {
+    console.log("optionss===", option)
     return option.label || option.value || props?.placeholder || ''
   }
   return option

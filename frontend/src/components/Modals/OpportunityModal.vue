@@ -93,18 +93,28 @@ const sections = createResource({
   params: { doctype: 'Opportunity', type: 'Quick Entry' },
   auto: true,
   transform: (data) => {
-    return data.forEach((section) => {
-      section.fields.forEach((field) => {
-        if (field.name == 'status') {
-          field.type = 'Select'
-          field.options = opportunityStatuses.value
-          field.prefix = getDealStatus(opportunity.status).iconColorClass
-        } else if (field.name == 'opportunity_owner') {
-          field.type = 'User'
-        }
-      })
+  data.forEach((section) => {
+    section.fields.forEach((field) => {
+      if (field.name === 'status') {
+        field.type = 'Select'
+        field.options = opportunityStatuses.value
+        field.prefix = getDealStatus(opportunity.status).iconColorClass
+      } else if (field.name === 'opportunity_owner') {
+        field.type = 'User'
+      } else if (field.name === 'opportunity_from') {
+  field.type = 'Select'
+  field.options = [
+    { label: 'Lead', value: 'Lead' },
+    { label: 'Customer', value: 'Customer' },
+    { label: 'Prospect', value: 'Prospect' },
+  ]
+  
+}
+
     })
-  },
+  })
+}
+
 })
 
 const filteredSections = computed(() => {

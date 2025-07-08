@@ -89,7 +89,7 @@
                 </div>
                 <div class="flex flex-col gap-2 truncate">
                   <div class="truncate text-2xl font-medium">
-                    <span>{{ customer.doc?.name }}</span>
+                    <span>{{ customer.doc?.customer_name }}</span>
                   </div>
                   <div
                     v-if="customer.doc?.website"
@@ -517,16 +517,18 @@ const breadcrumbs = computed(() => {
           query: { view: route.query.view },
         },
       })
+      // console.log("itemssss====", items)
     }
   }
 
   items.push({
-    label: props.customerId,
-    route: {
-      name: 'Customer',
-      params: { customerId: props.customerId },
-    },
-  })
+  label: props.customerId,
+  route: {
+    name: 'Customer',
+    params: { customerId: props.customerId },
+  },
+})
+
   return items
 })
 
@@ -630,6 +632,11 @@ const tabs = [
     label: 'Addresses',
     icon: h(AddressIcon, { class: 'h-4 w-4' }),
     count: computed(() => addresses.value.data?.length),
+  },
+   {
+    label: 'Activities',
+    icon: h(ContactsIcon, { class: 'h-4 w-4' }),
+    count: computed(() => contacts.value.data?.length),
   },
 ]
 
