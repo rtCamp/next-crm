@@ -62,7 +62,7 @@
             </div>
             <div class="flex flex-col gap-2 truncate">
               <div class="truncate text-lg font-medium text-ink-gray-9">
-                {{ customer.doc.name }}
+                {{ customer.doc.customer_name }}
               </div>
               <div class="flex items-center gap-1.5 relative">
                 <Button @click="openWebsite">

@@ -124,13 +124,13 @@ const routes = [
     component: () => import('@/pages/Reports.vue'),
     meta: { scrollPos: { top: 0, left: 0 } },
   },
-  // {
-  //   alias: '/checkin',
-  //   path: '/checkin/view/:viewType?',
-  //   name: 'CheckIn',
-  //   component: () => import('@/pages/CheckIn.vue'),
-  //   meta: { scrollPos: { top: 0, left: 0 } },
-  // },
+  {
+    alias: '/checkin',
+    path: '/checkin/view/:viewType?',
+    name: 'CheckIn',
+    component: () => import('@/pages/CheckIn.vue'),
+    meta: { scrollPos: { top: 0, left: 0 } },
+  },
   
   {
     path: '/:invalidpath',
