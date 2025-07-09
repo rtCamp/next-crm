@@ -81,4 +81,3 @@ def clear_all_notifications():
     """
     user = frappe.session.user
     frappe.db.delete("CRM Notification", {"to_user": user})
-    return
