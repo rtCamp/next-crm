@@ -200,7 +200,6 @@ class Lead(Lead):
 
     def create_opportunity(self, contact, customer_or_prospect):
         from erpnext.crm.doctype.lead.lead import make_opportunity
-
         from next_crm.api.address import migrate_lead_addresses_to_opportunity
         from next_crm.api.contact import (
             link_contact_to_doc,
@@ -209,30 +208,40 @@ class Lead(Lead):
         )
 
         opportunity = make_opportunity(self.name)
-
+        
         if "Customer" in customer_or_prospect:
             opportunity.update({"customer": customer_or_prospect["Customer"]})
         else:
             opportunity.update({"custom_prospect": customer_or_prospect["Prospect"]})
 
         if self.first_responded_on:
-            opportunity.update(
-                {
-                    "sla_creation": self.sla_creation,
-                    "response_by": self.response_by,
-                    "sla_status": self.sla_status,
-                    "communication_status": self.communication_status,
-                    "first_response_time": self.first_response_time,
-                    "first_responded_on": self.first_responded_on,
-                }
-            )
+            opportunity.update({
+                "sla_creation": self.sla_creation,
+                "response_by": self.response_by,
+                "sla_status": self.sla_status,
+                "communication_status": self.communication_status,
+                "first_response_time": self.first_response_time,
+                "first_responded_on": self.first_responded_on,
+            })
 
         opportunity.insert()
+
+        # Step 4: Re-link original ToDos from Lead to Opportunity (preserve status)
+        todos = frappe.get_all("ToDo", filters={"reference_type": "Lead", "reference_name": self.name})
+        for todo in todos:
+            frappe.db.set_value("ToDo", todo.name, {
+                "reference_type": "Opportunity",
+                "reference_name": opportunity.name
+            })
+
+        # Step 5: Handle contact, addresses, etc.
         link_contact_to_doc(contact, "Opportunity", opportunity.name)
         migrate_lead_addresses_to_opportunity(self.name, opportunity.name)
         migrate_lead_contacts_to_opportunity(self.name, opportunity.name)
         set_opportunity_primary_contact(opportunity.name)
+
         return opportunity.name
+
 
     def set_sla(self):
         """
@@ -365,6 +374,7 @@ def convert_to_opportunity(lead, prospect, existing_contact=None, doc=None):
         )
 
     lead = frappe.get_cached_doc("Lead", lead)
+
     if frappe.db.exists("CRM Lead Status", "Qualified"):
         lead.status = "Qualified"
     lead.converted = 1

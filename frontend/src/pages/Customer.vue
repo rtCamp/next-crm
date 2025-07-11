@@ -633,11 +633,7 @@ const tabs = [
     icon: h(AddressIcon, { class: 'h-4 w-4' }),
     count: computed(() => addresses.value.data?.length),
   },
-   {
-    label: 'Activities',
-    icon: h(ContactsIcon, { class: 'h-4 w-4' }),
-    count: computed(() => contacts.value.data?.length),
-  },
+  
 ]
 
 const opportunities = createListResource({
