@@ -65,7 +65,7 @@
             class="form-control"
             :value="getUser(_todo.allocated_to).full_name"
             doctype="User"
-            @change="(option) => (_todo.allocated_to = option)"
+            @change="(option) => updateAssignee(option)"
             :placeholder="__('John Doe')"
             :hideMe="true"
             :filters="[['User', 'user_type', '=', 'System User']]"
@@ -232,6 +232,20 @@ function updateToDoStatus(status) {
 
 function updateToDoPriority(priority) {
   _todo.value.priority = priority
+}
+
+function updateAssignee(option) {
+  _todo.value.allocated_to = option
+
+  const assigneeUser = getUser(option)
+
+  if (assigneeUser.google_calendar) {
+    _event.value.google_calendar = assigneeUser.google_calendar
+    _event.value.sync_with_google_calendar = 1
+  } else {
+    _event.value.google_calendar = null
+    _event.value.sync_with_google_calendar = 0
+  }
 }
 
 function redirect() {
