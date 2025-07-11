@@ -192,6 +192,8 @@ import { globalStore } from '@/stores/global'
 import { statusesStore } from '@/stores/statuses'
 import ExportIcon from '@/components/Icons/ExportIcon.vue'
 import QuotationList from '../components/ListViews/QuotationList.vue'
+import { capture } from '@/telemetry'
+
 import {
   whatsappEnabled,
   callEnabled,
@@ -486,7 +488,7 @@ let opportunity = await call(
 if (opportunity) {
   capture('convert_lead_to_opportunity')
 
-    await contacts.reload()
+    // await contacts.reload()
   
   router.push({ name: 'Opportunity', params: { opportunityId: opportunity } })
 }

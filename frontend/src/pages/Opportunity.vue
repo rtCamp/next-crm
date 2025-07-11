@@ -110,6 +110,12 @@
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
               </Button>
             </Tooltip>
+
+            <Tooltip :text="__('Check Details')">
+              <Button  class="h-7 w-7" @click="redirectToLead">
+                <FeatherIcon name="external-link" class="h-4 w-4" />
+              </Button>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -1061,6 +1067,22 @@ const createProjectFromOpportunity = async () => {
 
 async function deleteOpportunity() {
   showDeleteModal.value = true;
+}
+
+function redirectToLead() {
+  const docType = opportunity.data.opportunity_from; 
+  const docName = opportunity.data.party_name;
+
+  if (!docType || !docName) {
+    errorMessage(__('No linked party to redirect.'));
+    return;
+  }
+
+  const routeBase = docType === 'Lead'
+    ? `/leads/${docName}`
+    : `/customers/${docName}`;
+
+  router.push(`${routeBase}#activity`);
 }
 
 const activities = ref(null)

@@ -140,12 +140,25 @@ async function callInsertDoc() {
     _contact.value.email_ids = [{ email_id: _contact.value.email_id }]
     delete _contact.value.email_id
   }
+  if (_contact.value.mobile_no) {
+    const mobile = _contact.value.mobile_no
 
-  if (_contact.value.actual_mobile_no) {
-    _contact.value.phone_nos = [{ phone: _contact.value.actual_mobile_no }]
-    delete _contact.value.actual_mobile_no
+    _contact.value.phone_nos = [
+      {
+        phone: mobile,
+        is_primary_mobile_no: 1,
+        is_primary_phone: 0,
+        doctype: 'Contact Phone',
+        parentfield: 'phone_nos',
+        parenttype: 'Contact',
+        __unsaved: 1,
+        docstatus: 0,
+      },
+    ]
+    _contact.value.phone = mobile
   }
 
+// console.log("contacttt===", _contact.value)
   const doc = await call('frappe.client.insert', {
     doc: {
       doctype: 'Contact',

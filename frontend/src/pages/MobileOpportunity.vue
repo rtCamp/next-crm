@@ -500,8 +500,19 @@ const fieldsLayout = createResource({
 })
 
 function getParsedFields(sections) {
+  if (!Array.isArray(sections)) {
+    console.warn('Invalid sections passed to getParsedFields:', sections)
+    return []
+  }
+
   sections.forEach((section) => {
     if (section.name == 'contacts_section') return
+
+    if (!Array.isArray(section.fields)) {
+      console.warn('Missing or invalid fields in section:', section)
+      section.fields = [] 
+    }
+
     section.fields.forEach((field) => {
       if (field.name == 'customer') {
         field.create = (value, close) => {
@@ -517,8 +528,10 @@ function getParsedFields(sections) {
       }
     })
   })
+
   return sections
 }
+
 
 const showContactModal = ref(false)
 const _contact = ref({})
