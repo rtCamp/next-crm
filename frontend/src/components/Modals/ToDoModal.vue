@@ -33,11 +33,13 @@
       <div class="flex flex-col gap-4">
         <div>
           <FormControl
-            ref="custom_title"
-            :label="__('Title')"
-            v-model="_todo.custom_title"
-            :placeholder="__('Call with John Doe')"
-          />
+          ref="custom_title"
+          :label="__('Title')"
+          v-model="_todo.custom_title"
+          :placeholder="__('Call with John Doe')"
+          :error="!_todo.custom_title.trim() && showError"
+        />
+        
         </div>
         <div>
           <div class="mb-1.5 text-xs text-ink-gray-5">
@@ -188,22 +190,34 @@ function redirect() {
   }
   router.push({ name: name, params: params })
 }
+const showError = ref(false)
+
 
 async function updateToDo() {
   if (!_todo.value.allocated_to) {
     _todo.value.allocated_to = getUser().name
   }
   _todo.value.assigned_by = getUser().name
+  if (!_todo.value.custom_title || !_todo.value.custom_title.trim()) {
+  createToast({
+    title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
+    text: __('ToDo title is required.'),
+    icon: 'x',
+    iconClasses: 'text-ink-red-4',
+  })
+  return
+}
 
-  if (!_todo.value.description.trim() && !_todo.value.custom_title.trim()) {
-    createToast({
-      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
-      text: __('ToDo must have either a title or a description.'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
-    return
-  }
+if (!_todo.value.description || !_todo.value.description.trim()) {
+  createToast({
+    title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
+    text: __('ToDo must have either a title or a description.'),
+    icon: 'x',
+    iconClasses: 'text-ink-red-4',
+  })
+  return
+}
+
 
   try {
     if (_todo.value.name) {

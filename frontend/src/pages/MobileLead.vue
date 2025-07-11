@@ -81,6 +81,11 @@
             </div>
           </div>
         </div>
+        <QuotationList
+          v-if="tabs[tabIndex].name === 'Quotation'"
+          :lead-id="lead.data.name"
+          :count="tabs.find(tab => tab.name === 'Quotation')?.count"
+        />
         <Activities
           v-else
           doctype="Lead"
@@ -185,6 +190,8 @@ import { createToast, setupAssignees, setupCustomizations } from '@/utils'
 import { getView } from '@/utils/view'
 import { globalStore } from '@/stores/global'
 import { statusesStore } from '@/stores/statuses'
+import ExportIcon from '@/components/Icons/ExportIcon.vue'
+import QuotationList from '../components/ListViews/QuotationList.vue'
 import {
   whatsappEnabled,
   callEnabled,
@@ -326,6 +333,8 @@ const breadcrumbs = computed(() => {
   return items
 })
 
+const quotationCount = ref(0)
+
 const tabs = computed(() => {
   let tabOptions = [
     {
@@ -375,6 +384,12 @@ const tabs = computed(() => {
       label: __('WhatsApp'),
       icon: WhatsAppIcon,
       condition: () => whatsappEnabled.value,
+    },
+    {
+      name: 'Quotation',
+      label: __('Quotation'),
+      icon: ExportIcon,
+      count: quotationCount
     },
   ]
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))

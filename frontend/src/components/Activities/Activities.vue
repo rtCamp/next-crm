@@ -1,5 +1,6 @@
 <template>
   <ActivityHeader
+  v-if="title !== 'Quotation'"
     v-model="tabIndex"
     v-model:showWhatsappTemplates="showWhatsappTemplates"
     v-model:showFilesUploader="showFilesUploader"
@@ -271,7 +272,9 @@
         </div>
       </div>
     </div>
-    <div v-else class="flex flex-1 flex-col items-center justify-center gap-3 text-xl font-medium text-ink-gray-4">
+    <div
+    v-else-if="title !== 'Quotation'"
+     class="flex flex-1 flex-col items-center justify-center gap-3 text-xl font-medium text-ink-gray-4">
       <component :is="emptyTextIcon" class="h-10 w-10" />
       <span>{{ __(emptyText) }}</span>
       <Button v-if="title == 'Calls'" :label="__('Make a Call')" @click="makeCall(doc.data.mobile_no)" />
