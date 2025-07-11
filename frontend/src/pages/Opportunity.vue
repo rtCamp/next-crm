@@ -38,9 +38,23 @@
         </button>
       </template>
       <template #tab-panel>
-        <Activities ref="activities" doctype="Opportunity" :tabs="tabs" v-model:reload="reload"
-          v-model:tabIndex="tabIndex" v-model="opportunity" />
+        <QuotationList
+        v-if="tabs[tabIndex].name === 'Quotation'"
+        :opportunity-id="opportunity.data.name"
+        :count="tabs.find(tab => tab.name === 'Quotation').count"
+      />
+        <Activities
+          ref="activities"
+          doctype="Opportunity"
+          :tabs="tabs"
+          v-model:reload="reload"
+          v-model:tabIndex="tabIndex"
+          v-model="opportunity"
+        />
       </template>
+      
+      
+      
     </Tabs>
     <Resizer side="right" class="flex flex-col justify-between border-l">
       <div class="flex h-10.5 cursor-copy items-center border-b px-5 py-2.5 text-lg font-medium text-ink-gray-9"
@@ -392,7 +406,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 import { getMeta } from '@/stores/meta'
 import { replaceMeWithUser } from '../utils'
-
+import ExportIcon from '@/components/Icons/ExportIcon.vue'
+import QuotationList from '../components/ListViews/QuotationList.vue'
 const { $dialog, $socket, makeCall } = globalStore()
 const { statusOptions, getDealStatus } = statusesStore()
 const { isManager, getUser } = usersStore()
@@ -609,6 +624,9 @@ usePageMeta(() => {
   }
 })
 
+const quotationCount = ref(0)
+
+
 const tabs = computed(() => {
   let tabOptions = [
     {
@@ -666,6 +684,12 @@ const tabs = computed(() => {
       icon: WhatsAppIcon,
       condition: () => whatsappEnabled.value,
       count: ref(0)
+    },
+    {
+      name: 'Quotation',
+      label: __('Quotation'),
+      icon: ExportIcon,
+      count: quotationCount
     },
   ]
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))

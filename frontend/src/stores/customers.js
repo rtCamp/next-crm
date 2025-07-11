@@ -13,7 +13,6 @@ export const customersStore = defineStore('customers', () => {
     transform(customers) {
       for (let customer of customers) {
         customersByName[customer.name] = customer
-        console.log("customers:::::", customer)
       }
       return customers
     },

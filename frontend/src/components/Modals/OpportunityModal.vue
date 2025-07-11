@@ -108,9 +108,7 @@ const sections = createResource({
     { label: 'Customer', value: 'Customer' },
     { label: 'Prospect', value: 'Prospect' },
   ]
-  
 }
-
     })
   })
 }

@@ -204,6 +204,11 @@
             </div>
           </div>
         </div>
+        <QuotationList
+        v-if="tabs[tabIndex].name === 'Quotation'"
+        :opportunity-id="opportunity.data.name"
+        :count="tabs.find(tab => tab.name === 'Quotation').count"
+      />
         <Activities
           v-else
           doctype="Opportunity"
@@ -212,6 +217,7 @@
           v-model:tabIndex="tabIndex"
           v-model="opportunity"
         />
+
       </TabPanel>
     </Tabs>
   </div>
@@ -262,6 +268,9 @@ import { createToast, setupAssignees, setupCustomizations } from '@/utils'
 import { getView } from '@/utils/view'
 import { globalStore } from '@/stores/global'
 import { statusesStore } from '@/stores/statuses'
+import QuotationList from '../components/ListViews/QuotationList.vue'
+import ExportIcon from '@/components/Icons/ExportIcon.vue'
+
 import {
   whatsappEnabled,
   callEnabled,
@@ -418,6 +427,9 @@ const breadcrumbs = computed(() => {
   return items
 })
 
+const quotationCount = ref(0)
+
+
 const tabs = computed(() => {
   let tabOptions = [
     {
@@ -467,6 +479,12 @@ const tabs = computed(() => {
       label: __('WhatsApp'),
       icon: WhatsAppIcon,
       condition: () => whatsappEnabled.value,
+    },
+    {
+      name: 'Quotation',
+      label: __('Quotation'),
+      icon: ExportIcon,
+      count: quotationCount
     },
   ]
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))

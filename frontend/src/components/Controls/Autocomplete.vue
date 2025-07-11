@@ -307,7 +307,6 @@ const makeOption = (option: AutocompleteOption) => {
 
 const getLabel = (option: AutocompleteOption) => {
   if (isOption(option)) {
-    console.log("optionss===", option)
     return option.label || option.value || props?.placeholder || ''
   }
   return option

@@ -59,6 +59,11 @@
         </button>
       </template>
       <template #tab-panel>
+        <QuotationList
+          v-if="tabs[tabIndex].name === 'Quotation'"
+          :lead-id="lead.data.name"
+          :count="tabs.find(tab => tab.name === 'Quotation')?.count"
+        />
         <Activities
           ref="activities"
           doctype="Lead"
@@ -68,6 +73,7 @@
           v-model="lead"
         />
       </template>
+      
     </Tabs>
     <Resizer class="flex flex-col justify-between border-l" side="right">
       <div
@@ -621,6 +627,8 @@ import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
 import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
+import ExportIcon from '@/components/Icons/ExportIcon.vue'
+import QuotationList from '../components/ListViews/QuotationList.vue'
 import {
   openWebsite,
   createToast,
@@ -945,6 +953,9 @@ const leadAddresses = createResource({
   },
 })
 
+const quotationCount = ref(0)
+
+
 const tabs = computed(() => {
   let tabOptions = [
     {
@@ -1003,6 +1014,12 @@ const tabs = computed(() => {
       icon: WhatsAppIcon,
       condition: () => whatsappEnabled.value,
       count: ref(0)
+    },
+    {
+      name: 'Quotation',
+      label: __('Quotation'),
+      icon: ExportIcon,
+      count: quotationCount
     },
   ]
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))
