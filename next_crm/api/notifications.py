@@ -72,3 +72,12 @@ def get_hash(notification):
         if "has been removed by" in notification.message:
             _hash = ""
     return _hash
+
+
+@frappe.whitelist()
+def clear_all_notifications():
+    """
+    Clear all notifications for the current user.
+    """
+    user = frappe.session.user
+    frappe.db.delete("CRM Notification", {"to_user": user})

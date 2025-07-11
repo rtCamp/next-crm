@@ -23,6 +23,15 @@
               </Button>
             </div>
           </Tooltip>
+          <Tooltip :text="__('Clear all notifications')">
+            <div>
+              <Button variant="ghost" @click="() => clearAll()">
+                <template #icon>
+                  <FeatherIcon name="trash-2" class="h-4 w-4" />
+                </template>
+              </Button>
+            </div>
+          </Tooltip>
           <Tooltip :text="__('Close')">
             <div>
               <Button variant="ghost" @click="() => toggle()">
@@ -82,10 +91,10 @@ import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { visible, notifications, notificationsStore } from '@/stores/notifications'
 import { globalStore } from '@/stores/global'
-import { timeAgo } from '@/utils'
+import { timeAgo, createToast } from '@/utils'
 import { onClickOutside } from '@vueuse/core'
 import { capture } from '@/telemetry'
-import { Tooltip } from 'frappe-ui'
+import { Tooltip, call } from 'frappe-ui'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const { $socket } = globalStore()
@@ -110,6 +119,16 @@ function markAsRead(doc) {
 function markAllAsRead() {
   capture('notification_mark_all_as_read')
   mark_as_read.reload()
+}
+
+async function clearAll() {
+  await call('next_crm.api.notifications.clear_all_notifications')
+  createToast({
+    title: __('Notifications deleted successfully'),
+    icon: 'check',
+    iconClasses: 'text-green-500',
+  })
+  notifications.reload()
 }
 
 onBeforeUnmount(() => {
