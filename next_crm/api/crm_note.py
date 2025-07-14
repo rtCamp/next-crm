@@ -210,22 +210,28 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
         new_parent_note.added_by = note.added_by
         new_parent_note.added_on = note.added_on or now()
 
+        new_parent_note.insert(ignore_permissions=True)
         attachments = frappe.get_all(
             "NCRM Attachments",
             filters={"parent": note.name, "parenttype": "CRM Note"},
             fields=["filename"],
         )
         for row in attachments:
-            new_parent_note.append(
-                "custom_note_attachments",
-                {
-                    "filename": row.filename,
-                },
+            new_file_name = duplicate_file(
+                row.filename,
+                new_attached_to_doctype="Opportunity",
+                new_attached_to_name=opportunity,
             )
+            if new_file_name:
+                new_parent_note.append(
+                    "custom_note_attachments",
+                    {
+                        "filename": new_file_name,
+                    },
+                )
 
-        new_parent_note.insert(ignore_permissions=True)
-
-        # ToDo : Duplicate file from oldnote to new parent note
+        if attachments:
+            new_parent_note.save()
 
         frappe.db.set_value(
             "CRM Note",
@@ -252,22 +258,29 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
             new_child_note.added_on = child_note.added_on or now()
             new_child_note.custom_parent_note = new_parent_note.name
 
+            new_child_note.insert(ignore_permissions=True)
             child_attachments = frappe.get_all(
                 "NCRM Attachments",
                 filters={"parent": child_note.name, "parenttype": "CRM Note"},
                 fields=["filename"],
             )
+
             for row in child_attachments:
-                new_child_note.append(
-                    "custom_note_attachments",
-                    {
-                        "filename": row.filename,
-                    },
+                new_file_name = duplicate_file(
+                    row.filename,
+                    new_attached_to_doctype="Opportunity",
+                    new_attached_to_name=opportunity,
                 )
+                if new_file_name:
+                    new_child_note.append(
+                        "custom_note_attachments",
+                        {
+                            "filename": new_file_name,
+                        },
+                    )
 
-            new_child_note.insert(ignore_permissions=True)
-
-            # ToDo : Duplicate file from oldnote to new child note
+            if child_attachments:
+                new_child_note.save()
 
             frappe.db.set_value(
                 "CRM Note",
@@ -277,6 +290,58 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
                 },
             )
     frappe.db.commit()
+
+
+def duplicate_file(
+    original_file_name, new_attached_to_doctype=None, new_attached_to_name=None
+):
+    """
+    Create a duplicate of a file with new attachment references.
+    Returns the name of the new file document.
+    """
+    try:
+        original_file = frappe.get_doc("File", original_file_name)
+        new_file = frappe.new_doc("File")
+
+        new_file.file_name = original_file.file_name or ""
+        new_file.attached_to_doctype = new_attached_to_doctype
+        new_file.attached_to_name = new_attached_to_name
+        new_file.is_private = original_file.is_private or 0
+        new_file.folder = original_file.folder or "Home"
+
+        original_file_url = original_file.file_url
+        if original_file_url:
+            try:
+                file_content = original_file.get_content()
+                if file_content:
+                    new_file.content = file_content
+                    new_file.file_size = len(file_content)
+                else:
+                    new_file.file_size = original_file.file_size or 0
+            except Exception:
+                new_file.file_size = original_file.file_size or 0
+        else:
+            new_file.file_size = original_file.file_size or 0
+
+        new_file.flags.ignore_permissions = True
+        new_file.insert()
+
+        if hasattr(new_file, "save_file") and original_file_url:
+            try:
+                file_content = original_file.get_content()
+                if file_content:
+                    new_file.save_file(file_content, original_file.file_name or "")
+            except Exception:
+                pass
+
+        return new_file.name
+
+    except Exception as e:
+        frappe.log_error(
+            f"Error duplicating file {original_file_name}: {str(e)}",
+            "File Duplication Error",
+        )
+        return None
 
 
 @frappe.whitelist()
