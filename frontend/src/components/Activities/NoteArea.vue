@@ -1,5 +1,5 @@
 <template>
-  <div class="activity group">
+  <div class="activity group overflow-hidden">
     <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
       <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
         <UserAvatar class="mr-1" :user="note.owner" size="md" />
@@ -73,7 +73,7 @@ import { usersStore } from '@/stores/users'
 import ReplyIcon from '@/components/Icons/ReplyIcon.vue'
 import { createToast } from '@/utils'
 import NoteAttachments from './NoteAttachments.vue'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   note: Object,
@@ -91,18 +91,21 @@ function replyNote() {
 }
 
 const filteredAttachments = ref([])
-watch(
-  [() => notes?.value?.data?.attachments, props.note],
-  ([attachments, note]) => {
-    const fileNames = note?.attachments.map((item) => item.filename)
-    if (!attachments || !fileNames?.length) {
-      filteredAttachments.value = []
-      return
-    }
-    filteredAttachments.value = attachments.filter((att) => fileNames.includes(att.name))
-  },
-  { immediate: true },
-)
+
+onMounted(() => {
+  watch(
+    [() => notes?.value?.data?.attachments, () => props.note],
+    ([attachments, note]) => {
+      const fileNames = note?.attachments?.map((item) => item.filename) || []
+      if (!attachments || fileNames.length === 0) {
+        filteredAttachments.value = []
+        return
+      }
+      filteredAttachments.value = attachments.filter((att) => fileNames.includes(att.name))
+    },
+    { immediate: true },
+  )
+})
 
 async function deleteNote(name) {
   try {
