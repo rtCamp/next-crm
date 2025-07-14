@@ -9,7 +9,7 @@
       />
       <TextEditor
         ref="textEditor"
-        :editor-class="['prose-sm max-w-none', editable && 'min-h-[7rem]']"
+        :editor-class="['prose-sm max-w-none', editable && 'min-h-[4rem]']"
         :content="content"
         @change="editable ? (content = $event) : null"
         :starterkit-options="{ heading: { levels: [2, 3, 4, 5, 6] } }"

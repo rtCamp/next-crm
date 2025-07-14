@@ -484,7 +484,7 @@ const activities = computed(() => {
       name: note.name,
       type: 'note',
       value: 'added a note',
-      attachments: [],
+      attachments: note.attachments || [],
     }))
 
     _activities = [..._activities, ...notesAsActivities]
