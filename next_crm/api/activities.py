@@ -51,6 +51,17 @@ def get_opportunity_activities(name):
         activities, calls, _notes, todos, events, attachments = get_lead_activities(
             lead, False
         )
+
+        crm_note_names = frappe.get_all(
+            "CRM Note", filters={"parent": lead, "parenttype": "Lead"}, pluck="name"
+        )
+        filenames_to_exclude = frappe.get_all(
+            "NCRM Attachments",
+            filters={"parenttype": "CRM Note", "parent": ["in", crm_note_names]},
+            pluck="filename",
+        )
+        attachments = [a for a in attachments if a.name not in filenames_to_exclude]
+
         creation_text = "converted the lead to this opportunity"
 
     activities.append(
