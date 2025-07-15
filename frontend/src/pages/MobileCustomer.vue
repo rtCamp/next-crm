@@ -135,6 +135,7 @@
           <component v-if="tab.icon" :is="tab.icon" class="h-5" />
           {{ __(tab.label) }}
           <Badge
+
             class="group-hover:bg-surface-gray-7"
             :class="[selected ? 'bg-surface-gray-7' : 'bg-gray-600']"
             variant="solid"
@@ -191,8 +192,14 @@
           :columns="columns"
           :options="{ selectable: false, showTooltip: false }"
         />
+        <ActivityList
+        v-if="tab.label === 'Activities'"
+        :customer-id="customer.doc.name"
+        :count="tabs.find(tab => tab.label === 'Activities').count"
+
+      />
         <div
-          v-if="!rows.length && tab.name !== 'Details'"
+          v-if="!rows.length && tab.name !== 'Details' && !tab.label === 'Activities'"
           class="grid flex-1 place-items-center text-xl font-medium text-ink-gray-4"
         >
           <div class="flex flex-col items-center justify-center space-y-3">
@@ -285,6 +292,9 @@ import AddressIcon from '@/components/Icons/AddressIcon.vue'
 import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'
 import { getView } from '@/utils/view'
+import ActivityList from "@/components/ListViews/ActivityList.vue"
+import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
+
 import {
   dateFormat,
   dateTooltipFormat,
@@ -465,7 +475,7 @@ function getParsedFields(data) {
     }
   })
 }
-
+const activityCount = ref(0)
 const tabIndex = ref(0)
 const tabs = [
   {
@@ -490,6 +500,11 @@ const tabs = [
     label: __('Addresses'),
     icon: h(AddressIcon, { class: 'h-4 w-4' }),
     count: computed(() => addresses.value.data?.length),
+  },
+  {
+    label: 'Activities',
+    icon: h(ActivityIcon, { class: 'h-4 w-4' }),
+    count: activityCount
   },
 ]
 
@@ -812,6 +827,8 @@ async function createActivity() {
       variant: 'success',
     })
     showActivityModal.value = false
+    window.location.reload()
+
   } catch (error) {
     createToast({
       title: 'Error',

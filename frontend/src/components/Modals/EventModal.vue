@@ -126,6 +126,21 @@
           >
           </Link>
         </div>
+        <!-- Only show when editing an existing event -->
+<div v-if="editMode" class="flex items-center gap-2">
+  <FormControl
+    class="form-control"
+    type="checkbox"
+    v-model="createAnother"
+  />
+  <label
+    class="text-sm text-ink-gray-5"
+    @click="createAnother = !createAnother"
+  >
+    {{ __('Create New Event') }}
+  </label>
+</div>
+
         <div class="flex flex-wrap items-center gap-2 w-full" v-if="_event.sync_with_google_calendar">
           <!-- Multi input to enter email addresses for event participants. -->
           <MultiValueInput
@@ -175,6 +190,8 @@ const props = defineProps({
 })
 
 const show = defineModel()
+const createAnother = ref(true)
+
 const events = defineModel('reloadEvents')
 
 const emit = defineEmits(['updateEvent', 'after'])
@@ -299,7 +316,27 @@ async function updateEvent() {
         iconClasses: 'text-ink-green-3',
       })
     }
-    show.value = false
+    if (_event.value.status === 'Closed' || _event.value.status === 'Completed' && createAnother.value) {
+  nextTick(() => {
+    editMode.value = false
+    _event.value = {
+      title: '',
+      description: '',
+      _assign: '',
+      starts_on: '',
+      ends_on: '',
+      status: 'Open',
+      event_type: 'Private',
+      event_category: 'Event',
+      sync_with_google_calendar: getUser().google_calendar ? 1 : 0,
+      google_calendar: getUser().google_calendar,
+    }
+    event_participants.value = [getUser().email]
+    show.value = true
+  })
+} else {
+  show.value = false
+}
   } catch (error) {
     createToast({
       title: __(`Error ${editMode.value ? 'updating' : 'adding'} Event`),

@@ -319,7 +319,6 @@ const showQuickEntryModal = ref(false)
 
 const defaults = reactive({})
 
-// Create button is shown only with write access
 const hasCreateAccess = ref(false)
 
 call('next_crm.api.doc.check_create_access', {
@@ -328,7 +327,6 @@ call('next_crm.api.doc.check_create_access', {
   hasCreateAccess.value = show;       
 })
 
-// opportunities data is loaded in the ViewControls component
 const opportunities = ref({})
 const loadMore = ref(1)
 const triggerResize = ref(1)
