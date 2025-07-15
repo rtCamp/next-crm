@@ -12,7 +12,8 @@
       ],
     }"
   >
-    <template #body-title>
+  <template #body-title>
+    <div class="flex flex-col gap-1">
       <div class="flex items-center gap-3">
         <h3 class="text-2xl font-semibold leading-6 text-ink-gray-9">
           {{ editMode ? __('Edit ToDo') : __('Create ToDo') }}
@@ -28,7 +29,16 @@
           </template>
         </Button>
       </div>
-    </template>
+      <div
+        v-if="referenceTitle"
+        class="text-base leading-6 text-ink-gray-9 mt-1"
+        :title="referenceTitle"
+      >
+        {{ referenceTitle }}
+      </div>
+    </div>
+  </template>
+  
     <template #body-content>
       <div class="flex flex-col gap-4">
         <div>
@@ -113,6 +123,20 @@
             </Button>
           </Dropdown>
         </div>
+<div v-if="editMode" class="flex items-center gap-2">
+  <FormControl
+    class="form-control"
+    type="checkbox"
+    v-model="createAnother"
+  />
+  <label
+    class="text-sm text-ink-gray-5"
+    @click="createAnother = !createAnother"
+  >
+    {{ __('Create New ToDo') }}
+  </label>
+</div>
+
       </div>
     </template>
   </Dialog>
@@ -150,6 +174,7 @@ const props = defineProps({
 
 const show = defineModel()
 const todos = defineModel('reloadToDos')
+const createAnother = ref(true)
 
 const emit = defineEmits(['updateToDo', 'after'])
 
@@ -254,7 +279,25 @@ if (!_todo.value.description || !_todo.value.description.trim()) {
         iconClasses: 'text-ink-green-3',
       })
     }
-    show.value = false
+    if (_todo.value.status === 'Closed' && createAnother.value) {
+  nextTick(() => {
+    editMode.value = false
+    _todo.value = {
+      custom_title: '',
+      description: '',
+      allocated_to: '',
+      assigned_by: '',
+      date: '',
+      status: 'Open',
+      priority: 'Medium',
+      reference_type: props.doctype,
+      reference_name: props.doc || null,
+    }
+    show.value = true
+  })
+} else {
+  show.value = false
+}
   } catch (error) {
     createToast({
       title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
@@ -264,9 +307,12 @@ if (!_todo.value.description || !_todo.value.description.trim()) {
     })
   }
 }
+const referenceTitle = ref('')
+
 
 async function render() {
   editMode.value = false
+
   nextTick(async () => {
     custom_title.value?.el?.focus?.()
     _todo.value = { ...props.todo }
@@ -279,8 +325,34 @@ async function render() {
     if (_todo.value.description) {
       editMode.value = true
     }
+
+    referenceTitle.value = ''
+    if (editMode.value && _todo.value.reference_type && _todo.value.reference_name) {
+      try {
+        const res = await call('frappe.client.get', {
+          doctype: _todo.value.reference_type,
+          name: _todo.value.reference_name,
+        })
+        const doc = res.message
+        console.log('res', res)
+
+        if (_todo.value.reference_type === 'Lead') {
+          referenceTitle.value = doc.title || doc.lead_name || doc.name 
+        } else if (_todo.value.reference_type === 'Opportunity') {
+          referenceTitle.value = doc.opportunity_name || doc.name
+        } else {
+          referenceTitle.value = doc.name
+        }
+      } catch (err) {
+        console.warn('Error fetching reference title:', err)
+        referenceTitle.value = _todo.value.reference_name
+      }
+    }
   })
 }
+
+
+
 
 onMounted(() => show.value && render())
 

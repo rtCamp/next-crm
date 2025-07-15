@@ -209,3 +209,42 @@ def get_all_customers():
     get_doc = frappe.db.get_all("Customer", fields=['name', 'represents_company'])
 
     return get_doc
+import frappe
+
+@frappe.whitelist()
+def get_customer_events(customer_name):
+    # Get all opportunities created from this customer
+    opportunities = frappe.get_all("Opportunity", {
+        "opportunity_from": "Customer",
+        "party_name": customer_name
+    }, pluck="name")
+
+    if not opportunities:
+        return []
+
+    # Get event parents from Event Participants where reference is to those opportunities
+    event_names = frappe.get_all("Event Participants", {
+        "reference_doctype": "Opportunity",
+        "reference_docname": ["in", opportunities]
+    }, pluck="parent")
+
+    if not event_names:
+        return []
+
+    # Fetch Event details
+    events = frappe.get_all("Event", {
+        "name": ["in", event_names]
+    }, fields=["name", "subject", "event_category", "starts_on", "modified"])
+
+    return events
+@frappe.whitelist(allow_guest=True)
+def get_all_events():
+    events = frappe.get_all("Event", fields=["name"], limit=1000)
+
+    # Fetch full docs with children
+    full_events = []
+    for e in events:
+        doc = frappe.get_doc("Event", e.name)
+        full_events.append(doc.as_dict())
+
+    return full_events

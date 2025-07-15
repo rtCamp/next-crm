@@ -20,7 +20,7 @@
 			<span v-if="locationStatus" class="font-medium text-gray-500 text-sm">
 				{{ locationStatus }}
 			</span>
-			<div class="rounded border-4  w-full ">
+			<div class="rounded border-4  w-full h-170">
 				<iframe
 					width="100%"
 					
@@ -58,35 +58,50 @@
   
   
 <script setup>
-import { createResource, createListResource, toast, FeatherIcon, Button, call } from "frappe-ui"
-import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue"
+import { createResource, createListResource, toast, FeatherIcon, Button } from "frappe-ui"
+import { computed, inject, ref, onMounted, onBeforeUnmount, provide } from "vue"
 import { IonModal, modalController } from "@ionic/vue"
+import { formatTimestamp } from "@/utils/formatters"
+import axios from 'axios'
+
+
+onBeforeUnmount(() => {
+	socket.emit("doctype_unsubscribe", DOCTYPE)
+	socket.off("list_update")
+
+	if (videoRef.value?.srcObject) {
+		videoRef.value.srcObject.getTracks().forEach(track => track.stop())
+		videoRef.value.srcObject = null
+	}
+})
+
 
 const DOCTYPE = "Employee Checkin"
 const socket = inject("$socket")
+
 const employee = ref(null)
 const CheckEmployee = ref([])
-
-// Replace axios with fetch
 onMounted(async () => {
   try {
-    const sessionRes = await fetch('/api/method/frappe.auth.get_logged_user')
-    const sessionData = await sessionRes.json()
-    const user = sessionData?.message
+    const session = await axios.get('/api/method/frappe.auth.get_logged_user')
+    const user = session?.data?.message
+    console.log("Logged-in user:", user)
 
     if (user) {
-      const query = new URLSearchParams({
-        fields: JSON.stringify(['*']),
-        filters: JSON.stringify([['user_id', '=', user]]),
+      const response = await axios.get('/api/resource/Employee', {
+        params: {
+          fields: JSON.stringify(['*']),  // Get all fields
+          filters: JSON.stringify([['user_id', '=', user]])
+        }
       })
 
-      const empRes = await fetch(`/api/resource/Employee?${query}`)
-      const empJson = await empRes.json()
-      const empData = empJson?.data?.[0]
-
+      const empData = response?.data?.data?.[0]  // Get the first matching employee
       if (empData) {
         employee.value = empData
         CheckEmployee.value = empData
+        console.log("Matched Employee:", empData)
+      } else {
+        console.warn("No employee found for user:", user)
       }
     }
   } catch (err) {
@@ -103,205 +118,233 @@ const checkinTimestamp = ref(null)
 const latitude = ref(null)
 const longitude = ref(null)
 const locationStatus = ref("")
+const session = inject("$session")
+const user = inject("$user")
 
 const settings = createResource({
-  url: "next_crm.api.api.get_hr_settings",
-  auto: true,
+	url: "next_crm.api.api.get_hr_settings",
+	auto: true,
 })
 
 const checkins = createListResource({
-  doctype: DOCTYPE,
-  fields: ["employee", "employee_name", "log_type", "time", "device_id"],
-  filters: { employee: CheckEmployee.value.name },
-  orderBy: "time desc",
+	doctype: DOCTYPE,
+	fields: ["employee", "employee_name", "log_type", "time", "device_id"],
+	filters: { employee: CheckEmployee.value.name },
+	orderBy: "time desc",
 })
 checkins.reload()
 
 const lastLog = computed(() => checkins.list.loading || !checkins.data ? {} : checkins.data[0])
+const lastLogType = computed(() => lastLog?.value?.log_type === "IN" ? "check-in" : "check-out")
 const nextAction = computed(() => lastLog?.value?.log_type === "IN"
-  ? { action: "OUT", label: __("Check Out") }
-  : { action: "IN", label: __("Mark Attendance") }
+	? { action: "OUT", label: __("Check Out") }
+	: { action: "IN", label: __("Mark Attendance") }
 )
 
-function fetchLocation() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      locationStatus.value = __("Geolocation is not supported by your browser.")
-      return reject("Not supported")
-    }
-    locationStatus.value = __("Locating...")
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        latitude.value = pos.coords.latitude
-        longitude.value = pos.coords.longitude
-        locationStatus.value = `Latitude: ${latitude.value}, Longitude: ${longitude.value}`
-        resolve()
-      },
-      (err) => {
-        locationStatus.value = `Location Error: (${err.code}) ${err.message}`
-        reject(err)
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    )
-  })
+// ✅ Updated Geolocation Logic
+function handleLocationSuccess(position) {
+	latitude.value = position.coords.latitude
+	longitude.value = position.coords.longitude
+
+	locationStatus.value = [
+		__("Latitude: {0}°", [Number(latitude.value).toFixed(5)]),
+		__("Longitude: {0}°", [Number(longitude.value).toFixed(5)])
+	].join(", ")
 }
 
-fetchLocation()
+function handleLocationError(error) {
+	locationStatus.value = `Location Error: (${error.code}) ${error.message || ''}`
+}
 
-function handleEmployeeCheckin() {
-  checkinTimestamp.value = dayjs().format("YYYY-MM-DD HH:mm:ss")
-  if (settings.data?.allow_geolocation_tracking) {
-    fetchLocation()
-  }
+const fetchLocation = () => {
+	return new Promise((resolve, reject) => {
+		if (!navigator.geolocation) {
+			locationStatus.value = __("Geolocation is not supported by your browser.")
+			return reject("Not supported")
+		}
+		locationStatus.value = __("Locating...")
+		navigator.geolocation.getCurrentPosition(
+			(position) => {
+				latitude.value = position.coords.latitude
+				longitude.value = position.coords.longitude
+				locationStatus.value = `Latitude: ${latitude.value}, Longitude: ${longitude.value}`
+				resolve()
+			},
+			(error) => {
+				locationStatus.value = `Location Error: (${error.code}) ${error.message || ''}`
+				reject(error)
+			},
+			{ enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+		)
+	})
+}
+
+ fetchLocation()
+
+const handleEmployeeCheckin = () => {
+	checkinTimestamp.value = dayjs().format("YYYY-MM-DD HH:mm:ss")
+	if (settings.data?.allow_geolocation_tracking) {
+		fetchLocation()
+	}
 }
 handleEmployeeCheckin()
 
 const submitLog = async (logType) => {
-  const actionLabel = logType === "IN" ? __("Check-in") : __("Check-out")
+	const actionLabel = logType === "IN" ? __("Check-in") : __("Check-out")
 
-  if (settings.data?.allow_geolocation_tracking) {
-    try {
-      await fetchLocation()
-    } catch (err) {
-      toast({
-        title: __("Location Error"),
-        text: __("Unable to get location. Please enable location services."),
-        icon: "alert-circle",
-        position: "bottom-center",
-        iconClasses: "text-yellow-500",
-      })
-      return
-    }
-  }
+	if (settings.data?.allow_geolocation_tracking) {
+		try {
+			await fetchLocation()
+		} catch (err) {
+			toast({
+				title: __("Location Error"),
+				text: __("Unable to get location. Please enable location services."),
+				icon: "alert-circle",
+				position: "bottom-center",
+				iconClasses: "text-yellow-500",
+			})
+			return
+		}
+	}
 
-  if (!employee?.value?.name) {
-    toast({
-      title: __("Error"),
-      text: __("Employee not found. Please try again."),
-      icon: "alert-circle",
-      position: "bottom-center",
-      iconClasses: "text-red-500",
-    })
-    return
-  }
+	if (!employee?.value?.name) {
+		toast({
+			title: __("Error"),
+			text: __("Employee not found. Please try again."),
+			icon: "alert-circle",
+			position: "bottom-center",
+			iconClasses: "text-red-500",
+		})
+		return
+	}
 
-  await capturePhoto()
+	// 🔸 Auto-capture selfie before submission
+	await capturePhoto()
 
-  checkins.insert.submit({
-    employee: CheckEmployee.value.name,
-    log_type: logType,
-    time: checkinTimestamp.value,
-    latitude: latitude.value,
-    longitude: longitude.value,
-  }, {
-    onSuccess: async (doc) => {
-      if (capturedImage.value) {
-        await uploadSelfieToCheckin(doc.name)
-      }
-      modalController.dismiss()
-      toast({
-        title: __("Success"),
-        text: __(`{0} successful!`, [actionLabel]),
-        icon: "check-circle",
-        position: "bottom-center",
-        iconClasses: "text-green-500",
-      })
-    //   window.location.reload()
-    },
-    onError(error) {
-      toast({
-        title: __("Error"),
-        text: __(`{0} failed!`, [actionLabel]),
-        icon: "alert-circle",
-        position: "bottom-center",
-        iconClasses: "text-red-500",
-      })
-    //   window.location.reload()
-    },
-  })
+	checkins.insert.submit({
+		employee: CheckEmployee.value.name,
+		log_type: logType,
+		time: checkinTimestamp.value,
+		latitude: latitude.value,
+		longitude: longitude.value,
+	}, {
+		onSuccess: async (doc) => {
+			// 🔸 Upload captured selfie
+			if (capturedImage.value) {
+				await uploadSelfieToCheckin(doc.name)
+			}
+
+			modalController.dismiss()
+			toast({
+				title: __("Success"),
+				text: __("{0} successful!", [actionLabel]),
+				icon: "check-circle",
+				position: "bottom-center",
+				iconClasses: "text-green-500",
+			})
+
+			window.location.reload()
+		},
+		onError(error) {
+			console.error("Check-in failed", error)
+			toast({
+				title: __("Error"),
+				text: __("{0} failed!", [actionLabel]),
+				icon: "alert-circle",
+				position: "bottom-center",
+				iconClasses: "text-red-500",
+			})
+
+			window.location.reload()
+		},
+	})
 }
 
+
+
+
 onMounted(() => {
-  socket.emit("doctype_subscribe", DOCTYPE)
-  socket.on("list_update", (data) => {
-    if (data.doctype === DOCTYPE) checkins.reload()
-  })
-  startCamera()
+	socket.emit("doctype_subscribe", DOCTYPE)
+	socket.on("list_update", (data) => {
+		if (data.doctype === DOCTYPE) checkins.reload()
+	})
+	startCamera()
 })
 
 onBeforeUnmount(() => {
-  socket.emit("doctype_unsubscribe", DOCTYPE)
-  socket.off("list_update")
+	socket.emit("doctype_unsubscribe", DOCTYPE)
+	socket.off("list_update")
 })
 
+// 🟡 Camera / Selfie
 const videoRef = ref(null)
 const canvasRef = ref(null)
 const capturedImage = ref(null)
 
 const startCamera = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true })
-    if (videoRef.value) videoRef.value.srcObject = stream
-  } catch (err) {
-    console.error("Camera error:", err)
-  }
+	try {
+		const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+		if (videoRef.value) videoRef.value.srcObject = stream
+	} catch (err) {
+		console.error("Camera error:", err)
+	}
 }
 
 const capturePhoto = async () => {
-  const video = videoRef.value
-  const canvas = canvasRef.value
-  if (!video || !canvas) return
+	const video = videoRef.value
+	const canvas = canvasRef.value
+	if (!video || !canvas) return
 
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
-  const context = canvas.getContext("2d")
-  context.drawImage(video, 0, 0, canvas.width, canvas.height)
+	canvas.width = video.videoWidth
+	canvas.height = video.videoHeight
+	const context = canvas.getContext("2d")
+	context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-  canvas.toBlob((blob) => {
-    const file = new File([blob], "selfie.jpg", { type: "image/jpeg" })
-    capturedImage.value = URL.createObjectURL(file)
-  }, "image/jpeg", 0.9)
+	canvas.toBlob(async (blob) => {
+		const file = new File([blob], "selfie.jpg", { type: "image/jpeg" })
+		capturedImage.value = URL.createObjectURL(file)
+
+	}, "image/jpeg", 0.9)
+
 }
 
 const uploadSelfieToCheckin = async (docname) => {
-  try {
-    const blob = await fetch(capturedImage.value).then(res => res.blob());
-    const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+	const blob = await fetch(capturedImage.value).then(res => res.blob())
+	const file = new File([blob], "selfie.jpg", { type: "image/jpeg" })
 
-    const formData = new FormData();
-    formData.append("file", file); // actual binary data
-    formData.append("is_private", "0");
-    formData.append("doctype", "Employee Checkin");
-    formData.append("docname", docname);
-    formData.append("fieldname", "image");
+	const formData = new FormData()
+	formData.append("file", file)
+	formData.append("is_private", "0")
+	formData.append("doctype", "Employee Checkin")
+	formData.append("fieldname", "image")
+	formData.append("docname", docname) // ✅ actual check-in document name
 
-    const response = await fetch("/api/method/upload_file", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
-    }
-
-    console.log("✅ Selfie uploaded to Checkin:", docname);
-  } catch (err) {
-    console.error("❌ Failed to upload selfie:", err);
-    toast({
-      title: __("Upload Error"),
-      text: __("Failed to upload selfie."),
-      icon: "alert-circle",
-      position: "bottom-center",
-      iconClasses: "text-red-500",
-    });
-  }
-};
-
+	try {
+		await axios.post("/api/method/upload_file", formData, {
+			headers: { "Content-Type": "multipart/form-data" }
+		})
+		console.log("Selfie uploaded for", docname)
+	} catch (err) {
+		console.error("Failed to upload selfie:", err)
+		toast({
+			title: __("Upload Error"),
+			text: __("Failed to upload selfie."),
+			icon: "alert-circle",
+			position: "bottom-center",
+			iconClasses: "text-red-500",
+		})
+	}
+}
 
 </script>
-
   
   <style>
+  
+  
+  
+  
+  
+  
   
   #img{
 	  border-radius: 10%;
