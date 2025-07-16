@@ -60,10 +60,11 @@
       </template>
       <template #tab-panel>
         <QuotationList
-          v-if="tabs[tabIndex].name === 'Quotation'"
-          :lead-id="lead.data.name"
-          :count="tabs.find(tab => tab.name === 'Quotation')?.count"
-        />
+        v-if="tabs[tabIndex].name === 'Quotation' && lead?.data?.name"
+        :lead-id="lead.data.name"
+        :count="tabs.find(tab => tab.name === 'Quotation')?.count"
+      />
+      
         <Activities
           ref="activities"
           doctype="Lead"
@@ -1018,7 +1019,7 @@ const tabs = computed(() => {
     {
       name: 'Quotation',
       label: __('Quotation'),
-      icon: ExportIcon,
+      icon: NoteIcon,
       count: quotationCount
     },
   ]

@@ -157,15 +157,15 @@ def get_hr_settings() -> dict:
 		allow_employee_checkin_from_mobile_app=settings.allow_employee_checkin_from_mobile_app,
 		allow_geolocation_tracking=settings.allow_geolocation_tracking,
 	)
-@frappe.whitelist()
-def get_employeecheckin_data():
-    get_data = frappe.db.get_list(
-        "Employee Checkin", 
-        fields=['*'], 
-        order_by="creation DESC",
-        ignore_permissions=False  # Sorting latest records first
-    )
-    return get_data	
+# @frappe.whitelist()
+# def get_employeecheckin_data():
+#     get_data = frappe.db.get_list(
+#         "Employee Checkin", 
+#         fields=['*'], 
+#         order_by="creation DESC",
+#         ignore_permissions=False  
+#     )
+#     return get_data	
 
 @frappe.whitelist(allow_guest=True)
 def get_attendance_list():
