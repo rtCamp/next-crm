@@ -390,7 +390,7 @@ const tabs = computed(() => {
     {
       name: 'Quotation',
       label: __('Quotation'),
-      icon: ExportIcon,
+      icon: NoteIcon,
       count: quotationCount
     },
   ]

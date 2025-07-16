@@ -39,10 +39,11 @@
       </template>
       <template #tab-panel>
         <QuotationList
-        v-if="tabs[tabIndex].name === 'Quotation'"
-        :opportunity-id="opportunity.data.name"
-        :count="tabs.find(tab => tab.name === 'Quotation').count"
-      />
+  v-if="tabs[tabIndex].name === 'Quotation' && opportunity?.data?.name"
+  :opportunity-id="opportunity.data.name"
+  :count="tabs.find(tab => tab.name === 'Quotation')?.count"
+/>
+
         <Activities
           ref="activities"
           doctype="Opportunity"
@@ -694,7 +695,7 @@ const tabs = computed(() => {
     {
       name: 'Quotation',
       label: __('Quotation'),
-      icon: ExportIcon,
+      icon: NoteIcon,
       count: quotationCount
     },
   ]

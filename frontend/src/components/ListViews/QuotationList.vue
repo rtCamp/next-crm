@@ -1,14 +1,33 @@
 <template>
-  <div class="w-[90%] mx-auto space-y-3">
-    <div v-if="loading" class="text-center text-ink-gray-5">
+ 
+    <div class="mx-4 my-3 flex items-center justify-between text-lg font-medium sm:mx-10 sm:mb-4 sm:mt-8">
+      <div class="flex h-8 items-center text-xl font-semibold text-ink-gray-8">
+        {{ __('Quotations') }}
+      </div>
+      <Button variant="solid" @click="goToNewQuotation">
+        <template #prefix>
+          <FeatherIcon name="plus" class="h-4 w-4" />
+        </template>
+        <span>{{ __('Create Quotation') }}</span>
+      </Button>
+    </div>
+  
+<div v-if="quotations.length === 0" class="flex flex-1 min-h-[40vh] items-center justify-center">
+<div class="flex flex-col items-center justify-center gap-3 text-xl font-medium text-ink-gray-4">
+  <FeatherIcon name="file-text" class="h-10 w-10" />
+  <span>{{ __('No Quotations') }}</span>
+  <Button :label="__('Create Quotation')" @click="goToNewQuotation" />
+</div>
+
+
+  </div>
+  <div v-else class="w-[90%] mx-auto space-y-3 mt-2">
+    <!-- <div v-if="loading" class="text-center text-ink-gray-5">
       {{ __('Loading quotations...') }}
-    </div>
+    </div> -->
 
-    <div v-else-if="quotations.length === 0" class="text-center text-ink-gray-5">
-      {{ __('No quotations linked to this opportunity.') }}
-    </div>
-
-    <div v-else class="space-y-4">
+    
+    <div  class="space-y-4">
       <div
         v-for="quotation in quotations"
         :key="quotation.name"
@@ -68,6 +87,7 @@
       </div>
     </div>
   </div>
+
 </template>
 
 
@@ -85,10 +105,11 @@ import { dateFormat, dateTooltipFormat, timeAgo, createToast } from '@/utils'
 dayjs.extend(relativeTime)
 
 const props = defineProps({
-  opportunityId: { type: String, default: null },
-  leadId: { type: String, default: null },
-  count: { type: Object, required: true },
+  opportunityId: String,
+  leadId: String,
+  count: Object,
 })
+
 
 
 const quotations = ref([])
@@ -136,14 +157,16 @@ async function cancelQuotation(name) {
   }
 }
 async function fetchQuotations() {
-  loading.value = true
 
   const filters = []
   if (props.opportunityId) {
     filters.push(['opportunity', '=', props.opportunityId])
-  } else if (props.leadId) {
+  } 
+  if (props.leadId) {
     filters.push(['party_name', '=', props.leadId])
   }
+
+  console.log('Quotation Filters:', filters)
 
   const res = await call('frappe.client.get_list', {
     doctype: 'Quotation',
@@ -151,6 +174,7 @@ async function fetchQuotations() {
     filters,
     order_by: 'creation desc',
   })
+  console.log('All Quotations:', res)
 
   quotations.value = res || []
   props.count.value = quotations.value.length
@@ -163,4 +187,17 @@ watch(
   () => [props.opportunityId, props.leadId],
   fetchQuotations
 )
+
+
+
+function goToNewQuotation() {
+  const isOpportunity = Boolean(props.opportunityId)
+  const quotationTo = isOpportunity ? 'Opportunity' : 'Lead'
+  const partyName = isOpportunity ? props.opportunityId : props.leadId
+
+  const url = `/app/quotation/new?quotation_to=${quotationTo}&party_name=${partyName}`
+  window.location.href = url
+}
+
+
 </script>
