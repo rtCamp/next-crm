@@ -210,7 +210,7 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
         new_parent_note.added_by = note.added_by
         new_parent_note.added_on = note.added_on or now()
 
-        new_parent_note.insert(ignore_permissions=True)
+        new_parent_note.insert()
         attachments = frappe.get_all(
             "NCRM Attachments",
             filters={"parent": note.name, "parenttype": "CRM Note"},
@@ -258,7 +258,7 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
             new_child_note.added_on = child_note.added_on or now()
             new_child_note.custom_parent_note = new_parent_note.name
 
-            new_child_note.insert(ignore_permissions=True)
+            new_child_note.insert()
             child_attachments = frappe.get_all(
                 "NCRM Attachments",
                 filters={"parent": child_note.name, "parenttype": "CRM Note"},

@@ -49,18 +49,8 @@ def get_opportunity_activities(name):
     if opportunity_from == "Lead":
         lead = doc[3]
         activities, calls, _notes, todos, events, attachments = get_lead_activities(
-            lead, False
+            lead, False, True
         )
-
-        crm_note_names = frappe.get_all(
-            "CRM Note", filters={"parent": lead, "parenttype": "Lead"}, pluck="name"
-        )
-        filenames_to_exclude = frappe.get_all(
-            "NCRM Attachments",
-            filters={"parenttype": "CRM Note", "parent": ["in", crm_note_names]},
-            pluck="filename",
-        )
-        attachments = [a for a in attachments if a.name not in filenames_to_exclude]
 
         creation_text = "converted the lead to this opportunity"
 
@@ -218,7 +208,7 @@ def get_opportunity_activities(name):
         activities.append(activity)
 
     calls = calls + get_linked_calls(name)
-    notes = get_linked_notes(name)
+    notes = get_linked_notes(name)["root_notes"]
     todos = todos + get_linked_todos(name)
     events = events + get_linked_events(name)
     attachments = attachments + get_attachments("Opportunity", name)
@@ -230,7 +220,7 @@ def get_opportunity_activities(name):
     return activities, calls, notes, todos, events, attachments
 
 
-def get_lead_activities(name, get_events=True):
+def get_lead_activities(name, get_events=True, exclude_crm_note_attachments=False):
     get_docinfo("", "Lead", name)
     docinfo = frappe.response["docinfo"]
     lead_meta = frappe.get_meta("Lead")
@@ -392,10 +382,15 @@ def get_lead_activities(name, get_events=True):
         activities.append(activity)
 
     calls = get_linked_calls(name)
-    notes = get_linked_notes(name)
+    linked_notes = get_linked_notes(name)
+    notes = linked_notes["root_notes"]
     todos = get_linked_todos(name)
     events = get_linked_events(name)
     attachments = get_attachments("Lead", name)
+
+    if exclude_crm_note_attachments:
+        filenames_to_exclude = linked_notes["attached_file_names"]
+        attachments = [a for a in attachments if a.name not in filenames_to_exclude]
 
     activities.sort(key=lambda x: x["creation"], reverse=True)
     activities = handle_multiple_versions(activities)
@@ -503,7 +498,7 @@ def get_linked_notes(name):
     )
 
     if not notes:
-        return []
+        return {"root_notes": [], "attached_file_names": []}
 
     note_map = {
         str(note["name"]).strip(): {**note, "noteReplies": [], "attachments": []}
@@ -516,8 +511,10 @@ def get_linked_notes(name):
         filters={"parent": ["in", note_names], "parenttype": "CRM Note"},
         fields=["parent", "filename"],
     )
+    attached_file_names = []
 
     for attachment in attachments:
+        attached_file_names.append(attachment["filename"])
         parent = attachment["parent"]
         if parent in note_map:
             note_map[parent]["attachments"].append(attachment)
@@ -533,7 +530,7 @@ def get_linked_notes(name):
         else:
             root_notes.append(note_map[note_id])
 
-    return root_notes
+    return {"root_notes": root_notes, "attached_file_names": attached_file_names}
 
 
 def get_linked_todos(name):
