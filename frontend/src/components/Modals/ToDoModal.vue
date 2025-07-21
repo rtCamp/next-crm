@@ -155,7 +155,8 @@
             :error="(value) => !validate(value)"
             :hideMe="true"
             :triggerKeys="['Enter', ',', 'Tab', ' ']"
-          ></MultiValueInput>
+          >
+          </MultiValueInput>
         </div>
       </div>
     </template>
@@ -242,9 +243,11 @@ function updateAssignee(option) {
   if (assigneeUser.google_calendar) {
     _event.value.google_calendar = assigneeUser.google_calendar
     _event.value.sync_with_google_calendar = 1
+    event_participants.value = []
   } else {
     _event.value.google_calendar = null
     _event.value.sync_with_google_calendar = 0
+    event_participants.value = []
   }
 }
 
