@@ -46,13 +46,7 @@ export function dateFormat(date, format) {
 
 export function addTzInfo(dateStr) {
   /*
-    If dateStr is not string, return it as it is.
-    If it is string, do the following:
-        1. If it already has timezone info (ends with 'Z' or has a timezone offset), return it as is.
-        2. If it does not have timezone info, append the server timezone to it.
-
-    To get server timezone, you can use window.server_timezone_offset, which returns the timezone in '+HH:mm' format.
-    If window.server_timezone is not set, return the dateStr as it is.
+  This function adds timezone information from window.server_timezone_offset to a date string if it doesn't already have it.
   */
 
   if (typeof dateStr !== 'string') {
