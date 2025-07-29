@@ -2,6 +2,7 @@ import datetime
 
 import frappe
 import pytz
+from frappe.utils import get_system_timezone
 
 
 @frappe.whitelist(methods=["POST"], allow_guest=True)
@@ -19,17 +20,14 @@ def get_boot():
             "site_name": frappe.local.site,
             "read_only_mode": frappe.flags.read_only,
             "csrf_token": frappe.sessions.get_csrf_token(),
-            "server_timezone": frappe.db.get_single_value(
-                "System Settings", "time_zone"
-            )
-            or None,
+            "server_timezone": get_system_timezone() or None,
             "server_timezone_offset": get_server_timezone_offset(),
         }
     )
 
 
 def get_server_timezone_offset():
-    timezone_str = frappe.db.get_single_value("System Settings", "time_zone")
+    timezone_str = get_system_timezone()
 
     if not timezone_str:
         return None
