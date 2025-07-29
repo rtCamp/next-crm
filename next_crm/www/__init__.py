@@ -1,7 +1,6 @@
 import datetime
 
 import frappe
-import frappe.client
 import pytz
 
 
@@ -20,14 +19,20 @@ def get_boot():
             "site_name": frappe.local.site,
             "read_only_mode": frappe.flags.read_only,
             "csrf_token": frappe.sessions.get_csrf_token(),
-            "server_timezone": frappe.client.get_time_zone().get("time_zone", None),
+            "server_timezone": frappe.db.get_single_value(
+                "System Settings", "time_zone"
+            )
+            or None,
             "server_timezone_offset": get_server_timezone_offset(),
         }
     )
 
 
 def get_server_timezone_offset():
-    timezone_str = frappe.client.get_time_zone().get("time_zone", "UTC")
+    timezone_str = frappe.db.get_single_value("System Settings", "time_zone")
+
+    if not timezone_str:
+        return None
 
     # Get current time in that timezone
     tz = pytz.timezone(timezone_str)
