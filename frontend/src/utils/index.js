@@ -397,3 +397,16 @@ export const sanitizeCurrency = (str) => {
 }
 
 export const replaceMeWithUser = (obj, user) => ({ ...obj, ...Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v === "@me" ? user : v])) });
+
+/**
+ * Converts a erp-backend datetime string to an HTML datetime-local compatible string.
+ */
+export function toDatetimeLocal(dateStr){
+  if (!dateStr) return ''
+
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+
+  const tzOffset = date.getTimezoneOffset() * 60000
+  return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)
+}

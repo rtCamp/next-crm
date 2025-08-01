@@ -495,6 +495,7 @@ def get_linked_notes(name):
             "added_on",
             "custom_parent_note",
         ],
+        order_by="added_on desc",
     )
 
     if not notes:
@@ -526,7 +527,7 @@ def get_linked_notes(name):
         parent_note_id = str(note.get("custom_parent_note") or "").strip()
 
         if parent_note_id and parent_note_id in note_map:
-            note_map[parent_note_id]["noteReplies"].insert(0, note_map[note_id])
+            note_map[parent_note_id]["noteReplies"].append(note_map[note_id])
         else:
             root_notes.append(note_map[note_id])
 

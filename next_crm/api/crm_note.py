@@ -11,13 +11,21 @@ from next_crm.ncrm.doctype.crm_notification.crm_notification import notify_user
 
 @frappe.whitelist()
 def create_note(
-    doctype, docname, title=None, note=None, parent_note=None, attachments=None
+    doctype,
+    docname,
+    title=None,
+    note=None,
+    parent_note=None,
+    attachments=None,
+    added_on=None,
 ):
     """
     Create a new CRM Note.
     """
     if not note and not title:
         raise frappe.ValidationError("Either note or title is required.")
+
+    added_on = added_on if added_on else now()
 
     new_note = frappe.get_doc(
         {
@@ -29,7 +37,7 @@ def create_note(
             "parentfield": "notes",
             "owner": frappe.session.user,
             "added_by": frappe.session.user,
-            "added_on": now(),
+            "added_on": added_on,
             "custom_parent_note": parent_note,
         }
     )
@@ -62,6 +70,8 @@ def update_note(doctype, docname, note_name, note=None, attachments=None):
 
     note_doc.custom_title = note.get("custom_title")
     note_doc.note = note.get("note")
+    if note.get("added_on"):
+        note_doc.added_on = note.get("added_on")
 
     if attachments:
         existing_filenames = {row.filename for row in note_doc.custom_note_attachments}

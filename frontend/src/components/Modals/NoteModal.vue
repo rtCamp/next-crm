@@ -41,6 +41,17 @@
           />
         </div>
         <div>
+          <div class="mb-1.5 text-xs text-ink-gray-5">{{ __('Posting Date') }}</div>
+          <TextInput
+            type="datetime-local"
+            size="sm"
+            variant="subtle"
+            :placeholder="__('Posting Date')"
+            v-model="_note.added_on"
+            class="datepicker w-full border-none"
+          />
+        </div>
+        <div>
           <div class="mb-1.5 text-xs text-ink-gray-5">{{ __('Content') }}</div>
           <TextEditor
             variant="outline"
@@ -86,7 +97,7 @@ import { TextEditor, call } from 'frappe-ui'
 import { ref, computed, nextTick, watch, h, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
-import { createToast } from '@/utils'
+import { createToast, toDatetimeLocal } from '@/utils'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
 import NoteAttachments from '../Activities/NoteAttachments.vue'
 import { isEqual, sortBy } from 'lodash'
@@ -158,7 +169,7 @@ async function updateNote() {
         doctype: props.doctype,
         docname: props.doc || '',
         note_name: _note.value.name,
-        note: { custom_title: _note.value.custom_title, note: _note.value.note || '' },
+        note: { custom_title: _note.value.custom_title, note: _note.value.note || '', added_on: _note.value.added_on },
         attachments: filteredAttachments.value.map((att) => att.name),
       })
       if (d.name) {
@@ -177,6 +188,7 @@ async function updateNote() {
         title: _note.value.custom_title,
         note: _note.value.note || '',
         attachments: filteredAttachments.value.map((att) => att.name),
+        added_on: _note.value.added_on,
       })
       if (d.name) {
         capture('note_created')
@@ -232,6 +244,9 @@ watch(
     editMode.value = Boolean(props.note?.name)
     nextTick(() => {
       _note.value = { ...props.note }
+      if (props.note?.added_on) {
+        _note.value.added_on = toDatetimeLocal(props.note.added_on)
+      }
       const fileNames = (props.note?.attachments || []).map((item) => item.filename)
       attachedFileNames.value = fileNames
     })
@@ -325,12 +340,15 @@ watchEffect(() => {
 
   const title = noteVal.custom_title?.trim() || ''
   const note = noteVal.note || ''
+  const postingDate = toDatetimeLocal(noteVal.added_on) || ''
 
   const originalTitle = props.note.custom_title?.trim() || ''
   const originalNote = props.note.note || ''
+  const originalPostingDate = toDatetimeLocal(props.note.added_on) || ''
 
   const titleChanged = title !== originalTitle
   const noteChanged = note !== originalNote
+  const postingDateChanged = postingDate !== originalPostingDate
 
   const noteHasContent = !isRichTextEmpty(note)
   const titleHasContent = title.length > 0
@@ -338,10 +356,12 @@ watchEffect(() => {
   const initialAttachmentNames = (props.note.attachments || []).map((a) => a.filename).sort()
   const currentAttachmentNames = attachedFileNames.value.slice().sort()
   const attachmentsChanged = !isEqual(sortBy(initialAttachmentNames), sortBy(currentAttachmentNames))
+
   if (!isEdit) {
-    hasChanged.value = titleHasContent || noteHasContent || attachedFileNames.value.length > 0
+    hasChanged.value = titleHasContent || noteHasContent || attachedFileNames.value.length > 0 || postingDate
   } else {
-    hasChanged.value = (titleChanged && titleHasContent) || (noteChanged && noteHasContent) || attachmentsChanged
+    hasChanged.value =
+      (titleChanged && titleHasContent) || (noteChanged && noteHasContent) || attachmentsChanged || postingDateChanged
   }
 })
 </script>
