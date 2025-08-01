@@ -42,12 +42,9 @@
         </div>
         <div>
           <div class="mb-1.5 text-xs text-ink-gray-5">{{ __('Posting Date') }}</div>
-          <TextInput
-            type="datetime-local"
-            size="sm"
-            variant="subtle"
-            :placeholder="__('Posting Date')"
+          <DateTimePicker
             v-model="_note.added_on"
+            :placeholder="__('Posting Date')"
             class="datepicker w-full border-none"
           />
         </div>
@@ -93,11 +90,11 @@
 <script setup>
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import { capture } from '@/telemetry'
-import { TextEditor, call } from 'frappe-ui'
+import { TextEditor, call, DateTimePicker } from 'frappe-ui'
 import { ref, computed, nextTick, watch, h, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
-import { createToast, toDatetimeLocal } from '@/utils'
+import { createToast } from '@/utils'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
 import NoteAttachments from '../Activities/NoteAttachments.vue'
 import { isEqual, sortBy } from 'lodash'
@@ -245,7 +242,7 @@ watch(
     nextTick(() => {
       _note.value = { ...props.note }
       if (props.note?.added_on) {
-        _note.value.added_on = toDatetimeLocal(props.note.added_on)
+        _note.value.added_on = props.note.added_on
       }
       const fileNames = (props.note?.attachments || []).map((item) => item.filename)
       attachedFileNames.value = fileNames
@@ -340,11 +337,11 @@ watchEffect(() => {
 
   const title = noteVal.custom_title?.trim() || ''
   const note = noteVal.note || ''
-  const postingDate = toDatetimeLocal(noteVal.added_on) || ''
+  const postingDate = noteVal.added_on || ''
 
   const originalTitle = props.note.custom_title?.trim() || ''
   const originalNote = props.note.note || ''
-  const originalPostingDate = toDatetimeLocal(props.note.added_on) || ''
+  const originalPostingDate = props.note.added_on || ''
 
   const titleChanged = title !== originalTitle
   const noteChanged = note !== originalNote
