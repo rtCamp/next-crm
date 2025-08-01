@@ -495,6 +495,7 @@ def get_linked_notes(name):
             "added_on",
             "custom_parent_note",
         ],
+        order_by="added_on desc",
     )
 
     if not notes:
