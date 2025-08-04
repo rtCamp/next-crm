@@ -44,8 +44,40 @@ export function dateFormat(date, format) {
   return useDateFormat(date, _format).value
 }
 
+export function addTzInfo(dateStr) {
+  /*
+  This function adds timezone information from window.server_timezone_offset to a date string if it doesn't already have it.
+  */
+
+  if (typeof dateStr !== 'string') {
+    return dateStr;
+  }
+
+  if (dateStr.endsWith('Z') || /[+-]\d{1,2}:\d{2}$/.test(dateStr)) {
+    return dateStr;
+  }
+
+  const serverTimezoneOffset = window.server_timezone_offset;
+
+  if (!serverTimezoneOffset) {
+    return dateStr;
+  }
+
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      return dateStr; // Invalid date, return as is
+    }
+    // Append the server timezone offset to the date string
+    return `${dateStr}${serverTimezoneOffset}`;
+
+  } catch (e) {
+    return dateStr;
+  }
+}
+
 export function timeAgo(date) {
-  return useTimeAgo(date).value
+  return useTimeAgo(addTzInfo(date)).value
 }
 
 export const dateTooltipFormat = 'ddd, MMM D, YYYY h:mm A'
