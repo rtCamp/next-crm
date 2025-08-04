@@ -14,6 +14,8 @@
               <UserAvatar :user="todo.allocated_to" size="xs" />
               {{ getUser(todo.allocated_to).full_name }}
             </div>
+
+            <!-- Keep Date (if needed) -->
             <div
               v-if="
                 todo.date &&
@@ -38,31 +40,10 @@
                 </div>
               </Tooltip>
             </div>
-            <div class="flex items-center justify-center">
-              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
-            </div>
-            <div v-if="todo?.custom_from_time">
-              <Tooltip :text="dateFormat(todo?.custom_from_time, 'ddd, MMM D, YYYY | hh:mm a')">
-                <div class="flex gap-2">
-                  <CalendarIcon class="size-4 text-ink-gray-5" />
-                  <div>{{ dateFormat(todo?.custom_from_time, 'D MMM , hh:mm a') }}</div>
-                </div>
-              </Tooltip>
-            </div>
-            <div v-if="todo?.custom_from_time" class="flex items-center justify-center">
-              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
-            </div>
-            <div v-if="todo?.custom_to_time">
-              <Tooltip :text="dateFormat(todo?.custom_to_time, 'ddd, MMM D, YYYY | hh:mm a')">
-                <div class="flex gap-2">
-                  <CalendarIcon class="size-4 text-ink-gray-5" />
-                  <div>{{ dateFormat(todo?.custom_to_time, 'D MMM , hh:mm a') }}</div>
-                </div>
-              </Tooltip>
-            </div>
-            <div v-if="todo?.custom_to_time" class="flex items-center justify-center">
-              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
-            </div>
+
+            <!-- Removed: custom_from_time -->
+            <!-- Removed: custom_to_time -->
+
             <div class="flex gap-2">
               <ToDoPriorityIcon class="!h-2 !w-2" :priority="todo.priority" />
               {{ todo.priority }}
@@ -111,6 +92,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import CalendarIcon from '@/components/Icons/CalendarIcon.vue'
 import ToDoStatusIcon from '@/components/Icons/ToDoStatusIcon.vue'
