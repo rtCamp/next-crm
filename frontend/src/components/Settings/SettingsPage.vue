@@ -2,45 +2,26 @@
   <div class="flex h-full flex-col gap-8">
     <h2 class="flex gap-2 text-xl font-semibold leading-none h-5 text-ink-gray-9">
       <div>{{ title || __(doctype) }}</div>
-      <Badge
-        v-if="data.isDirty"
-        :label="__('Not Saved')"
-        variant="subtle"
-        theme="orange"
-      />
+      <Badge v-if="data.isDirty" :label="__('Not Saved')" variant="subtle" theme="orange" />
     </h2>
     <div v-if="!data.get.loading" class="flex-1 overflow-y-auto">
-      <Fields
-        v-if="data?.doc && sections"
-        :sections="sections"
-        :data="data.doc"
-      />
+      <Fields v-if="data?.doc && sections" :sections="sections" :data="data.doc" />
       <ErrorMessage class="mt-2" :message="error" />
     </div>
     <div v-else class="flex flex-1 items-center justify-center">
       <Spinner class="size-8" />
     </div>
     <div class="flex flex-row-reverse">
-      <Button
-        :loading="data.save.loading"
-        :label="__('Update')"
-        variant="solid"
-        @click="update"
-      />
+      <Button :loading="data.save.loading" :label="__('Update')" variant="solid" @click="update" />
     </div>
   </div>
 </template>
 <script setup>
 import Fields from '@/components/Fields.vue'
-import {
-  createDocumentResource,
-  createResource,
-  Spinner,
-  Badge,
-  ErrorMessage,
-} from 'frappe-ui'
+import { createDocumentResource, createResource, Spinner, Badge, ErrorMessage } from 'frappe-ui'
 import { evaluateDependsOnValue, createToast } from '@/utils'
 import { ref, computed } from 'vue'
+import { hiddenPagesResource } from '../../composables/settings'
 
 const props = defineProps({
   doctype: {
@@ -84,6 +65,9 @@ const data = createDocumentResource({
         icon: 'check',
         iconClasses: 'text-ink-green-3',
       })
+      if (props.doctype === 'NCRM Settings') {
+        hiddenPagesResource.reload()
+      }
     },
     onError: (err) => {
       createToast({
@@ -104,7 +88,7 @@ const sections = computed(() => {
   if (fieldsData[0].type !== 'Section Break') {
     _sections.push({
       label: 'General',
-      hideLabel: true,
+      hideLabel: false,
       columns: 1,
       fields: [],
     })
@@ -112,8 +96,8 @@ const sections = computed(() => {
   fieldsData.forEach((field) => {
     if (field.type === 'Section Break') {
       _sections.push({
-        label: field.value,
-        hideLabel: true,
+        label: field.label || '',
+        hideLabel: field.label ? false : true,
         columns: 1,
         fields: [],
       })
@@ -123,14 +107,8 @@ const sections = computed(() => {
       _sections[_sections.length - 1].fields.push({
         ...field,
         filters: field.link_filters && JSON.parse(field.link_filters),
-        display_via_depends_on: evaluateDependsOnValue(
-          field.depends_on,
-          data.doc,
-        ),
-        mandatory_via_depends_on: evaluateDependsOnValue(
-          field.mandatory_depends_on,
-          data.doc,
-        ),
+        display_via_depends_on: evaluateDependsOnValue(field.depends_on, data.doc),
+        mandatory_via_depends_on: evaluateDependsOnValue(field.mandatory_depends_on, data.doc),
         name: field.value,
       })
     }
@@ -149,8 +127,7 @@ function validateMandatoryFields() {
   for (let section of sections.value) {
     for (let field of section.fields) {
       if (
-        (field.mandatory ||
-          (field.mandatory_depends_on && field.mandatory_via_depends_on)) &&
+        (field.mandatory || (field.mandatory_depends_on && field.mandatory_via_depends_on)) &&
         !data.doc[field.name]
       ) {
         error.value = __('{0} is mandatory', [__(field.label)])
