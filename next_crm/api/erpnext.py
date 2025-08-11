@@ -175,7 +175,7 @@ def get_pages_visibility():
     hideable_pages = ["Prospects", "ToDos", "Call Logs", "Email Templates"]
     hidden_pages = []
     for page in hideable_pages:
-        page_name = page.lower().replace(" ", "_")
+        page_name = "hide_" + page.lower().replace(" ", "_")
         hidden = frappe.db.get_single_value("NCRM Settings", page_name)
         if hidden:
             hidden_pages.append(page)

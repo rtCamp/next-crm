@@ -8,10 +8,10 @@
     "restore_defaults",
     "hide_comments_tab",
     "hide_pages_section",
-    "prospects",
-    "todos",
-    "call_logs",
-    "email_templates"
+    "hide_prospects",
+    "hide_todos",
+    "hide_call_logs",
+    "hide_email_templates"
   ],
   "fields": [
     {
@@ -33,25 +33,25 @@
     },
     {
       "default": "0",
-      "fieldname": "prospects",
+      "fieldname": "hide_prospects",
       "fieldtype": "Check",
       "label": "Prospects"
     },
     {
       "default": "0",
-      "fieldname": "todos",
+      "fieldname": "hide_todos",
       "fieldtype": "Check",
       "label": "ToDos"
     },
     {
       "default": "0",
-      "fieldname": "call_logs",
+      "fieldname": "hide_call_logs",
       "fieldtype": "Check",
       "label": "Call Logs"
     },
     {
       "default": "0",
-      "fieldname": "email_templates",
+      "fieldname": "hide_email_templates",
       "fieldtype": "Check",
       "label": "Email Templates"
     }
@@ -59,7 +59,7 @@
   "index_web_pages_for_search": 1,
   "issingle": 1,
   "links": [],
-  "modified": "2025-08-11 15:47:28.313812",
+  "modified": "2025-08-11 15:59:48.169243",
   "modified_by": "Administrator",
   "module": "NCRM",
   "name": "NCRM Settings",
