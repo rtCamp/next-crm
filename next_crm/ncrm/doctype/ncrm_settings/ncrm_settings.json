@@ -4,7 +4,15 @@
   "creation": "2024-09-29 13:48:02.715924",
   "doctype": "DocType",
   "engine": "InnoDB",
-  "field_order": ["restore_defaults", "hide_comments_tab"],
+  "field_order": [
+    "restore_defaults",
+    "hide_comments_tab",
+    "hide_pages_section",
+    "hide_prospects",
+    "hide_todos",
+    "hide_call_logs",
+    "hide_email_templates"
+  ],
   "fields": [
     {
       "fieldname": "restore_defaults",
@@ -17,12 +25,41 @@
       "fieldname": "hide_comments_tab",
       "fieldtype": "Check",
       "label": "Hide Comments Tab"
+    },
+    {
+      "fieldname": "hide_pages_section",
+      "fieldtype": "Section Break",
+      "label": "Hide Pages"
+    },
+    {
+      "default": "0",
+      "fieldname": "hide_prospects",
+      "fieldtype": "Check",
+      "label": "Prospects"
+    },
+    {
+      "default": "0",
+      "fieldname": "hide_todos",
+      "fieldtype": "Check",
+      "label": "ToDos"
+    },
+    {
+      "default": "0",
+      "fieldname": "hide_call_logs",
+      "fieldtype": "Check",
+      "label": "Call Logs"
+    },
+    {
+      "default": "0",
+      "fieldname": "hide_email_templates",
+      "fieldtype": "Check",
+      "label": "Email Templates"
     }
   ],
   "index_web_pages_for_search": 1,
   "issingle": 1,
   "links": [],
-  "modified": "2025-05-23 10:51:30.482563",
+  "modified": "2025-08-11 15:59:48.169243",
   "modified_by": "Administrator",
   "module": "NCRM",
   "name": "NCRM Settings",
@@ -39,6 +76,7 @@
       "write": 1
     }
   ],
+  "row_format": "Dynamic",
   "sort_field": "creation",
   "sort_order": "DESC",
   "states": []
