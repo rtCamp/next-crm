@@ -104,64 +104,67 @@ import { unreadNotificationsCount, notificationsStore } from '@/stores/notificat
 import { FeatherIcon } from 'frappe-ui'
 import { useStorage } from '@vueuse/core'
 import { computed, h } from 'vue'
+import { hiddenPages } from '../../composables/settings'
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 const { toggle: toggleNotificationPanel } = notificationsStore()
 
 const isSidebarCollapsed = useStorage('isSidebarCollapsed', false)
 
-const links = [
-  {
-    label: 'Leads',
-    icon: LeadsIcon,
-    to: 'Leads',
-  },
-  {
-    label: 'Opportunities',
-    icon: OpportunitiesIcon,
-    to: 'Opportunities',
-  },
-  {
-    label: 'Prospects',
-    icon: ProspectsIcon,
-    to: 'Prospects',
-  },
-  {
-    label: 'Contacts',
-    icon: ContactsIcon,
-    to: 'Contacts',
-  },
-  {
-    label: 'Addresses',
-    icon: AddressIcon,
-    to: 'Addresses',
-  },
-  {
-    label: 'Customers',
-    icon: CustomersIcon,
-    to: 'Customers',
-  },
-  {
-    label: 'Reports',
-    icon: FileTextIcon,
-    to: 'Reports',
-  },
-  // {
-  //   label: 'ToDos',
-  //   icon: ToDoIcon,
-  //   to: 'ToDos',
-  // },
-  // {
-  //   label: 'Call Logs',
-  //   icon: PhoneIcon,
-  //   to: 'Call Logs',
-  // },
-  // {
-  //   label: 'Email Templates',
-  //   icon: Email2Icon,
-  //   to: 'Email Templates',
-  // },
-]
+const links = computed(() =>
+  [
+    {
+      label: 'Leads',
+      icon: LeadsIcon,
+      to: 'Leads',
+    },
+    {
+      label: 'Opportunities',
+      icon: OpportunitiesIcon,
+      to: 'Opportunities',
+    },
+    {
+      label: 'Prospects',
+      icon: ProspectsIcon,
+      to: 'Prospects',
+    },
+    {
+      label: 'Contacts',
+      icon: ContactsIcon,
+      to: 'Contacts',
+    },
+    {
+      label: 'Addresses',
+      icon: AddressIcon,
+      to: 'Addresses',
+    },
+    {
+      label: 'Customers',
+      icon: CustomersIcon,
+      to: 'Customers',
+    },
+    {
+      label: 'Reports',
+      icon: FileTextIcon,
+      to: 'Reports',
+    },
+    {
+      label: 'ToDos',
+      icon: ToDoIcon,
+      to: 'ToDos',
+    },
+    {
+      label: 'Call Logs',
+      icon: PhoneIcon,
+      to: 'Call Logs',
+    },
+    {
+      label: 'Email Templates',
+      icon: Email2Icon,
+      to: 'Email Templates',
+    },
+  ].filter((link) => !hiddenPages.value.includes(link.label)),
+)
 
 const allViews = computed(() => {
   let _views = [
@@ -169,7 +172,7 @@ const allViews = computed(() => {
       name: 'All Views',
       hideLabel: true,
       opened: true,
-      views: links,
+      views: links.value,
     },
   ]
   if (getPublicViews().length) {

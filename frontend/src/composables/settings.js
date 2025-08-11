@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 export const whatsappEnabled = ref(false)
 export const isWhatsappInstalled = ref(false)
+export const hiddenPages = ref([])
 createResource({
   url: 'next_crm.api.whatsapp.is_whatsapp_enabled',
   cache: 'Is Whatsapp Enabled',
@@ -19,6 +20,15 @@ createResource({
     isWhatsappInstalled.value = Boolean(data)
   },
 })
+
+export const hiddenPagesResource = ref(createResource({
+  url: 'next_crm.api.erpnext.get_pages_visibility',
+  cache: 'crm-hidden-pages',
+  auto: true,
+  onSuccess: (data) => {
+    hiddenPages.value = data
+  },
+}))
 
 export const callEnabled = ref(false)
 createResource({

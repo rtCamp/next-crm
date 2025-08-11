@@ -168,3 +168,16 @@ def create_customer(customer_data=None):
             frappe.get_traceback(), "Error while creating customer against Opportunity"
         )
         pass
+
+
+@frappe.whitelist()
+def get_pages_visibility():
+    hideable_pages = ["Prospects", "ToDos", "Call Logs", "Email Templates"]
+    hidden_pages = []
+    for page in hideable_pages:
+        page_name = page.lower().replace(" ", "_")
+        hidden = frappe.db.get_single_value("NCRM Settings", page_name)
+        if hidden:
+            hidden_pages.append(page)
+
+    return hidden_pages

@@ -19,11 +19,7 @@
                 :icon="i.icon"
                 :label="__(i.label)"
                 class="w-full"
-                :class="
-                  activeTab?.label == i.label
-                    ? 'bg-surface-white shadow-sm'
-                    : 'hover:bg-surface-gray-2'
-                "
+                :class="activeTab?.label == i.label ? 'bg-surface-white shadow-sm' : 'hover:bg-surface-gray-2'"
                 @click="activeTab = i"
               />
             </nav>
@@ -41,9 +37,11 @@ import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import ERPNextIcon from '@/components/Icons/ERPNextIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
+import SettingsIcon from '@/components/Icons/SettingsIcon.vue'
 import ProfileSettings from '@/components/Settings/ProfileSettings.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
 import ERPNextSettings from '@/components/Settings/ERPNextSettings.vue'
+import NCRMSettings from '@/components/Settings/NCRMSettings.vue'
 import TwilioSettings from '@/components/Settings/TwilioSettings.vue'
 import SidebarLink from '@/components/SidebarLink.vue'
 import { isWhatsappInstalled } from '@/composables/settings'
@@ -62,6 +60,11 @@ const tabs = computed(() => {
           label: __('Profile'),
           icon: ContactsIcon,
           component: markRaw(ProfileSettings),
+        },
+        {
+          label: __('NCRM'),
+          icon: SettingsIcon,
+          component: markRaw(NCRMSettings),
         },
       ],
     },
