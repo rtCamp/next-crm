@@ -91,6 +91,20 @@
                 <AttachmentIcon class="size-4" />
               </Button>
             </Tooltip>
+            <div v-if="followStatus">
+              <Tooltip :text="__('Unfollow Document')">
+                <Button class="h-7 w-7" @click="updateFollow">
+                    <FeatherIcon name="eye" class="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
+            <div v-else>
+              <Tooltip :text="__('Follow Document')">
+                <Button class="h-7 w-7" @click="updateFollow">
+                    <FeatherIcon name="eye-off" class="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
             <Tooltip :text="__('Delete Opportunity')">
               <Button theme="red" class="h-7 w-7" @click="deleteOpportunity">
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -1058,6 +1072,47 @@ function getMissingRequiredFields(requiredFieldKeys, data) {
   return requiredFieldKeys.filter(key => {
     const value = data[key]
     return value === undefined || value === null || String(value).trim() === ''
+  })
+}
+
+const followStatus = ref(false)
+
+function updateFollow(event) {
+  event.stopImmediatePropagation();
+  call('frappe.desk.form.document_follow.update_follow', {
+    doctype: 'Opportunity',
+    doc_name: props.opportunityId,
+    following: !followStatus.value,
+  }).then((res) => {
+    if(res || followStatus.value) {
+      followStatus.value = !followStatus.value
+      createToast({
+        title: __('Follow status updated'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+      return
+    }
+    createToast({
+      title: __('Error updating follow status'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+
+  })
+}
+
+getFollowStatus()
+function getFollowStatus() {
+  call('next_crm.api.doc.is_document_followed', {
+    doctype: 'Opportunity',
+    doc_name: props.opportunityId,
+  }).then((res) => {
+    if(res) {
+      followStatus.value = true
+    } else {
+      followStatus.value = false
+    }
   })
 }
 
