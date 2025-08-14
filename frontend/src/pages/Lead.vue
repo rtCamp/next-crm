@@ -173,6 +173,20 @@
                     <AttachmentIcon class="h-4 w-4" />
                   </Button>
                 </Tooltip>
+                <div v-if="followStatus == 1">
+                  <Tooltip :text="__('Unfollow Document')">
+                    <Button class="h-7 w-7" @click="updateFollow">
+                      <FeatherIcon name="eye" class="h-4 w-4" />
+                    </Button>
+                  </Tooltip>
+                </div>
+                <div v-else>
+                  <Tooltip :text="__('Follow Document')">
+                    <Button class="h-7 w-7" @click="updateFollow">
+                      <FeatherIcon name="eye-off" class="h-4 w-4" />
+                    </Button>
+                  </Tooltip>
+                </div>
                 <Tooltip :text="__('Delete Lead')">
                   <Button theme="red" class="h-7 w-7" @click="deleteLead">
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -1122,5 +1136,47 @@ function afterRename(renamed_docname) {
   router.push({ name: props.doctype, params: { leadId: renamed_docname } }).then(() => {
     location.reload();
   });
+}
+
+const followStatus = ref(false)
+
+async function updateFollow(event) {
+  event.stopImmediatePropagation();
+  await call('frappe.desk.form.document_follow.update_follow', {
+    doctype: 'Lead',
+    doc_name: props.leadId,
+    following: !followStatus.value,
+  }).then((res) => {
+    if(res || res === 1 && followStatus.value) {
+      followStatus.value = !followStatus.value
+      createToast({
+        title: __('Follow status updated'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+      return
+    }
+    createToast({
+      title: __('Error updating follow status'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+
+  })
+  return 0
+}
+
+getFollowStatus()
+function getFollowStatus() {
+  call('next_crm.api.doc.is_document_followed', {
+    doctype: 'Lead',
+    doc_name: props.leadId,
+  }).then((res) => {
+    if(res) {
+      followStatus.value = true
+    } else {
+      followStatus.value = false
+    }
+  })
 }
 </script>
