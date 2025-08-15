@@ -281,7 +281,7 @@ async function updateToDo() {
     let current_doc_link = new URL(window.location.href)
     current_doc_link.hash = '#todos'
     if (_todo.value.name) {
-      if (fromTime && toTime) {
+      if (fromTime.value && toTime.value) {
         if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
           createToast({
             title: __('Validation error'),
@@ -373,7 +373,7 @@ async function updateToDo() {
         iconClasses: 'text-ink-green-3',
       })
     } else {
-      if (fromTime && toTime) {
+      if (fromTime.value && toTime.value) {
         if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
           createToast({
             title: __('Validation error'),
