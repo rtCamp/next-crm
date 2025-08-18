@@ -928,12 +928,10 @@ function updateField(name, value, callback) {
         icon: 'x',
         iconClasses: 'text-ink-red-4',
       });
+      showCreateProjectModal.value = true;
     } else {
-      console.log(_customer.value)
-      console.log(opportunity.data.customer)
       showMSAModal.value = true;
     }
-    // showCreateProjectModal.value = true;
   }
 }
 

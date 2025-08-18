@@ -20,6 +20,10 @@
       <div class="flex flex-row gap-4">
         <div>
           <div class="mt-4">
+            <div class="mb-2 text-sm text-ink-gray-5">
+              MSA Start Date
+              <span class="text-red-500">*</span>
+            </div>
             <DatePicker
               v-model="fieldValues.msa_start_date"
               :placeholder="'MSA Start Date'"
@@ -27,9 +31,11 @@
             />
           </div>
           <div class="mt-4">
+            <div class="mb-2 text-sm text-ink-gray-5">MSA End Date</div>
             <DatePicker v-model="fieldValues.msa_end_date" :placeholder="'MSA End Date'" input-class="border-none" />
           </div>
           <div class="mt-4">
+            <div class="mb-2 text-sm text-ink-gray-5">MSA Document Link</div>
             <FormControl type="text" :placeholder="'MSA Document Link'" v-model="fieldValues.msa_document_link" />
           </div>
         </div>
@@ -44,6 +50,7 @@
           </div>
           <div v-if="fieldValues.insurance_requested">
             <div class="mt-4">
+              <div class="mb-2 text-sm text-ink-gray-5">Insurance Start Date</div>
               <DatePicker
                 v-model="fieldValues.insurance_start_date"
                 :placeholder="'Insurance Start Date'"
@@ -51,6 +58,7 @@
               />
             </div>
             <div class="mt-4">
+              <div class="mb-2 text-sm text-ink-gray-5">Insurance End Date</div>
               <DatePicker
                 v-model="fieldValues.insurance_end_date"
                 :placeholder="'Insurance End Date'"
@@ -58,6 +66,7 @@
               />
             </div>
             <div class="mt-4">
+              <div class="mb-2 text-sm text-ink-gray-5">Insurance Document Link</div>
               <FormControl
                 type="text"
                 :placeholder="'Insurance Document Link'"
