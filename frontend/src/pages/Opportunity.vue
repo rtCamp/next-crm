@@ -324,6 +324,9 @@
       },
     ],
   }" v-model="showCreateProjectModal" />
+  <MSAModal v-model="showMSAModal" :label="__('MSA and Insurance')" :customer="opportunity.data.customer"
+    @close="onMSAClosed" @msa_set="onMSAClosed" 
+  />
   <DeleteModal v-model="showDeleteModal" doctype="Opportunity" :docname="props.opportunityId" :redirectTo="'Opportunities'"/>
 </template>
 <script setup>
@@ -482,6 +485,7 @@ const _customer = ref({})
 const showLostReasonModal = ref(false)
 const showMissingValueModal = ref(false)
 const showCreateProjectModal = ref(false)
+const showMSAModal = ref(false)
 const showDeleteModal = ref(false)
 
 function updateOpportunity(fieldname, value, callback) {
@@ -918,8 +922,24 @@ function updateField(name, value, callback) {
   });
 
   if (isStatusField && value === "Won") {
-    showCreateProjectModal.value = true;
+    if (!opportunity.data.customer){
+      createToast({
+        title: __('Skipping MSA and Insurance due to missing customer'),
+        icon: 'x',
+        iconClasses: 'text-ink-red-4',
+      });
+    } else {
+      console.log(_customer.value)
+      console.log(opportunity.data.customer)
+      showMSAModal.value = true;
+    }
+    // showCreateProjectModal.value = true;
   }
+}
+
+function onMSAClosed() {
+  showMSAModal.value = false;
+  showCreateProjectModal.value = true;
 }
 
 const projectResource = createResource({
@@ -1024,7 +1044,9 @@ const filteredFields = computed(() => {
 const createProjectFromOpportunity = async () => {
   const requiredFields = Object.keys(OPPORTUNITY_TO_PROJECT_KEY_MAP);
   const filteredRequiredFields = requiredFields.filter(field => field in opportunity.data.fields_meta);
+  console.log("filteredRequiredFields", filteredRequiredFields);
   const missingFieldArray = getMissingRequiredFields(filteredRequiredFields, opportunity.data);
+  console.log("missingFieldArray", missingFieldArray);
   if (missingFieldArray.length) {
     showMissingValueModal.value = true;
     showCreateProjectModal.value = false;
@@ -1032,6 +1054,7 @@ const createProjectFromOpportunity = async () => {
       Object.entries(opportunity.data)
         .filter(([key]) => requiredFields.includes(key))
     );
+    console.log("missingFields.value", missingFields.value);
   } else {
     await createProject(opportunity.data);
   }
