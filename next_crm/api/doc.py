@@ -877,3 +877,11 @@ def check_create_access(doctype):
     if frappe.has_permission(doctype, "create"):
         return True
     return False
+
+
+@frappe.whitelist()
+def is_document_followed(doctype, doc_name):
+    return frappe.db.exists(
+        "Document Follow",
+        {"ref_doctype": doctype, "ref_docname": doc_name, "user": frappe.session.user},
+    )

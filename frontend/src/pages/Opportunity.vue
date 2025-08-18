@@ -91,6 +91,20 @@
                 <AttachmentIcon class="size-4" />
               </Button>
             </Tooltip>
+            <div v-if="followStatus">
+              <Tooltip :text="__('Unfollow Document')">
+                <Button class="h-7 w-7" @click="updateFollow">
+                    <FeatherIcon name="eye" class="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
+            <div v-else>
+              <Tooltip :text="__('Follow Document')">
+                <Button class="h-7 w-7" @click="updateFollow">
+                    <FeatherIcon name="eye-off" class="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
             <Tooltip :text="__('Delete Opportunity')">
               <Button theme="red" class="h-7 w-7" @click="deleteOpportunity">
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -324,6 +338,9 @@
       },
     ],
   }" v-model="showCreateProjectModal" />
+  <MSAModal v-model="showMSAModal" :label="__('MSA and Insurance')" :customer="opportunity.data.customer"
+    @close="onMSAClosed" @msa_set="onMSAClosed" 
+  />
   <DeleteModal v-model="showDeleteModal" doctype="Opportunity" :docname="props.opportunityId" :redirectTo="'Opportunities'"/>
 </template>
 <script setup>
@@ -482,6 +499,7 @@ const _customer = ref({})
 const showLostReasonModal = ref(false)
 const showMissingValueModal = ref(false)
 const showCreateProjectModal = ref(false)
+const showMSAModal = ref(false)
 const showDeleteModal = ref(false)
 
 function updateOpportunity(fieldname, value, callback) {
@@ -918,8 +936,22 @@ function updateField(name, value, callback) {
   });
 
   if (isStatusField && value === "Won") {
-    showCreateProjectModal.value = true;
+    if (!opportunity.data.customer){
+      createToast({
+        title: __('Skipping MSA and Insurance due to missing customer'),
+        icon: 'x',
+        iconClasses: 'text-ink-red-4',
+      });
+      showCreateProjectModal.value = true;
+    } else {
+      showMSAModal.value = true;
+    }
   }
+}
+
+function onMSAClosed() {
+  showMSAModal.value = false;
+  showCreateProjectModal.value = true;
 }
 
 const projectResource = createResource({
@@ -1058,6 +1090,47 @@ function getMissingRequiredFields(requiredFieldKeys, data) {
   return requiredFieldKeys.filter(key => {
     const value = data[key]
     return value === undefined || value === null || String(value).trim() === ''
+  })
+}
+
+const followStatus = ref(false)
+
+function updateFollow(event) {
+  event.stopImmediatePropagation();
+  call('frappe.desk.form.document_follow.update_follow', {
+    doctype: 'Opportunity',
+    doc_name: props.opportunityId,
+    following: !followStatus.value,
+  }).then((res) => {
+    if(res || followStatus.value) {
+      followStatus.value = !followStatus.value
+      createToast({
+        title: __('Follow status updated'),
+        icon: 'check',
+        iconClasses: 'text-ink-green-3',
+      })
+      return
+    }
+    createToast({
+      title: __('Error updating follow status'),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+
+  })
+}
+
+getFollowStatus()
+function getFollowStatus() {
+  call('next_crm.api.doc.is_document_followed', {
+    doctype: 'Opportunity',
+    doc_name: props.opportunityId,
+  }).then((res) => {
+    if(res) {
+      followStatus.value = true
+    } else {
+      followStatus.value = false
+    }
   })
 }
 
