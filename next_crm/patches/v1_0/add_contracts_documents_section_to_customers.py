@@ -19,6 +19,8 @@ def execute():
             "custom_insurance_start_date",
             "custom_insurance_end_date",
             "custom_insurance_document_link",
+            "custom_contract_start_date",
+            "custom_contract_end_date",
         ],
     }
 

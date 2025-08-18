@@ -174,7 +174,7 @@ def add_default_fields_layout(force=False):
         },
         "Customer-Side Panel": {
             "doctype": "Customer",
-            "layout": '[{"label":"Details","name":"details","opened":true,"fields":["customer_name","website","territory","industry","no_of_employees","customer_primary_address"]}, {"label":"Contracts and Documents", "name": "contracts_documents", "opened":true,"fields":["custom_msa_start_date","custom_msa_end_date","custom_msa_document_link","custom_insurance_requested","custom_insurance_start_date","custom_insurance_end_date","custom_insurance_document_link"]}]',
+            "layout": '[{"label":"Details","name":"details","opened":true,"fields":["customer_name","website","territory","industry","no_of_employees","customer_primary_address"]}, {"label":"Contracts and Documents", "name": "contracts_documents", "opened":true,"fields":["custom_msa_start_date","custom_msa_end_date","custom_msa_document_link","custom_insurance_requested","custom_insurance_start_date","custom_insurance_end_date","custom_insurance_document_link", "custom_contract_start_date", "custom_contract_end_date"]}]',
         },
         "Address-Side Panel": {
             "doctype": "Address",
