@@ -1042,9 +1042,7 @@ const filteredFields = computed(() => {
 const createProjectFromOpportunity = async () => {
   const requiredFields = Object.keys(OPPORTUNITY_TO_PROJECT_KEY_MAP);
   const filteredRequiredFields = requiredFields.filter(field => field in opportunity.data.fields_meta);
-  console.log("filteredRequiredFields", filteredRequiredFields);
   const missingFieldArray = getMissingRequiredFields(filteredRequiredFields, opportunity.data);
-  console.log("missingFieldArray", missingFieldArray);
   if (missingFieldArray.length) {
     showMissingValueModal.value = true;
     showCreateProjectModal.value = false;
@@ -1052,7 +1050,6 @@ const createProjectFromOpportunity = async () => {
       Object.entries(opportunity.data)
         .filter(([key]) => requiredFields.includes(key))
     );
-    console.log("missingFields.value", missingFields.value);
   } else {
     await createProject(opportunity.data);
   }
