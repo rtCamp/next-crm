@@ -171,12 +171,11 @@ function validateAndEmit() {
         return
       }
     }
-  } else if (!fieldValues.msa_document_link) {
+  }
+  if (!fieldValues.msa_document_link || fieldValues.msa_document_link == '') {
     createToast({
       title: __('Info'),
-      text: `MSA should be signed and updated by ${new Date(fieldValues.msa_start_date).setDate(
-        new Date(fieldValues.msa_start_date).getDate() + 30,
-      )}`,
+      text: `MSA should be signed and updated by ${getMSAInfoDate()}`,
       icon: 'info',
       iconClasses: 'text-ink-blue-3',
     })
@@ -219,5 +218,11 @@ function validateAndEmit() {
     })
   emit('msa_set')
   isUpdating.value = false
+}
+
+function getMSAInfoDate() {
+  const docLinkDate = new Date(fieldValues.msa_start_date)
+  docLinkDate.setDate(docLinkDate.getDate() + 30)
+  return docLinkDate.toLocaleDateString()
 }
 </script>
