@@ -293,6 +293,10 @@ def get_data(
         if not filters.get("disabled"):
             filters["disabled"] = 0
 
+    if doctype == "ToDo":
+        filters["allocated_to"] = ["=", frappe.session.user]
+        filters["reference_type"] = ["in", ["Lead", "Opportunity", "Customer"]]
+
     is_default = True
     data = []
     _list = get_controller(doctype)
