@@ -338,7 +338,7 @@
       },
     ],
   }" v-model="showCreateProjectModal" />
-  <MSAModal v-model="showMSAModal" :label="__('MSA and Insurance')" :customer="opportunity.data.customer"
+  <MSAModal v-model="showMSAModal" :label="__('MSA and Insurance')" :customer="opportunity?.data?.customer"
     @close="onMSAClosed" @msa_set="onMSAClosed" 
   />
   <DeleteModal v-model="showDeleteModal" doctype="Opportunity" :docname="props.opportunityId" :redirectTo="'Opportunities'"/>
@@ -930,6 +930,10 @@ function updateField(name, value, callback) {
     return;
   }
 
+  if (isStatusField && opportunity.data[name] != value) {
+    createChecklist(value)
+  }
+
   updateOpportunity(name, value, () => {
     opportunity.data[name] = value;
     callback?.();
@@ -947,6 +951,20 @@ function updateField(name, value, callback) {
       showMSAModal.value = true;
     }
   }
+}
+
+function createChecklist(value) {
+  call('next_crm.api.opportunity.create_checklist', {
+    docname: props.opportunityId,
+    status: value,
+  }).catch((err) => {
+    createToast({
+      title: __('Error creating checklist'),
+      text: __(err.messages?.[0]),
+      icon: 'x',
+      iconClasses: 'text-ink-red-4',
+    })
+  })
 }
 
 function onMSAClosed() {

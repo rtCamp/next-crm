@@ -29,3 +29,49 @@ def declare_enquiry_lost_api(
         detailed_reason=detailed_reason,
     )
     return _("Opportunity updated successfully")
+
+
+@frappe.whitelist()
+def create_checklist(docname, status=None):
+    if not status:
+        return
+
+    checklist_items = frappe.get_all(
+        "Opportunity Status Checklist",
+        filters={"parent": status, "parenttype": "CRM Deal Status"},
+        fields=["checklist_item"],
+        pluck="checklist_item",
+    )
+
+    if not checklist_items:
+        return
+
+    content = (
+        '<div class="ql-editor read-mode"><ol>'
+        + "".join(
+            [
+                f'<li data-list="unchecked"><span class="ql-ui" contenteditable="false"></span>{item}</li>'
+                for item in checklist_items
+            ]
+        )
+        + "</ol></div>"
+    )
+
+    opportunity_owner = (
+        frappe.db.get_value("Opportunity", docname, "opportunity_owner")
+        or frappe.session.user
+    )
+
+    todo = frappe.get_doc(
+        {
+            "doctype": "ToDo",
+            "custom_title": _("Checklist for {0}").format(status),
+            "description": content,
+            "reference_type": "Opportunity",
+            "reference_name": docname,
+            "allocated_to": opportunity_owner,
+        }
+    )
+
+    todo.insert()
+    return todo.name
