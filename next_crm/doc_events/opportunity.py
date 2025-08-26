@@ -18,7 +18,7 @@ def before_save(doc, method=None):
         if status_changed:
             create_checklist(doc.name, field="status", value=doc.status)
         if stage_changed:
-            create_checklist(doc.name, field="stage", value=doc.sales_stage)
+            create_checklist(doc.name, field="sales_stage", value=doc.sales_stage)
 
 
 def on_trash(doc, method=None):

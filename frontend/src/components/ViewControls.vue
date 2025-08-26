@@ -843,11 +843,10 @@ function updateColumns(obj) {
 
 async function updateKanbanSettings(data) {
   if (data.item && data.to) {
-    const fieldname = view.value.column_field
     await call('frappe.client.set_value', {
       doctype: props.doctype,
       name: data.item,
-      fieldname: fieldname,
+      fieldname: view.value.column_field,
       value: data.to,
     })
   }
