@@ -922,6 +922,7 @@ function triggerCall() {
 
 function updateField(name, value, callback) {
   const isStatusField = name === "status";
+  const isStageField = name === "sales_stage";
 
   if (isStatusField && opportunity.data[name] === value && value != "Won") {
     return;
@@ -930,8 +931,8 @@ function updateField(name, value, callback) {
     return;
   }
 
-  if (isStatusField && opportunity.data[name] != value) {
-    createChecklist(value)
+  if ((isStatusField || isStageField) && opportunity.data[name] != value) {
+    createChecklist(name, value)
   }
 
   updateOpportunity(name, value, () => {
@@ -953,10 +954,11 @@ function updateField(name, value, callback) {
   }
 }
 
-function createChecklist(value) {
+function createChecklist(field, value) {
   call('next_crm.api.opportunity.create_checklist', {
     docname: props.opportunityId,
-    status: value,
+    field: field,
+    value: value,
   }).catch((err) => {
     createToast({
       title: __('Error creating checklist'),

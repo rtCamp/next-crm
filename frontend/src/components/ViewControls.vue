@@ -841,14 +841,27 @@ function updateColumns(obj) {
   }
 }
 
+async function createChecklist(name, fieldname, value) {
+  await call('next_crm.api.opportunity.create_checklist', {
+    docname: name,
+    field: fieldname,
+    value: value,
+  })
+}
+
 async function updateKanbanSettings(data) {
   if (data.item && data.to) {
+    const fieldname = view.value.column_field
     await call('frappe.client.set_value', {
       doctype: props.doctype,
       name: data.item,
-      fieldname: view.value.column_field,
+      fieldname: fieldname,
       value: data.to,
     })
+
+    if (props.doctype == 'Opportunity' && (fieldname == 'status' || fieldname == 'sales_stage')) {
+      await createChecklist(data.item, fieldname, data.to)
+    }
   }
   let isDirty = viewUpdated.value
 
