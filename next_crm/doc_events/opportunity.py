@@ -9,16 +9,12 @@ def before_save(doc, method=None):
     if not current_status and not current_stage:
         return
 
-    status_changed = doc.status != current_status
-    stage_changed = doc.sales_stage != current_stage
+    from next_crm.api.opportunity import create_checklist
 
-    if status_changed or stage_changed:
-        from next_crm.api.opportunity import create_checklist
-
-        if status_changed:
-            create_checklist(doc.name, field="status", value=doc.status)
-        if stage_changed:
-            create_checklist(doc.name, field="sales_stage", value=doc.sales_stage)
+    if doc.status != current_status:
+        create_checklist(doc.name, field="status", value=doc.status)
+    if doc.sales_stage != current_stage:
+        create_checklist(doc.name, field="sales_stage", value=doc.sales_stage)
 
 
 def on_trash(doc, method=None):
