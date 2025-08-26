@@ -31,7 +31,6 @@ def declare_enquiry_lost_api(
     return _("Opportunity updated successfully")
 
 
-@frappe.whitelist()
 def create_checklist(docname, field=None, value=None):
     if not field and not value:
         return
@@ -42,6 +41,7 @@ def create_checklist(docname, field=None, value=None):
         filters={"parent": value, "parenttype": parenttype},
         fields=["checklist_item"],
         pluck="checklist_item",
+        ignore_permissions=True,
     )
 
     if not checklist_items:
@@ -71,8 +71,9 @@ def create_checklist(docname, field=None, value=None):
             "reference_type": "Opportunity",
             "reference_name": docname,
             "allocated_to": opportunity_owner,
-        }
+        },
+        ignore_permissions=True,
     )
 
-    todo.insert()
+    todo.insert(ignore_permissions=True)
     return todo.name
