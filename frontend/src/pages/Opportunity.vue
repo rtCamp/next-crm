@@ -922,17 +922,12 @@ function triggerCall() {
 
 function updateField(name, value, callback) {
   const isStatusField = name === "status";
-  const isStageField = name === "sales_stage";
 
   if (isStatusField && opportunity.data[name] === value && value != "Won") {
     return;
   } else if (isStatusField && value === "Lost") {
     showLostReasonModal.value = true;
     return;
-  }
-
-  if ((isStatusField || isStageField) && opportunity.data[name] != value) {
-    createChecklist(name, value)
   }
 
   updateOpportunity(name, value, () => {
@@ -952,21 +947,6 @@ function updateField(name, value, callback) {
       showMSAModal.value = true;
     }
   }
-}
-
-function createChecklist(field, value) {
-  call('next_crm.api.opportunity.create_checklist', {
-    docname: props.opportunityId,
-    field: field,
-    value: value,
-  }).catch((err) => {
-    createToast({
-      title: __('Error creating checklist'),
-      text: __(err.messages?.[0]),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
-  })
 }
 
 function onMSAClosed() {

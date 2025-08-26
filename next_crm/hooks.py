@@ -171,7 +171,10 @@ doc_events = {
     "User": {
         "before_validate": ["next_crm.doc_events.user.before_validate"],
     },
-    "Opportunity": {"on_trash": ["next_crm.doc_events.opportunity.on_trash"]},
+    "Opportunity": {
+        "on_trash": ["next_crm.doc_events.opportunity.on_trash"],
+        "before_save": ["next_crm.doc_events.opportunity.before_save"],
+    },
     "Notification Log": {
         "before_save": ["next_crm.doc_events.notification_log.before_save"],
     },

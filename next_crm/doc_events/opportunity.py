@@ -3,6 +3,24 @@ import frappe
 from next_crm.doc_events.utils import delete_attachments_from_crm_notes
 
 
+def before_save(doc, method=None):
+    current_status = frappe.db.get_value("Opportunity", doc.name, "status")
+    current_stage = frappe.db.get_value("Opportunity", doc.name, "sales_stage")
+    if not current_status and not current_stage:
+        return
+
+    status_changed = doc.status != current_status
+    stage_changed = doc.sales_stage != current_stage
+
+    if status_changed or stage_changed:
+        from next_crm.api.opportunity import create_checklist
+
+        if status_changed:
+            create_checklist(doc.name, field="status", value=doc.status)
+        if stage_changed:
+            create_checklist(doc.name, field="stage", value=doc.sales_stage)
+
+
 def on_trash(doc, method=None):
     frappe.db.delete("Prospect Opportunity", filters={"opportunity": doc.name})
     frappe.db.delete(
