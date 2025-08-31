@@ -3,8 +3,9 @@
     <Draggable
       v-if="columns"
       :list="columns"
+      :move="onDragStart"
       item-key="column"
-      @end="updateColumn"
+      @end="onMove"
       :delay="isTouchScreenDevice() ? 200 : 0"
       class="flex sm:mx-2.5 mx-2 pb-3.5"
     >
@@ -18,9 +19,7 @@
               <NestedPopover>
                 <template #target>
                   <Button variant="ghost" size="sm" class="hover:!bg-surface-gray-2">
-                    <IndicatorIcon
-                      :class="colorClasses(column.column.color, true)"
-                    />
+                    <IndicatorIcon :class="colorClasses(column.column.color, true)" />
                   </Button>
                 </template>
                 <template #body="{ close }">
@@ -39,11 +38,7 @@
                       </Button>
                     </div>
                     <div class="flex flex-row-reverse">
-                      <Button
-                        variant="solid"
-                        :label="__('Apply')"
-                        @click="updateColumn"
-                      />
+                      <Button variant="solid" :label="__('Apply')" @click="updateColumn" />
                     </div>
                   </div>
                 </template>
@@ -53,27 +48,20 @@
             <div class="flex">
               <Dropdown :options="actions(column)">
                 <template #default>
-                  <Button
-                    class="hidden group-hover:flex"
-                    icon="more-horizontal"
-                    variant="ghost"
-                  />
+                  <Button class="hidden group-hover:flex" icon="more-horizontal" variant="ghost" />
                 </template>
               </Dropdown>
-              <Button
-                icon="plus"
-                variant="ghost"
-                @click="options.onNewClick(column)"
-              />
+              <Button icon="plus" variant="ghost" @click="options.onNewClick(column)" />
             </div>
           </div>
           <div class="overflow-y-auto flex flex-col gap-2 h-full">
             <Draggable
               :list="column.data"
               group="fields"
+              :move="onDragStart"
               item-key="name"
               class="flex flex-col gap-3.5 flex-1"
-              @end="updateColumn"
+              @end="onMove"
               :delay="isTouchScreenDevice() ? 200 : 0"
               :data-column="column.column.name"
             >
@@ -84,15 +72,10 @@
                   :data-name="fields.name"
                   v-bind="{
                     to: options.getRoute ? options.getRoute(fields) : undefined,
-                    onClick: options.onClick
-                      ? () => options.onClick(fields)
-                      : undefined,
+                    onClick: options.onClick ? () => options.onClick(fields) : undefined,
                   }"
                 >
-                  <slot
-                    name="title"
-                    v-bind="{ fields, titleField, itemName: fields.name }"
-                  >
+                  <slot name="title" v-bind="{ fields, titleField, itemName: fields.name }">
                     <div class="h-5 flex items-center">
                       <div v-if="fields[titleField]">
                         {{ fields[titleField] }}
@@ -130,31 +113,17 @@
                 </component>
               </template>
             </Draggable>
-            <div
-              v-if="column.column.count < column.column.all_count"
-              class="flex items-center justify-center"
-            >
-              <Button
-                :label="__('Load More')"
-                @click="emit('loadMore', column.column.name)"
-              />
+            <div v-if="column.column.count < column.column.all_count" class="flex items-center justify-center">
+              <Button :label="__('Load More')" @click="emit('loadMore', column.column.name)" />
             </div>
           </div>
         </div>
       </template>
     </Draggable>
     <div v-if="deletedColumns.length" class="shrink-0 min-w-64">
-      <Autocomplete
-        value=""
-        :options="deletedColumns"
-        @change="(e) => addColumn(e)"
-      >
+      <Autocomplete value="" :options="deletedColumns" @change="(e) => addColumn(e)">
         <template #target="{ togglePopover }">
-          <Button
-            class="w-full mt-2.5 mb-1 mr-5"
-            @click="togglePopover()"
-            :label="__('Add Column')"
-          >
+          <Button class="w-full mt-2.5 mb-1 mr-5" @click="togglePopover()" :label="__('Add Column')">
             <template #prefix>
               <FeatherIcon name="plus" class="h-4" />
             </template>
@@ -171,7 +140,7 @@ import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import { isTouchScreenDevice } from '@/utils'
 import Draggable from 'vuedraggable'
 import { Dropdown } from 'frappe-ui'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   options: {
@@ -186,6 +155,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update', 'loadMore'])
 
+const oldColumns = ref([])
 const kanban = defineModel()
 
 const titleField = computed(() => {
@@ -193,8 +163,7 @@ const titleField = computed(() => {
 })
 
 const columns = computed(() => {
-  if (!kanban.value?.data?.data || kanban.value.data.view_type != 'kanban')
-    return []
+  if (!kanban.value?.data?.data || kanban.value.data.view_type != 'kanban') return []
   let _columns = kanban.value.data.data
 
   let has_color = _columns.some((column) => column.column?.color)
@@ -205,6 +174,35 @@ const columns = computed(() => {
   }
   return _columns
 })
+function onDragStart() {
+  oldColumns.value = JSON.parse(JSON.stringify(columns.value))
+}
+const onMove = (d) => {
+  $dialog({
+    title: __('Move Item'),
+    message: __('Are you sure you want to move this item?'),
+    variant: 'solid',
+    theme: 'blue',
+    actions: [
+      {
+        label: __('Move'),
+        variant: 'solid',
+        onClick: (close) => {
+          updateColumn(d)
+          close()
+        },
+      },
+      {
+        label: __('Cancel'),
+        variant: 'text',
+        onClick: (close) => {
+          kanban.value.data.data = JSON.parse(JSON.stringify(oldColumns.value))
+          close()
+        },
+      },
+    ],
+  })
+}
 
 const deletedColumns = computed(() => {
   return columns.value
