@@ -141,6 +141,9 @@ import { isTouchScreenDevice } from '@/utils'
 import Draggable from 'vuedraggable'
 import { Dropdown } from 'frappe-ui'
 import { computed, ref } from 'vue'
+import { globalStore } from '@/stores/global'
+
+const { $dialog } = globalStore()
 
 const props = defineProps({
   options: {
