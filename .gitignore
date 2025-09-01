@@ -2,6 +2,9 @@
 *.pyc
 *.egg-info
 *.swp
+.env.development
+.env.production
+.env.local
 .env
 __pycache__
 dev-dist

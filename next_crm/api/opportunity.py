@@ -31,16 +31,17 @@ def declare_enquiry_lost_api(
     return _("Opportunity updated successfully")
 
 
-@frappe.whitelist()
-def create_checklist(docname, status=None):
-    if not status:
+def create_checklist(docname, field=None, value=None):
+    if not field and not value:
         return
 
+    parenttype = "CRM Deal Status" if field == "status" else "Sales Stage"
     checklist_items = frappe.get_all(
         "Opportunity Status Checklist",
-        filters={"parent": status, "parenttype": "CRM Deal Status"},
+        filters={"parent": value, "parenttype": parenttype},
         fields=["checklist_item"],
         pluck="checklist_item",
+        ignore_permissions=True,
     )
 
     if not checklist_items:
@@ -65,13 +66,14 @@ def create_checklist(docname, status=None):
     todo = frappe.get_doc(
         {
             "doctype": "ToDo",
-            "custom_title": _("Checklist for {0}").format(status),
+            "custom_title": _("Checklist for {0}").format(value),
             "description": content,
             "reference_type": "Opportunity",
             "reference_name": docname,
             "allocated_to": opportunity_owner,
-        }
+        },
+        ignore_permissions=True,
     )
 
-    todo.insert()
+    todo.insert(ignore_permissions=True)
     return todo.name
