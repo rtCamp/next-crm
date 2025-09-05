@@ -177,7 +177,7 @@ import { TextEditor, Dropdown, Tooltip, call, DatePicker, TextInput } from 'frap
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMeta } from '@/stores/meta'
-import { createToast } from '@/utils'
+import { createToast, dateFormat } from '@/utils'
 
 const props = defineProps({
   todo: {
@@ -497,6 +497,8 @@ async function render() {
   nextTick(async () => {
     custom_title.value?.el?.focus?.()
     _todo.value = { ...props.todo }
+    _todo.value.custom_from_time = _todo.value.custom_from_time || dateFormat(new Date(), 'YYYY-MM-DDTHH:mm')
+    _todo.value.custom_to_time = _todo.value.custom_to_time || dateFormat(new Date(), 'YYYY-MM-DDTHH:mm')
 
     if (_todo.value._event) {
       _event.value = _todo.value._event
