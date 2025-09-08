@@ -33,6 +33,7 @@
         </template>
       </Dropdown>
       <Button
+        v-if="lead?.data?.converted != 1"
         :label="__('Convert to Opportunity')"
         variant="solid"
         @click="showConvertToOpportunityModal = true"
