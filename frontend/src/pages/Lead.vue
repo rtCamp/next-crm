@@ -591,6 +591,7 @@
       doctype="Lead"
       :docname="lead?.data?.name"
       :title="lead?.data?.title"
+      :allow_rename_docname="false"
       :options="{
         afterRename: afterRename
       }"
