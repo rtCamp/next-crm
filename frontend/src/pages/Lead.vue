@@ -33,6 +33,7 @@
         </template>
       </Dropdown>
       <Button
+        v-if="lead?.data?.converted != 1"
         :label="__('Convert to Opportunity')"
         variant="solid"
         @click="showConvertToOpportunityModal = true"
@@ -591,6 +592,7 @@
       doctype="Lead"
       :docname="lead?.data?.name"
       :title="lead?.data?.title"
+      :allow_rename_docname="false"
       :options="{
         afterRename: afterRename
       }"

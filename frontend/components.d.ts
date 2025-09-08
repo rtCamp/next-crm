@@ -187,6 +187,7 @@ declare module 'vue' {
     RightSideLayoutIcon: typeof import('./src/components/Icons/RightSideLayoutIcon.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchPopover: typeof import('./src/components/SearchPopover.vue')['default']
     Section: typeof import('./src/components/Section.vue')['default']
     SectionFields: typeof import('./src/components/SectionFields.vue')['default']
     SelectIcon: typeof import('./src/components/Icons/SelectIcon.vue')['default']

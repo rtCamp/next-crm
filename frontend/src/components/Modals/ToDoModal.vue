@@ -46,9 +46,9 @@
           <TextEditor
             variant="outline"
             ref="description"
-            editor-class="!prose-sm overflow-auto min-h-[180px] max-h-80 py-1.5 px-2 rounded border border-[--surface-gray-2] bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3 text-ink-gray-8 transition-colors"
-            :bubbleMenu="true"
+            editor-class="!prose-sm overflow-auto min-h-[180px] max-h-80 py-1.5 px-2 rounded-b border border-t-0 border-outline-gray-modals bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 hover:shadow-sm focus:bg-surface-white focus:shadow-sm  text-ink-gray-8 transition-colors"
             :content="_todo.description"
+            :fixed-menu="true"
             @change="(val) => (_todo.description = val)"
             :placeholder="__('Took a call with John Doe and discussed the new project.')"
           />
@@ -177,7 +177,7 @@ import { TextEditor, Dropdown, Tooltip, call, DatePicker, TextInput } from 'frap
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMeta } from '@/stores/meta'
-import { createToast } from '@/utils'
+import { createToast, dateFormat } from '@/utils'
 
 const props = defineProps({
   todo: {
@@ -497,6 +497,8 @@ async function render() {
   nextTick(async () => {
     custom_title.value?.el?.focus?.()
     _todo.value = { ...props.todo }
+    _todo.value.custom_from_time = _todo.value.custom_from_time || dateFormat(new Date(), 'YYYY-MM-DDTHH:mm')
+    _todo.value.custom_to_time = _todo.value.custom_to_time || dateFormat(new Date(), 'YYYY-MM-DDTHH:mm')
 
     if (_todo.value._event) {
       _event.value = _todo.value._event

@@ -1,5 +1,6 @@
 import frappe
 
+from next_crm.api.opportunity import create_checklist
 from next_crm.doc_events.utils import delete_attachments_from_crm_notes
 
 
@@ -9,12 +10,15 @@ def before_save(doc, method=None):
     if not current_status and not current_stage:
         return
 
-    from next_crm.api.opportunity import create_checklist
-
     if doc.status != current_status:
         create_checklist(doc.name, field="status", value=doc.status)
     if doc.sales_stage != current_stage:
         create_checklist(doc.name, field="sales_stage", value=doc.sales_stage)
+
+
+def after_insert(doc, method=None):
+    create_checklist(doc.name, field="status", value=doc.status)
+    create_checklist(doc.name, field="sales_stage", value=doc.sales_stage)
 
 
 def on_trash(doc, method=None):
