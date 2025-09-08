@@ -304,7 +304,7 @@
       }
     " />
   <RenameModal v-model="showRenameModal" doctype="Opportunity" :docname="opportunity?.data?.name"
-    :title="opportunity?.data?.title" :options="{
+    :title="opportunity?.data?.title" :allow_rename_docname="false" :options="{
       afterRename: afterRename
     }" />
   <LostReasonModal v-if="opportunity?.data?.name" v-model="showLostReasonModal" :opportunity="opportunity"

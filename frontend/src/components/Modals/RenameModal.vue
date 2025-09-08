@@ -24,7 +24,7 @@
           v-model="_name.title"
         />
       </div>
-      <div class="mt-6">
+      <div class="mt-6" v-if="allowRenameDocname">
         <FormControl
           :type="'text'"
           size="md"
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
+import { ref, nextTick, watch, computed } from 'vue'
 import { createToast } from '@/utils'
 import { call } from 'frappe-ui'
 
@@ -58,11 +58,17 @@ const props = defineProps({
   },
   options: {
     type: Object,
-    default: {
+    default: () => ({
       afterRename: () => {},
-    },
+    }),
+  },
+  allow_rename_docname: {
+    type: Boolean,
+    default: true,
   },
 })
+
+const allowRenameDocname = computed(() => props.allow_rename_docname)
 
 const _name = ref({
   title: '',
@@ -72,13 +78,15 @@ const _name = ref({
 const show = defineModel()
 
 async function renameDoc() {
-  if (props.title === _name.value.title && props.docname === _name.value.name) return
+  // Only check name if renaming docname is allowed
+  if (props.title === _name.value.title && (!allowRenameDocname.value || props.docname === _name.value.name)) return
   try {
     const renamed_docname = await call('frappe.model.rename_doc.update_document_title', {
       doctype: props.doctype,
       docname: props.docname,
       title: _name.value.title,
-      name: _name.value.name,
+      // Only send name if allowed, else send original docname
+      name: allowRenameDocname.value ? _name.value.name : props.docname,
     })
     show.value = false
     createToast({
