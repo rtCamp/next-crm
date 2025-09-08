@@ -174,6 +174,7 @@ doc_events = {
     "Opportunity": {
         "on_trash": ["next_crm.doc_events.opportunity.on_trash"],
         "before_save": ["next_crm.doc_events.opportunity.before_save"],
+        "after_insert": ["next_crm.doc_events.opportunity.after_insert"],
     },
     "Notification Log": {
         "before_save": ["next_crm.doc_events.notification_log.before_save"],

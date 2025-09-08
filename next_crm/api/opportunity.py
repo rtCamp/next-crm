@@ -35,6 +35,23 @@ def create_checklist(docname, field=None, value=None):
     if not field and not value:
         return
 
+    title = _("Checklist for {0}").format(value)
+
+    existing_todo = frappe.get_all(
+        "ToDo",
+        filters={
+            "reference_type": "Opportunity",
+            "reference_name": docname,
+            "custom_title": title,
+            "status": "Open",
+        },
+        fields=["name"],
+        limit=1,
+        ignore_permissions=True,
+    )
+    if existing_todo:
+        return
+
     parenttype = "CRM Deal Status" if field == "status" else "Sales Stage"
     checklist_items = frappe.get_all(
         "Opportunity Status Checklist",
@@ -66,7 +83,7 @@ def create_checklist(docname, field=None, value=None):
     todo = frappe.get_doc(
         {
             "doctype": "ToDo",
-            "custom_title": _("Checklist for {0}").format(value),
+            "custom_title": title,
             "description": content,
             "reference_type": "Opportunity",
             "reference_name": docname,
