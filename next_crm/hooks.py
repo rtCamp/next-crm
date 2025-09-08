@@ -11,7 +11,7 @@ app_icon_route = "/next-crm"
 # Apps
 # ------------------
 
-required_apps = ["frappe/erpnext"]
+required_apps = ["frappe/erpnext", "rtCamp/frappe-search"]
 
 add_to_apps_screen = [
     {

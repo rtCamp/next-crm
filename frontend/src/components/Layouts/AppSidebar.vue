@@ -7,7 +7,7 @@
       <UserDropdown class="p-2" :isCollapsed="isSidebarCollapsed" />
     </div>
     <div class="flex-1 overflow-y-auto">
-      <div class="mb-3 flex flex-col">
+      <div class="flex flex-col">
         <SidebarLink
           id="notifications-btn"
           :label="__('Notifications')"
@@ -28,6 +28,36 @@
             />
           </template>
         </SidebarLink>
+      </div>
+      <div class="mb-3 flex flex-col">
+        <button
+          class="flex h-7 cursor-pointer items-center rounded text-ink-gray-7 duration-300 ease-in-out focus:outline-none focus:transition-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-gray-400 hover:bg-surface-gray-2 relative mx-2 my-0.5"
+          id="search-btn"
+          :class="isSidebarCollapsed ? '' : 'hover:bg-surface-gray-2'"
+          @click="showSearchModal = true"
+        >
+          <div class="flex w-full items-center justify-between duration-300 ease-in-out px-2 py-1">
+            <div class="flex items-center truncate w-full">
+              <span class="grid flex-shrink-0 place-items-center">
+                <FeatherIcon :name="'search'" class="size-4 text-ink-gray-7" />
+              </span>
+              <span
+                class="flex-1 w-full flex justify-between flex-shrink-0 truncate text-sm duration-300 ease-in-out ml-2 w-auto opacity-100"
+                data-state="closed"
+                data-grace-area-trigger=""
+                :class="isSidebarCollapsed && 'hidden'"
+              >
+                <span>Search</span>
+                <span class="flex gap-1 items-center">
+                  <kbd class="text-[0.65rem] items-center text-ink-gray-5">
+                    {{ isMac() ? '⌘' : 'Ctrl' }}
+                  </kbd>
+                  <kbd class="text-xs items-center text-ink-gray-5">K</kbd>
+                </span>
+              </span>
+            </div>
+          </div>
+        </button>
       </div>
       <div v-for="view in allViews" :key="view.label">
         <div v-if="!view.hideLabel && isSidebarCollapsed && view.views?.length" class="mx-2 my-2 h-1 border-b" />
@@ -79,6 +109,7 @@
     </div>
     <Notifications />
   </div>
+  <SearchPopover v-model="showSearchModal" />
 </template>
 
 <script setup>
@@ -97,19 +128,22 @@ import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import ProspectsIcon from '@/components/Icons/ProspectsIcon.vue'
 import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
+// import SearchIcon from '@/components/Icons/SearchIcon.vue'
 import SidebarLink from '@/components/SidebarLink.vue'
 import Notifications from '@/components/Notifications.vue'
+import SearchPopover from '@/components/SearchPopover.vue'
 import { viewsStore } from '@/stores/views'
 import { unreadNotificationsCount, notificationsStore } from '@/stores/notifications'
 import { FeatherIcon } from 'frappe-ui'
 import { useStorage } from '@vueuse/core'
-import { computed, h } from 'vue'
+import { computed, h, onBeforeUnmount, onMounted, ref } from 'vue'
 import { hiddenPages } from '../../composables/settings'
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 const { toggle: toggleNotificationPanel } = notificationsStore()
 
 const isSidebarCollapsed = useStorage('isSidebarCollapsed', false)
+const showSearchModal = ref(false)
 
 const links = computed(() =>
   [
@@ -231,4 +265,23 @@ function getIcon(routeName, icon) {
       return PinIcon
   }
 }
+
+function toggleGlobalSearch(e) {
+  if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault()
+    showSearchModal.value = !showSearchModal.value
+  }
+}
+
+function isMac() {
+  return navigator.platform.toUpperCase().indexOf('MAC') >= 0
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', toggleGlobalSearch)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', toggleGlobalSearch)
+})
 </script>
