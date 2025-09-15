@@ -295,7 +295,7 @@ def get_data(
 
     if doctype == "ToDo":
         filters["allocated_to"] = ["=", frappe.session.user]
-        filters["reference_type"] = ["in", ["Lead", "Opportunity", "Customer"]]
+        filters["reference_type"] = ["in", ["Lead", "Opportunity", "Customer", "Task"]]
 
     is_default = True
     data = []
