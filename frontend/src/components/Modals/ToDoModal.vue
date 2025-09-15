@@ -18,7 +18,7 @@
           {{ editMode ? __('Edit ToDo') : __('Create ToDo') }}
         </h3>
         <Button
-          v-if="todo?.reference_name"
+          v-if="(todo?.reference_name && todo?.reference_type == 'Opportunity') || todo?.reference_type == 'Lead'"
           size="sm"
           :label="todo.reference_type == 'Opportunity' ? __('Open Opportunity') : __('Open Lead')"
           @click="redirect()"
