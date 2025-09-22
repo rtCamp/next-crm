@@ -48,7 +48,7 @@ const opportunityColumns = [
   {
     label: __('Title'),
     key: 'title',
-    width: '11rem',
+    width: '20rem',
   },
   {
     label: __('Status'),
