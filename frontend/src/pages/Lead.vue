@@ -621,6 +621,7 @@ import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import AddressIcon from '@/components/Icons/AddressIcon.vue'
 import SuccessIcon from '@/components/Icons/SuccessIcon.vue'
+import OpportunitiesIcon from '@/components/Icons/OpportunitiesIcon.vue'
 import AssignmentModal from '@/components/Modals/AssignmentModal.vue'
 import LoadingIndicator from '@/components/Icons/LoadingIndicator.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
@@ -1011,6 +1012,12 @@ const tabs = computed(() => {
       name: 'Attachments',
       label: __('Attachments'),
       icon: AttachmentIcon,
+      count: ref(0)
+    },
+    {
+      name: 'Opportunities',
+      label: __('Opportunities'),
+      icon: OpportunitiesIcon,
       count: ref(0)
     },
     {
