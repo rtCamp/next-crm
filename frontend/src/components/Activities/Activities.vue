@@ -88,6 +88,9 @@
           @reload="all_activities.reload()"
         />
       </div>
+      <div v-else-if="title == 'Opportunities'" class="w-full px-3 pb-3 sm:px-5 sm:pb-5 overflow-x-auto">
+        <OpportunityListArea :docname="doc?.data?.name" :doctype="doc?.data?.doctype" :opportunities="activities" />
+      </div>
       <div
         v-else
         v-for="(activity, i) in activities"
@@ -335,6 +338,7 @@ import NoteArea from '@/components/Activities/NoteArea.vue'
 import ToDoArea from '@/components/Activities/ToDoArea.vue'
 import EventArea from '@/components/Activities/EventArea.vue'
 import AttachmentArea from '@/components/Activities/AttachmentArea.vue'
+import OpportunityListArea from '@/components/Activities/OpportunityListArea.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
@@ -410,8 +414,8 @@ const all_activities = createResource({
   params: { name: doc.value.data.name },
   cache: ['activity', doc.value.data.name],
   auto: true,
-  transform: ([versions, calls, notes, todos, events, attachments]) => {
-    return { versions, calls, notes, todos, events, attachments }
+  transform: ([versions, calls, notes, todos, events, attachments, opportunities]) => {
+    return { versions, calls, notes, todos, events, attachments, opportunities }
   },
 })
 
@@ -509,6 +513,9 @@ const activities = computed(() => {
   } else if (title.value == 'Attachments') {
     if (!all_activities.data?.attachments) return []
     return sortByCreation(all_activities.data.attachments)
+  } else if (title.value == 'Opportunities') {
+    if (!all_activities.data?.opportunities) return []
+    return sortByCreation(all_activities.data.opportunities)
   }
 
   _activities.forEach((activity) => {
@@ -576,6 +583,8 @@ const emptyText = computed(() => {
     text = 'No Attachments'
   } else if (title.value == 'WhatsApp') {
     text = 'No WhatsApp Messages'
+  } else if (title.value == 'Opportunities') {
+    text = 'No Opportunities'
   }
   return text
 })
@@ -598,6 +607,8 @@ const emptyTextIcon = computed(() => {
     icon = AttachmentIcon
   } else if (title.value == 'WhatsApp') {
     icon = WhatsAppIcon
+  } else if (title.value == 'Opportunities') {
+    icon = OpportunitiesIcon
   }
   return h(icon, { class: 'text-ink-gray-4' })
 })
@@ -657,6 +668,7 @@ watch(
       Events: value?.events?.length || 0,
       Notes: value?.notes?.length || 0,
       Attachments: value?.attachments?.length || 0,
+      Opportunities: value?.opportunities?.length || 0,
     }
 
     for (const [name, count] of Object.entries(tabCounts)) {

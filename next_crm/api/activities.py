@@ -48,8 +48,8 @@ def get_opportunity_activities(name):
 
     if opportunity_from == "Lead":
         lead = doc[3]
-        activities, calls, _notes, todos, events, attachments = get_lead_activities(
-            lead, False, True
+        activities, calls, _notes, todos, events, attachments, _opportunities = (
+            get_lead_activities(lead, False, True)
         )
 
         creation_text = "converted the lead to this opportunity"
@@ -217,7 +217,7 @@ def get_opportunity_activities(name):
     activities = handle_multiple_versions(activities)
     notes.sort(key=lambda x: x["added_on"], reverse=True)
 
-    return activities, calls, notes, todos, events, attachments
+    return activities, calls, notes, todos, events, attachments, []
 
 
 def get_lead_activities(name, get_events=True, exclude_crm_note_attachments=False):
@@ -387,6 +387,7 @@ def get_lead_activities(name, get_events=True, exclude_crm_note_attachments=Fals
     todos = get_linked_todos(name)
     events = get_linked_events(name)
     attachments = get_attachments("Lead", name)
+    opportunities = get_linked_opportunities("Lead", name)
 
     if exclude_crm_note_attachments:
         filenames_to_exclude = linked_notes["attached_file_names"]
@@ -396,7 +397,7 @@ def get_lead_activities(name, get_events=True, exclude_crm_note_attachments=Fals
     activities = handle_multiple_versions(activities)
     notes.sort(key=lambda x: x["added_on"], reverse=True)
 
-    return activities, calls, notes, todos, events, attachments
+    return activities, calls, notes, todos, events, attachments, opportunities
 
 
 def get_attachments(doctype, name):
@@ -621,6 +622,23 @@ def get_linked_events(name):
         )
 
     return events or []
+
+
+def get_linked_opportunities(doctype, name):
+    opportunities = frappe.get_all(
+        "Opportunity",
+        filters={"opportunity_from": doctype, "party_name": name},
+        fields=[
+            "name",
+            "title",
+            "status",
+            "opportunity_owner",
+            "modified",
+            "creation",
+        ],
+    )
+
+    return opportunities
 
 
 def parse_attachment_log(html, type):
