@@ -294,7 +294,16 @@ def get_data(
             filters["disabled"] = 0
 
     if doctype == "ToDo":
-        filters["allocated_to"] = ["=", frappe.session.user]
+        session_user = frappe.session.user
+        sales_users = frappe.get_all(
+            "Employee",
+            filters={"department": ["like", "sales%"], "user_id": ["is", "set"]},
+            pluck="user_id",
+        )
+        if session_user not in sales_users:
+            filters["allocated_to"] = ["=", session_user]
+        else:
+            filters["allocated_to"] = ["in", sales_users]
         filters["reference_type"] = ["in", ["Lead", "Opportunity", "Customer", "Task"]]
 
     is_default = True
@@ -358,16 +367,28 @@ def get_data(
         if group_by_field and group_by_field not in rows:
             rows.append(group_by_field)
 
-        data = (
-            frappe.get_list(
-                doctype,
-                fields=rows,
-                filters=filters,
-                order_by=order_by,
-                page_length=page_length,
+        if doctype == "ToDo":
+            data = (
+                frappe.get_all(
+                    doctype,
+                    fields=rows,
+                    filters=filters,
+                    order_by=order_by,
+                    page_length=page_length,
+                )
+                or []
             )
-            or []
-        )
+        else:
+            data = (
+                frappe.get_list(
+                    doctype,
+                    fields=rows,
+                    filters=filters,
+                    order_by=order_by,
+                    page_length=page_length,
+                )
+                or []
+            )
 
     if view_type == "kanban":
         if not rows:
