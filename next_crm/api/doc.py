@@ -294,7 +294,12 @@ def get_data(
             filters["disabled"] = 0
 
     if doctype == "ToDo":
-        filters["allocated_to"] = ["=", frappe.session.user]
+        users = frappe.get_all(
+            "Employee",
+            filters={"department": ["like", "sales%"], "user_id": ["is", "set"]},
+            pluck="user_id",
+        )
+        filters["allocated_to"] = ["in", users]
         filters["reference_type"] = ["in", ["Lead", "Opportunity", "Customer", "Task"]]
 
     is_default = True
