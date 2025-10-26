@@ -55,7 +55,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <Dropdown :options="todoStatusOptions(updateToDoStatus)">
-            <Button :label="_todo.status" class="w-full justify-between">
+            <Button :label="_todo.status" class="justify-between">
               <template #prefix>
                 <ToDoStatusIcon :status="_todo.status" />
               </template>
@@ -112,7 +112,7 @@
             class="datepicker w-fit border-none"
           />
           <Dropdown :options="todoPriorityOptions(updateToDoPriority)">
-            <Button :label="_todo.priority" class="w-full justify-between">
+            <Button :label="_todo.priority" class="justify-between">
               <template #prefix>
                 <ToDoPriorityIcon :priority="_todo.priority" />
               </template>

@@ -46,7 +46,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <Dropdown :options="eventStatusOptions(updateEventStatus)">
-            <Button :label="_event.status" class="w-full justify-between">
+            <Button :label="_event.status" class="justify-between">
               <template #prefix>
                 <EventStatusIcon :status="_event.status" />
               </template>
