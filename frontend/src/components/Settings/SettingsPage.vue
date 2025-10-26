@@ -18,8 +18,8 @@
 </template>
 <script setup>
 import Fields from '@/components/Fields.vue'
-import { createDocumentResource, createResource, Spinner, Badge, ErrorMessage } from 'frappe-ui'
-import { evaluateDependsOnValue, createToast } from '@/utils'
+import { createDocumentResource, createResource, Spinner, Badge, ErrorMessage, toast } from 'frappe-ui'
+import { evaluateDependsOnValue } from '@/utils'
 import { ref, computed } from 'vue'
 import { hiddenPagesResource } from '../../composables/settings'
 
@@ -59,23 +59,13 @@ const data = createDocumentResource({
   setValue: {
     onSuccess: () => {
       error.value = null
-      createToast({
-        title: __('Success'),
-        text: __(props.successMessage),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__(props.successMessage))
       if (props.doctype === 'NCRM Settings') {
         hiddenPagesResource.reload()
       }
     },
     onError: (err) => {
-      createToast({
-        title: __('Error'),
-        text: err.message + ': ' + err.messages[0],
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(err.message + ': ' + err.messages[0])
     },
   },
 })

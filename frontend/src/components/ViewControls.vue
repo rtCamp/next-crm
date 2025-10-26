@@ -257,9 +257,9 @@ import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
 import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
-import { isEmoji, createToast, sanitizeCurrency } from '@/utils'
+import { isEmoji, sanitizeCurrency } from '@/utils'
 import { setDefaultViewCache } from '@/utils/view'
-import { Tooltip, createResource, Dropdown, call, FeatherIcon, usePageMeta } from 'frappe-ui'
+import { Tooltip, createResource, Dropdown, call, FeatherIcon, usePageMeta, toast } from 'frappe-ui'
 import { computed, ref, onMounted, watch, h, markRaw } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
@@ -644,11 +644,7 @@ const updateQuickFilters = createResource({
     quickFilters.update({ params: { doctype: props.doctype, cached: false } })
     quickFilters.reload()
 
-    createToast({
-      title: __('Quick Filters updated successfully'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Quick filters updated successfully'))
   },
 })
 

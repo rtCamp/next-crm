@@ -91,10 +91,10 @@ import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { visible, notifications, notificationsStore } from '@/stores/notifications'
 import { globalStore } from '@/stores/global'
-import { timeAgo, createToast } from '@/utils'
+import { timeAgo } from '@/utils'
 import { onClickOutside } from '@vueuse/core'
 import { capture } from '@/telemetry'
-import { Tooltip, call } from 'frappe-ui'
+import { Tooltip, call, toast } from 'frappe-ui'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const { $socket } = globalStore()
@@ -123,11 +123,7 @@ function markAllAsRead() {
 
 async function clearAll() {
   await call('next_crm.api.notifications.clear_all_notifications')
-  createToast({
-    title: __('Notifications deleted successfully'),
-    icon: 'check',
-    iconClasses: 'text-green-500',
-  })
+  toast.success(__('All notifications cleared'))
   notifications.reload()
 }
 

@@ -68,10 +68,9 @@
 <script setup>
 import UserAvatar from '@/components/UserAvatar.vue'
 import { timeAgo, dateFormat, dateTooltipFormat } from '@/utils'
-import { Tooltip, Dropdown, TextEditor, call } from 'frappe-ui'
+import { Tooltip, Dropdown, TextEditor, call, toast } from 'frappe-ui'
 import { usersStore } from '@/stores/users'
 import ReplyIcon from '@/components/Icons/ReplyIcon.vue'
-import { createToast } from '@/utils'
 import NoteAttachments from './NoteAttachments.vue'
 import { ref, watch, onMounted } from 'vue'
 
@@ -113,18 +112,9 @@ async function deleteNote(name) {
       note_name: name,
     })
     notes.value?.reload()
-    createToast({
-      title: __('Note deleted successfully'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Note deleted successfully'))
   } catch (error) {
-    createToast({
-      title: __('Error deleting note'),
-      text: error.message,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Error deleting note'))
   }
 }
 </script>

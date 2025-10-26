@@ -258,7 +258,7 @@ import Section from '@/components/Section.vue'
 import SectionFields from '@/components/SectionFields.vue'
 import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
-import { createToast, setupAssignees, setupCustomizations } from '@/utils'
+import { setupAssignees, setupCustomizations } from '@/utils'
 import { getView } from '@/utils/view'
 import { globalStore } from '@/stores/global'
 import { statusesStore } from '@/stores/statuses'
@@ -277,6 +277,7 @@ import {
   TabPanel,
   Breadcrumbs,
   call,
+  toast,
 } from 'frappe-ui'
 import { ref, computed, h, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -314,7 +315,8 @@ const opportunity = createResource({
       $socket,
       router,
       updateField,
-      createToast,
+      toast,
+      createToast: toast.create,
       deleteDoc: deleteOpportunity,
       resource: {
         opportunity,
@@ -361,20 +363,11 @@ function updateOpportunity(fieldname, value, callback) {
     onSuccess: () => {
       opportunity.reload()
       reload.value = true
-      createToast({
-        title: __('Opportunity updated'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Opportunity updated'))
       callback?.()
     },
     onError: (err) => {
-      createToast({
-        title: __('Error updating opportunity'),
-        text: __(err.messages?.[0]),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Error updating opportunity: {0}', [err.messages?.[0]]))
     },
   })
 }
@@ -382,12 +375,7 @@ function updateOpportunity(fieldname, value, callback) {
 function validateRequired(fieldname, value) {
   let meta = opportunity.data.fields_meta || {}
   if (meta[fieldname]?.reqd && !value) {
-    createToast({
-      title: __('Error Updating Opportunity'),
-      text: __('{0} is a required field', [meta[fieldname].label]),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('{0} is a required field', [meta[fieldname].label]))
     return true
   }
   return false
@@ -533,11 +521,7 @@ async function addContact(contact) {
   })
   if (d) {
     opportunityContacts.reload()
-    createToast({
-      title: __('Contact added'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact added'))
   }
 }
 
@@ -549,11 +533,7 @@ async function removeContact(contact) {
   })
   if (d) {
     opportunityContacts.reload()
-    createToast({
-      title: __('Contact removed'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact removed'))
   }
 }
 
@@ -565,11 +545,7 @@ async function setPrimaryContact(contact) {
   if (d) {
     opportunity.reload()
     opportunityContacts.reload()
-    createToast({
-      title: __('Primary contact set'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Primary contact set'))
   }
 }
 

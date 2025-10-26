@@ -40,8 +40,7 @@
 
 <script setup>
 import { ref, nextTick, watch, computed } from 'vue'
-import { createToast } from '@/utils'
-import { call } from 'frappe-ui'
+import { call, toast } from 'frappe-ui'
 
 const props = defineProps({
   title: {
@@ -89,19 +88,10 @@ async function renameDoc() {
       name: allowRenameDocname.value ? _name.value.name : props.docname,
     })
     show.value = false
-    createToast({
-      title: __(`${props.doctype} Renamed`),
-      icon: 'check',
-      iconClasses: 'text-ink-green-4',
-    })
+    toast.success(__(`${props.doctype} Renamed`))
     props.options.afterRename && props.options.afterRename(renamed_docname)
   } catch (error) {
-    createToast({
-      title: __('Error'),
-      text: error,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(error)
   }
 }
 

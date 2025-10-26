@@ -173,11 +173,11 @@ import MultiValueInput from '../Controls/MultiValueInput.vue'
 import { todoStatusOptions, todoPriorityOptions } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
-import { TextEditor, Dropdown, Tooltip, call, DatePicker, TextInput } from 'frappe-ui'
+import { TextEditor, Dropdown, Tooltip, call, DatePicker, TextInput, toast } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMeta } from '@/stores/meta'
-import { createToast, dateFormat } from '@/utils'
+import { dateFormat } from '@/utils'
 
 const props = defineProps({
   todo: {
@@ -268,12 +268,7 @@ async function updateToDo() {
   _todo.value.assigned_by = getUser().name
 
   if (!_todo.value.description.trim() && !_todo.value.custom_title.trim()) {
-    createToast({
-      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
-      text: __('ToDo must have either a title or a description.'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('ToDo must have either a title or a description.'))
     return
   }
 
@@ -283,24 +278,14 @@ async function updateToDo() {
     if (_todo.value.name) {
       if (fromTime.value && toTime.value) {
         if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
-          createToast({
-            title: __('Validation error'),
-            text: __('From Time and To Time is required'),
-            icon: 'x',
-            iconClasses: 'text-ink-red-4',
-          })
+          toast.error(__('From Time and To Time is required'))
           return
         }
         const fromDateTime = new Date(_todo.value.custom_from_time).getTime()
         const toDateTime = new Date(_todo.value.custom_to_time).getTime()
 
         if (toDateTime < fromDateTime) {
-          createToast({
-            title: __('Validation error'),
-            text: __('To Time cannot be earlier than From Time'),
-            icon: 'x',
-            iconClasses: 'text-ink-red-4',
-          })
+          toast.error(__('To Time cannot be earlier than From Time'))
           return
         }
 
@@ -314,12 +299,7 @@ async function updateToDo() {
       if (!_event.value.sync_with_google_calendar) {
         _event.value.google_calendar = null
       } else if (!_event.value.google_calendar) {
-        createToast({
-          title: __('Error'),
-          text: __('Select Google Calendar to which event should be synced'),
-          icon: 'x',
-          iconClasses: 'text-ink-red-4',
-        })
+        toast.error(__('Select Google Calendar to which event should be synced'))
         return
       }
 
@@ -350,12 +330,7 @@ async function updateToDo() {
           })
         }
       } catch (error) {
-        createToast({
-          title: __('Error updating event'),
-          text: __(error.message),
-          icon: 'x',
-          iconClasses: 'text-ink-red-4',
-        })
+        toast.error(__('Error updating event'))
         return
       }
 
@@ -367,32 +342,18 @@ async function updateToDo() {
       if (d.name) {
         todos.value.reload()
       }
-      createToast({
-        title: __('Todo updated successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Todo updated successfully'))
     } else {
       if (fromTime.value && toTime.value) {
         if (!_todo.value.custom_to_time || !_todo.value.custom_from_time) {
-          createToast({
-            title: __('Validation error'),
-            text: __('From Time and To Time is required'),
-            icon: 'x',
-            iconClasses: 'text-ink-red-4',
-          })
+          toast.error(__('From Time and To Time is required'))
           return
         }
         const fromDateTime = new Date(_todo.value.custom_from_time).getTime()
         const toDateTime = new Date(_todo.value.custom_to_time).getTime()
 
         if (toDateTime < fromDateTime) {
-          createToast({
-            title: __('Validation error'),
-            text: __('To Time cannot be earlier than From Time'),
-            icon: 'x',
-            iconClasses: 'text-ink-red-4',
-          })
+          toast.error(__('To Time cannot be earlier than From Time'))
           return
         }
 
@@ -407,23 +368,13 @@ async function updateToDo() {
       if (!_event.value.sync_with_google_calendar) {
         _event.value.google_calendar = null
       } else if (!_event.value.google_calendar) {
-        createToast({
-          title: __('Error'),
-          text: __('Select Google Calendar to which event should be synced'),
-          icon: 'x',
-          iconClasses: 'text-ink-red-4',
-        })
+        toast.error(__('Select Google Calendar to which event should be synced'))
         return
       }
 
       if (_event.value.sync_with_google_calendar) {
         if (!_todo.value.custom_from_time || !_todo.value.custom_to_time) {
-          createToast({
-            title: __('Validation error'),
-            text: __('From Time and To Time is required to sync with Google Calendar'),
-            icon: 'x',
-            iconClasses: 'text-ink-red-4',
-          })
+          toast.error(__('From Time and To Time is required to sync with Google Calendar'))
           return
         }
 
@@ -453,12 +404,7 @@ async function updateToDo() {
           _todo.value.custom_linked_event = d.name
           capture('event_created')
         } else {
-          createToast({
-            title: __('Error creating event'),
-            text: __('Please try again later.'),
-            icon: 'x',
-            iconClasses: 'text-ink-red-4',
-          })
+          toast.error(__('Error creating event'))
           return
         }
       }
@@ -475,20 +421,11 @@ async function updateToDo() {
         todos.value.reload()
         emit('after')
       }
-      createToast({
-        title: __('Todo created successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Todo created successfully'))
     }
     show.value = false
   } catch (error) {
-    createToast({
-      title: __(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`),
-      text: __(error.message),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__(`Error ${editMode.value ? 'updating' : 'adding'} ToDo`))
   }
 }
 

@@ -54,8 +54,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { createToast } from '@/utils'
-import { call, TextInput } from 'frappe-ui'
+import { call, TextInput, toast } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -145,7 +144,7 @@ function handleSearch(loadMore = false) {
       searchResults.value = allData
     })
     .catch(() => {
-      createToast({ message: 'Error fetching search results', type: 'error' })
+      toast.error(__('Error fetching search results'))
       searchResults.value = []
     })
     .finally(() => {

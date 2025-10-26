@@ -195,7 +195,6 @@ import {
   dateTooltipFormat,
   timeAgo,
   formatNumberIntoCurrency,
-  createToast,
 } from '@/utils'
 import {
   Breadcrumbs,
@@ -210,6 +209,7 @@ import {
   createDocumentResource,
   usePageMeta,
   createResource,
+  toast,
 } from 'frappe-ui'
 import { h, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -239,11 +239,7 @@ async function updateField(fieldname, value) {
   await customer.setValue.submit({
     [fieldname]: value,
   })
-  createToast({
-    title: __('Customer updated'),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Customer updated'))
 }
 
 const breadcrumbs = computed(() => {
@@ -303,11 +299,7 @@ async function changeCustomerImage(file) {
 
 function openWebsite() {
   if (!customer.doc.website)
-    createToast({
-      title: __('Website not found'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Website not found'))
   else window.open(customer.doc.website, '_blank')
 }
 

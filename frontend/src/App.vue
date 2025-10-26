@@ -1,15 +1,16 @@
 <template>
-  <Layout v-if="session().isLoggedIn">
-    <router-view :key="routeKey"/>
-  </Layout>
-  <Dialogs />
-  <Toasts />
+  <FrappeUIProvider>
+    <Layout v-if="session().isLoggedIn">
+      <router-view :key="routeKey"/>
+    </Layout>
+    <Dialogs />
+  </FrappeUIProvider>
 </template>
 
 <script setup>
 import { Dialogs } from '@/utils/dialogs'
 import { sessionStore as session } from '@/stores/session'
-import { Toasts, setConfig } from 'frappe-ui'
+import { FrappeUIProvider, setConfig } from 'frappe-ui'
 import { computed, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
