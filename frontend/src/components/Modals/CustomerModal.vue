@@ -12,19 +12,22 @@
             <Button
               v-if="isManager() || detailMode"
               variant="ghost"
-              class="w-7"
               @click="detailMode ? (detailMode = false) : openQuickEntryModal()"
             >
               <EditIcon class="h-4 w-4" />
             </Button>
-            <Button variant="ghost" class="w-7" @click="show = false">
+            <Button variant="ghost" @click="show = false">
               <FeatherIcon name="x" class="h-4 w-4" />
             </Button>
           </div>
         </div>
         <div>
           <div v-if="detailMode" class="flex flex-col gap-3.5">
-            <div class="flex h-7 items-center gap-2 text-base text-ink-gray-8" v-for="field in fields" :key="field.name">
+            <div
+              class="flex h-7 items-center gap-2 text-base text-ink-gray-8"
+              v-for="field in fields"
+              :key="field.name"
+            >
               <div class="grid w-7 place-content-center">
                 <component :is="field.icon" />
               </div>

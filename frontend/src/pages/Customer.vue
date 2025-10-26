@@ -140,7 +140,6 @@
                 <Button
                   v-if="i == 0 && isManager()"
                   variant="ghost"
-                  class="w-7"
                   @click="showSidePanelModal = true"
                 >
                   <EditIcon class="h-4 w-4" />

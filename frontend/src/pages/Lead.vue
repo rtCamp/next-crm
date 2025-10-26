@@ -134,7 +134,6 @@
               <div class="flex gap-1.5">
                 <Tooltip v-if="callEnabled" :text="__('Make a call')">
                   <Button
-                    class="h-7 w-7"
                     @click="
                       () =>
                         lead.data.mobile_no
@@ -146,7 +145,7 @@
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Send an email')">
-                  <Button class="h-7 w-7">
+                  <Button>
                     <Email2Icon
                       class="h-4 w-4"
                       @click="
@@ -158,7 +157,7 @@
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Go to website')">
-                  <Button class="h-7 w-7">
+                  <Button>
                     <LinkIcon
                       class="h-4 w-4"
                       @click="
@@ -170,26 +169,26 @@
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Attach a file')">
-                  <Button class="h-7 w-7" @click="showFilesUploader = true">
+                  <Button @click="showFilesUploader = true">
                     <AttachmentIcon class="h-4 w-4" />
                   </Button>
                 </Tooltip>
                 <div v-if="followStatus == 1">
                   <Tooltip :text="__('Unfollow Document')">
-                    <Button class="h-7 w-7" @click="updateFollow">
+                    <Button @click="updateFollow">
                       <FeatherIcon name="eye" class="h-4 w-4" />
                     </Button>
                   </Tooltip>
                 </div>
                 <div v-else>
                   <Tooltip :text="__('Follow Document')">
-                    <Button class="h-7 w-7" @click="updateFollow">
+                    <Button @click="updateFollow">
                       <FeatherIcon name="eye-off" class="h-4 w-4" />
                     </Button>
                   </Tooltip>
                 </div>
                 <Tooltip :text="__('Delete Lead')">
-                  <Button theme="red" class="h-7 w-7" @click="deleteLead">
+                  <Button theme="red" @click="deleteLead">
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
                   </Button>
                 </Tooltip>
@@ -234,7 +233,6 @@
                   >
                     <template #target="{ togglePopover }">
                       <Button
-                        class="h-7 px-3"
                         variant="ghost"
                         icon="plus"
                         @click="togglePopover()"
@@ -259,7 +257,6 @@
                   >
                     <template #target="{ togglePopover }">
                       <Button
-                        class="h-7 px-3"
                         variant="ghost"
                         icon="plus"
                         @click="togglePopover()"
@@ -272,7 +269,7 @@
                     ((!section.contacts && !section.addresses && i == 2) || i == 0) && isManager()
                   "
                   variant="ghost"
-                  class="w-7 mr-2"
+                  class="mr-2"
                   @click="showSidePanelModal = true"
                 >
                   <EditIcon class="h-4 w-4" />

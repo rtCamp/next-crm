@@ -131,7 +131,7 @@
                   }
                     ">
                   <template #target="{ togglePopover }">
-                    <Button class="h-7 px-3" variant="ghost" icon="plus" @click="togglePopover()" />
+                    <Button variant="ghost" icon="plus" @click="togglePopover()" />
                   </template>
                   </Link>
                 </div>
@@ -145,13 +145,13 @@
                   }
                     ">
                   <template #target="{ togglePopover }">
-                    <Button class="h-7 px-3" variant="ghost" icon="plus" @click="togglePopover()" />
+                    <Button variant="ghost" icon="plus" @click="togglePopover()" />
                   </template>
                   </Link>
                 </div>
                 <Button v-else-if="
                   ((!section.contacts && !section.addresses && i == 2) || i == 0) && isManager()
-                " variant="ghost" class="w-7 mr-2" @click="showSidePanelModal = true">
+                " variant="ghost" class="mr-2" @click="showSidePanelModal = true">
                   <EditIcon class="h-4 w-4" />
                 </Button>
               </template>

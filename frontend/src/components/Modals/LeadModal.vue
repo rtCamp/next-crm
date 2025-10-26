@@ -9,15 +9,10 @@
             </h3>
           </div>
           <div class="flex items-center gap-1">
-            <Button
-              v-if="isManager()"
-              variant="ghost"
-              class="w-7"
-              @click="openQuickEntryModal"
-            >
+            <Button v-if="isManager()" variant="ghost" @click="openQuickEntryModal">
               <EditIcon class="h-4 w-4" />
             </Button>
-            <Button variant="ghost" class="w-7" @click="show = false">
+            <Button variant="ghost" @click="show = false">
               <FeatherIcon name="x" class="h-4 w-4" />
             </Button>
           </div>
@@ -29,12 +24,7 @@
       </div>
       <div class="px-4 pb-7 pt-4 sm:px-6">
         <div class="flex flex-row-reverse gap-2">
-          <Button
-            variant="solid"
-            :label="__('Create')"
-            :loading="isLeadCreating"
-            @click="createNewLead"
-          />
+          <Button variant="solid" :label="__('Create')" :loading="isLeadCreating" @click="createNewLead" />
         </div>
       </div>
     </template>

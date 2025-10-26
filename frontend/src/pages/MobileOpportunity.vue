@@ -84,7 +84,6 @@
                       >
                         <template #target="{ togglePopover }">
                           <Button
-                            class="h-7 px-3"
                             variant="ghost"
                             icon="plus"
                             @click="togglePopover()"
