@@ -16,13 +16,13 @@
         >
           <div class="flex gap-2 items-center group justify-between">
             <div class="flex items-center text-base">
-              <NestedPopover>
-                <template #target>
-                  <Button variant="ghost" size="sm" class="hover:!bg-surface-gray-2">
+              <Popover>
+                <template #target="{ togglePopover }">
+                  <Button variant="ghost" size="sm" class="hover:!bg-surface-gray-2" @click="togglePopover">
                     <IndicatorIcon :class="colorClasses(column.column.color, true)" />
                   </Button>
                 </template>
-                <template #body="{ close }">
+                <template #body>
                   <div
                     class="flex flex-col gap-3 px-3 py-2.5 min-w-40 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
                   >
@@ -42,7 +42,7 @@
                     </div>
                   </div>
                 </template>
-              </NestedPopover>
+              </Popover>
               <div class="text-ink-gray-9">{{ column.column.name }}</div>
             </div>
             <div class="flex">
@@ -135,11 +135,10 @@
 </template>
 <script setup>
 import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
-import NestedPopover from '@/components/NestedPopover.vue'
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import { isTouchScreenDevice } from '@/utils'
 import Draggable from 'vuedraggable'
-import { Dropdown } from 'frappe-ui'
+import { Dropdown, Popover } from 'frappe-ui'
 import { computed, ref } from 'vue'
 import { globalStore } from '@/stores/global'
 

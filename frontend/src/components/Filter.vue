@@ -1,9 +1,13 @@
 <template>
-  <NestedPopover>
-    <template #target>
+  <Popover placement="bottom-end">
+    <template #target="{ togglePopover, close }">
       <div class="flex items-center">
-        <Button :label="__('Filter')" :class="filters?.size ? 'rounded-r-none' : ''">
-          <template #prefix><FilterIcon class="h-4" /></template>
+        <Button
+          :label="__('Filter')"
+          :class="filters?.size ? 'rounded-r-none' : ''"
+          :iconLeft="FilterIcon"
+          @click="togglePopover"
+        >
           <template v-if="filters?.size" #suffix>
             <div
               class="flex h-5 w-5 items-center justify-center rounded-[5px] bg-surface-white pt-px text-xs font-medium text-ink-gray-8 shadow-sm"
@@ -121,14 +125,13 @@
         </div>
       </div>
     </template>
-  </NestedPopover>
+  </Popover>
 </template>
 <script setup>
-import NestedPopover from '@/components/NestedPopover.vue'
 import FilterIcon from '@/components/Icons/FilterIcon.vue'
 import Link from '@/components/Controls/Link.vue'
 import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
-import { FormControl, createResource, Tooltip, DatePicker, DateTimePicker, DateRangePicker } from 'frappe-ui'
+import { FormControl, createResource, Tooltip, DatePicker, DateTimePicker, DateRangePicker, Popover } from 'frappe-ui'
 import { h, computed, onMounted } from 'vue'
 import { isMobileView } from '@/composables/settings'
 

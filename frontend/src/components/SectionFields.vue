@@ -23,11 +23,12 @@
             </Tooltip>
           </div>
           <div v-else-if="field.type === 'dropdown'">
-            <NestedPopover>
-              <template #target="{ open }">
+            <Popover>
+              <template #target="{ isOpen, togglePopover }">
                 <Button
                   :label="data[field.name]"
                   class="dropdown-button flex w-full items-center justify-between rounded border border-gray-100 bg-surface-gray-2 px-2 py-1.5 text-base text-ink-gray-8 placeholder-gray-500 transition-colors hover:border-gray-200 hover:bg-surface-gray-3 focus:border-gray-500 focus:bg-surface-white focus:shadow-sm focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400"
+                  @click="togglePopover"
                 >
                   <div v-if="data[field.name]" class="truncate">
                     {{ data[field.name] }}
@@ -36,7 +37,7 @@
                     {{ field.placeholder }}
                   </div>
                   <template #suffix>
-                    <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4 text-ink-gray-5" />
+                    <FeatherIcon :name="isOpen ? 'chevron-up' : 'chevron-down'" class="h-4 text-ink-gray-5" />
                   </template>
                 </Button>
               </template>
@@ -71,7 +72,7 @@
                   </div>
                 </div>
               </template>
-            </NestedPopover>
+            </Popover>
           </div>
           <FormControl
             v-else-if="field.type == 'checkbox'"
@@ -203,7 +204,6 @@
 </template>
 
 <script setup>
-import NestedPopover from '@/components/NestedPopover.vue'
 import DropdownItem from '@/components/DropdownItem.vue'
 import FadedScrollableDiv from '@/components/FadedScrollableDiv.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
@@ -211,7 +211,7 @@ import EditIcon from '@/components/Icons/EditIcon.vue'
 import Link from '@/components/Controls/Link.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { usersStore } from '@/stores/users'
-import { Tooltip } from 'frappe-ui'
+import { Tooltip, Popover } from 'frappe-ui'
 import { computed } from 'vue'
 import TableMultiselectInput from '@/components/Controls/TableMultiselectInput.vue'
 import CurrencyInput from './Controls/CurrencyInput.vue'
