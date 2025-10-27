@@ -102,8 +102,8 @@ import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
 import FileVideoIcon from '@/components/Icons/FileVideoIcon.vue'
 import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
 import { globalStore } from '@/stores/global'
-import { call, Tooltip, Badge } from 'frappe-ui'
-import { dateFormat, timeAgo, dateTooltipFormat, convertSize, isImage, createToast } from '@/utils'
+import { call, Tooltip, Badge, toast } from 'frappe-ui'
+import { dateFormat, timeAgo, dateTooltipFormat, convertSize, isImage } from '@/utils'
 import { ref } from 'vue'
 
 const props = defineProps({
@@ -142,12 +142,7 @@ const deleteAttachment = async () => {
       error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
         ? __('Cannot delete this doc because it is linked to other records.')
         : __('Failed to delete the doc. Please try again later.')
-    createToast({
-      title: __('Error'),
-      text: errorMessage,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(errorMessage)
   }
 }
 
@@ -168,12 +163,7 @@ const confirmTogglePrivate = async () => {
     })
     emit('reload')
   } catch (e) {
-    createToast({
-      title: __('Error'),
-      text: __('Failed to update attachment privacy'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Failed to update attachment privacy'))
   } finally {
     showToggleModal.value = false
   }

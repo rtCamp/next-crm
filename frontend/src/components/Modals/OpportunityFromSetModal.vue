@@ -52,8 +52,7 @@
 
 <script setup>
 import { ref, nextTick, watch, reactive } from 'vue'
-import { createToast } from '@/utils'
-import { call, Select } from 'frappe-ui'
+import { call, Select, toast } from 'frappe-ui'
 import Link from '@/components/Controls/Link.vue'
 
 const props = defineProps({
@@ -90,19 +89,10 @@ async function setOpportunityFrom() {
       },
     })
     show.value = false
-    createToast({
-      title: __(`Opportunity Updated`),
-      icon: 'check',
-      iconClasses: 'text-ink-green-4',
-    })
+    toast.success(__('Opportunity Updated'))
     emit('after')
   } catch (error) {
-    createToast({
-      title: __('Error'),
-      text: error,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(error || __('Failed to update Opportunity'))
   }
 }
 

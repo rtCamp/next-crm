@@ -56,8 +56,8 @@ import FileAudioIcon from '@/components/Icons/FileAudioIcon.vue'
 import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
 import FileVideoIcon from '@/components/Icons/FileVideoIcon.vue'
 import { globalStore } from '@/stores/global'
-import { call, Tooltip } from 'frappe-ui'
-import { dateFormat, timeAgo, dateTooltipFormat, convertSize, isImage, createToast } from '@/utils'
+import { call, Tooltip, toast } from 'frappe-ui'
+import { dateFormat, timeAgo, dateTooltipFormat, convertSize, isImage } from '@/utils'
 
 const props = defineProps({
   attachments: Array,
@@ -122,12 +122,7 @@ function deleteAttachment(fileName) {
               error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
                 ? __('Cannot delete this attachment because it is linked to other records.')
                 : __('Failed to delete the doc. Please try again later.')
-            createToast({
-              title: __('Error'),
-              text: errorMessage,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            })
+            toast.error(errorMessage)
           } finally {
             close()
           }

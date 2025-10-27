@@ -193,7 +193,6 @@ import {
   dateTooltipFormat,
   timeAgo,
   formatNumberIntoCurrency,
-  createToast,
 } from '@/utils'
 import { getView } from '@/utils/view'
 import { globalStore } from '@/stores/global.js'
@@ -212,6 +211,7 @@ import {
   createResource,
   usePageMeta,
   Dropdown,
+  toast,
 } from 'frappe-ui'
 import { ref, computed, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -323,12 +323,7 @@ async function deleteContact() {
               error.name === 'LinkExistsError' || error.message.includes('LinkExistsError')
                 ? __('Cannot delete this contact because it is linked to other records.')
                 : __('Failed to delete the contact. Please try again later.');
-            createToast({
-              title: __('Error'),
-              text: errorMessage,
-              icon: 'x',
-              iconClasses: 'text-ink-red-4',
-            });
+            toast.error(errorMessage)
           }
         },
       },
@@ -529,11 +524,7 @@ async function setAsPrimary(field, value) {
   })
   if (d) {
     contact.reload()
-    createToast({
-      title: 'Contact updated',
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact updated'))
   }
 }
 
@@ -546,11 +537,7 @@ async function createNew(field, value) {
   })
   if (d) {
     contact.reload()
-    createToast({
-      title: 'Contact updated',
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact updated'))
   }
 }
 
@@ -563,11 +550,7 @@ async function editOption(doctype, name, fieldname, value) {
   })
   if (d) {
     contact.reload()
-    createToast({
-      title: 'Contact updated',
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact updated'))
   }
 }
 
@@ -577,11 +560,7 @@ async function deleteOption(doctype, name) {
     name,
   })
   await contact.reload()
-  createToast({
-    title: 'Contact updated',
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Contact updated'))
 }
 
 async function updateField(fieldname, value) {
@@ -591,11 +570,7 @@ async function updateField(fieldname, value) {
     fieldname,
     value,
   })
-  createToast({
-    title: 'Contact updated',
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Contact updated'))
 
   contact.reload()
 }

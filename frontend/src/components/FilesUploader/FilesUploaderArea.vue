@@ -4,12 +4,7 @@
   </div>
   <div v-else-if="showCamera">
     <video v-show="!cameraImage" ref="video" class="rounded" autoplay></video>
-    <canvas
-      v-show="cameraImage"
-      ref="canvas"
-      class="rounded"
-      style="width: -webkit-fill-available"
-    />
+    <canvas v-show="cameraImage" ref="canvas" class="rounded" style="width: -webkit-fill-available" />
   </div>
   <div v-else>
     <div
@@ -23,9 +18,7 @@
         <div class="text-center text-ink-gray-5">
           {{ __('Drag and drop files here or upload from') }}
         </div>
-        <div
-          class="grid grid-flow-col justify-center gap-4 text-center text-base"
-        >
+        <div class="grid grid-flow-col justify-center gap-4 text-center text-base">
           <input
             type="file"
             class="hidden"
@@ -57,11 +50,7 @@
       </div>
     </div>
     <div v-show="files.length" class="flex flex-col divide-y">
-      <div
-        v-for="file in files"
-        :key="file.name"
-        class="flex items-center justify-between gap-2 py-3"
-      >
+      <div v-for="file in files" :key="file.name" class="flex items-center justify-between gap-2 py-3">
         <div class="flex items-center gap-4 truncate">
           <div
             class="size-11 rounded overflow-hidden flex-shrink-0 flex justify-center items-center"
@@ -88,11 +77,7 @@
               class="[&>label]:text-sm [&>label]:text-ink-gray-5"
               :label="__('Private')"
             />
-            <ErrorMessage
-              class="mt-2"
-              v-if="file.errorMessage"
-              :message="file.errorMessage"
-            />
+            <ErrorMessage class="mt-2" v-if="file.errorMessage" :message="file.errorMessage" />
           </div>
         </div>
         <div>
@@ -111,12 +96,7 @@
             variant="outline"
             :showPercentage="file.uploading"
           />
-          <Button
-            v-else
-            variant="ghost"
-            icon="trash-2"
-            @click="removeFile(file.name)"
-          />
+          <Button v-else variant="ghost" icon="trash-2" @click="removeFile(file.name)" />
         </div>
       </div>
     </div>
@@ -126,8 +106,8 @@
 import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
 import FileAudioIcon from '@/components/Icons/FileAudioIcon.vue'
 import FileVideoIcon from '@/components/Icons/FileVideoIcon.vue'
-import { createToast, dateFormat, convertSize } from '@/utils'
-import { FormControl, CircularProgressBar, createResource } from 'frappe-ui'
+import { dateFormat, convertSize } from '@/utils'
+import { FormControl, CircularProgressBar, createResource, toast } from 'frappe-ui'
 import { ref, onMounted } from 'vue'
 
 const props = defineProps({
@@ -155,9 +135,7 @@ const cameraImage = ref(null)
 const allowMultiple = ref(props.options.allowMultiple == false ? false : true)
 const disableFileBrowser = ref(props.options.disableFileBrowser || true)
 const allowWebLink = ref(props.options.allowWebLink == false ? false : true)
-const allowTakePhoto = ref(
-  props.options.allowTakePhoto || window.navigator.mediaDevices || false,
-)
+const allowTakePhoto = ref(props.options.allowTakePhoto || window.navigator.mediaDevices || false)
 const restrictions = ref(props.options.restrictions || {})
 const makeAttachmentsPublic = ref(props.options.makeAttachmentsPublic || false)
 
@@ -169,9 +147,7 @@ onMounted(() => {
     auto: true,
     transform: (data) => {
       restrictions.value = {
-        allowedFileTypes: data.allowed_file_types
-          ? data.allowed_file_types.split('\n').map((ext) => `.${ext}`)
-          : [],
+        allowedFileTypes: data.allowed_file_types ? data.allowed_file_types.split('\n').map((ext) => `.${ext}`) : [],
         maxFileSize: data.max_file_size,
         maxNumberOfFiles: data.max_number_of_files,
       }
@@ -324,50 +300,28 @@ function checkRestrictions(file) {
 
   if (!isCorrectType) {
     console.warn('File skipped because of invalid file type', file)
-    createToast({
-      title: __('File "{0}" was skipped because of invalid file type', [
-        file.name,
-      ]),
-      icon: 'alert-circle',
-      iconClasses: 'text-orange-600',
-    })
+    toast.info(__($`File "{file.name}" was skipped because of invalid file type`))
   }
   if (!validFileSize) {
     console.warn('File skipped because of invalid file size', file.size, file)
-    createToast({
-      title: __('File "{0}" was skipped because size exceeds {1} MB', [
-        file.name,
-        maxFileSize / (1024 * 1024),
-      ]),
-      icon: 'alert-circle',
-      iconClasses: 'text-orange-600',
-    })
+    toast.info(__($`File "{file.name}" was skipped because size exceeds {maxFileSize / (1024 * 1024)} MB`))
   }
 
   return isCorrectType && validFileSize
 }
 
 function showMaxFilesNumberWarning(file, maxNumberOfFiles) {
-  console.warn(
-    `File skipped because it exceeds the allowed specified limit of ${maxNumberOfFiles} uploads`,
-    file,
-  )
-  let message = __(
-    'File "{0}" was skipped because only {1} uploads are allowed',
-    [file.name, maxNumberOfFiles],
-  )
+  console.warn(`File skipped because it exceeds the allowed specified limit of ${maxNumberOfFiles} uploads`, file)
+  let message = __('File "{0}" was skipped because only {1} uploads are allowed', [file.name, maxNumberOfFiles])
   if (props.doctype) {
-    message = __(
-      'File "{0}" was skipped because only {1} uploads are allowed for DocType "{2}"',
-      [file.name, maxNumberOfFiles, props.doctype],
-    )
+    message = __('File "{0}" was skipped because only {1} uploads are allowed for DocType "{2}"', [
+      file.name,
+      maxNumberOfFiles,
+      props.doctype,
+    ])
   }
 
-  createToast({
-    title: message,
-    icon: 'alert-circle',
-    iconClasses: 'text-orange-600',
-  })
+  toast.info(message)
 }
 
 function removeFile(name) {

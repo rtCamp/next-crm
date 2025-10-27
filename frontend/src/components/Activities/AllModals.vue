@@ -28,12 +28,11 @@
 import ToDoModal from '@/components/Modals/ToDoModal.vue'
 import EventModal from '@/components/Modals/EventModal.vue'
 import NoteModal from '@/components/Modals/NoteModal.vue'
-import { call } from 'frappe-ui'
+import { call, toast } from 'frappe-ui'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
-import { createToast } from '@/utils'
 
 const { getUser } = usersStore()
 
@@ -94,18 +93,9 @@ async function deleteToDo(name) {
       name,
     })
     activities.value.reload()
-    createToast({
-      title: __('Todo deleted successfully'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('ToDo deleted successfully'))
   } catch (error) {
-    createToast({
-      title: __(`Error deleting ToDo`),
-      text: __(error.message),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Error deleting ToDo'))
   }
 }
 
@@ -116,18 +106,9 @@ async function deleteEvent(name) {
       name,
     })
     activities.value.reload()
-    createToast({
-      title: __('Event deleted successfully'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Event deleted successfully'))
   } catch (error) {
-    createToast({
-      title: __(`Error deleting Event`),
-      text: __(error.message),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Error deleting Event'))
   }
 }
 
@@ -140,19 +121,10 @@ function updateToDoStatus(status, todo) {
   })
     .then(() => {
       activities.value.reload()
-      createToast({
-        title: __('ToDo status updated successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('ToDo status updated successfully'))
     })
     .catch((error) => {
-      createToast({
-        title: __(`Error updating ToDo status`),
-        text: __(error.message),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Error updating ToDo status'))
     })
 }
 
@@ -165,19 +137,10 @@ function updateEventStatus(status, event) {
   })
     .then(() => {
       activities.value.reload()
-      createToast({
-        title: __('Event status updated successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Event status updated successfully'))
     })
     .catch((error) => {
-      createToast({
-        title: __(`Error updating Event status`),
-        text: __(error.message),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Error updating Event status'))
     })
 }
 

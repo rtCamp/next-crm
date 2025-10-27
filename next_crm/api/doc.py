@@ -295,16 +295,33 @@ def get_data(
 
     if doctype == "ToDo":
         session_user = frappe.session.user
-        sales_users = frappe.get_all(
-            "Employee",
-            filters={"department": ["like", "sales%"], "user_id": ["is", "set"]},
-            pluck="user_id",
+        sales_team_roles = ["Sales User", "Sales Manager", "Sales Master Manager"]
+        sales_team_members = frappe.get_all(
+            "Has Role",
+            filters={"role": ["in", sales_team_roles]},
+            fields=["parent"],
+            pluck="parent",
         )
-        if session_user not in sales_users:
-            filters["allocated_to"] = ["=", session_user]
+        if session_user in sales_team_members:
+            if not filters.get("allocated_to", None):
+                filters["allocated_to"] = ["in", sales_team_members]
+            else:
+                if isinstance(filters.get("allocated_to"), list):
+                    if filters.get("allocated_to")[0] == "in":
+                        allocated_to_list = filters.get("allocated_to")[1]
+                        allocated_to_list = list(
+                            set(allocated_to_list) & set(sales_team_members)
+                        )
+                        filters["allocated_to"] = ["in", allocated_to_list]
+                elif filters.get("allocated_to") not in sales_team_members:
+                    filters["allocated_to"] = ["=", session_user]
         else:
-            filters["allocated_to"] = ["in", sales_users]
-        filters["reference_type"] = ["in", ["Lead", "Opportunity", "Customer", "Task"]]
+            filters["allocated_to"] = ["=", session_user]
+        if not filters.get("reference_type", None):
+            filters["reference_type"] = [
+                "in",
+                ["Lead", "Opportunity", "Customer", "Task"],
+            ]
 
     is_default = True
     data = []

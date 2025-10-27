@@ -130,9 +130,8 @@ import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import { capture } from '@/telemetry'
 import { usersStore } from '@/stores/users'
 import { useStorage } from '@vueuse/core'
-import { call, createResource } from 'frappe-ui'
+import { call, createResource, toast } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
-import { createToast } from '../utils'
 import NoteEditor from '@/components/NoteEditor.vue'
 
 const props = defineProps({
@@ -215,11 +214,7 @@ const emailEmpty = computed(() => {
 async function sendMail() {
   let recipients = newEmailEditor.value.toEmails
   if (!recipients.length) {
-    createToast({
-      title: __('Please add at least one recipient'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Please add at least one recipient'))
     return false
   }
   let subject = newEmailEditor.value.subject
@@ -244,12 +239,7 @@ async function sendMail() {
       sender_full_name: getUser()?.full_name || undefined,
     })
   } catch (error) {
-    createToast({
-      title: __('Error'),
-      text: error.message,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(error.message)
     return false
   }
   return true
@@ -348,11 +338,7 @@ async function submitNote() {
   reload.value = true
   emit('scroll')
   capture('note_sent', { doctype: props.doctype })
-  createToast({
-    title: __('Note reply added.'),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Note reply added.'))
 }
 
 watch(

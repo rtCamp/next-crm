@@ -120,7 +120,6 @@ import {
   dateFormat,
   dateTooltipFormat,
   timeAgo,
-  createToast,
 } from '@/utils'
 import { getView } from '@/utils/view'
 import {
@@ -132,6 +131,7 @@ import {
   createListResource,
   createResource,
   usePageMeta,
+  toast,
 } from 'frappe-ui'
 import { ref, computed, h } from 'vue'
 import { useRoute } from 'vue-router'
@@ -440,11 +440,7 @@ async function setAsPrimary(field, value) {
   })
   if (d) {
     address.reload()
-    createToast({
-      title: 'Address updated',
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address updated'))
   }
 }
 
@@ -457,11 +453,7 @@ async function createNew(field, value) {
   })
   if (d) {
     address.reload()
-    createToast({
-      title: 'Address updated',
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address updated'))
   }
 }
 
@@ -474,11 +466,7 @@ async function editOption(doctype, name, fieldname, value) {
   })
   if (d) {
     address.reload()
-    createToast({
-      title: 'Address updated',
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address updated'))
   }
 }
 
@@ -488,11 +476,7 @@ async function deleteOption(doctype, name) {
     name,
   })
   await address.reload()
-  createToast({
-    title: 'Address updated',
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Address updated'))
 }
 
 async function updateField(fieldname, value) {
@@ -502,11 +486,7 @@ async function updateField(fieldname, value) {
     fieldname,
     value,
   })
-  createToast({
-    title: 'Address updated',
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Address updated'))
 
   address.reload()
 }

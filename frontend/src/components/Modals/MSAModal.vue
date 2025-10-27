@@ -82,8 +82,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { DatePicker, call } from 'frappe-ui'
-import { createToast } from '../../utils'
+import { DatePicker, call, toast } from 'frappe-ui'
 
 const props = defineProps({
   label: {
@@ -141,44 +140,24 @@ function setDefaultValues() {
 
 function validateAndEmit() {
   if (!fieldValues.msa_start_date) {
-    createToast({
-      title: __('Error'),
-      text: __('MSA Start Date is required.'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-3',
-    })
+    toast.error(__('MSA Start Date is required.'))
     return
   }
   if (fieldValues.msa_start_date && fieldValues.msa_end_date) {
     if (new Date(fieldValues.msa_start_date) >= new Date(fieldValues.msa_end_date)) {
-      createToast({
-        title: __('Error'),
-        text: __('MSA Start Date must be before MSA End Date.'),
-        icon: 'x',
-        iconClasses: 'text-ink-red-3',
-      })
+      toast.error(__('MSA Start Date must be before MSA End Date.'))
       return
     }
   } else if (fieldValues.insurance_requested) {
     if (fieldValues.insurance_start_date && fieldValues.insurance_end_date) {
       if (new Date(fieldValues.insurance_start_date) >= new Date(fieldValues.insurance_end_date)) {
-        createToast({
-          title: __('Error'),
-          text: __('Insurance Start Date must be before Insurance End Date.'),
-          icon: 'x',
-          iconClasses: 'text-ink-red-3',
-        })
+        toast.error(__('Insurance Start Date must be before Insurance End Date.'))
         return
       }
     }
   }
   if (!fieldValues.msa_document_link || fieldValues.msa_document_link == '') {
-    createToast({
-      title: __('Info'),
-      text: `MSA should be signed and updated by ${getMSAInfoDate()}`,
-      icon: 'info',
-      iconClasses: 'text-ink-blue-3',
-    })
+    toast.info(`MSA should be signed and updated by ${getMSAInfoDate()}`)
   }
 
   isUpdating.value = true
@@ -197,21 +176,11 @@ function validateAndEmit() {
     },
   })
     .then(() => {
-      createToast({
-        title: __('Success'),
-        text: __('MSA details updated successfully.'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('MSA details updated successfully.'))
       emit('msa_set')
     })
     .catch((err) => {
-      createToast({
-        title: __('Error'),
-        text: err.message || __('Failed to update MSA details.'),
-        icon: 'x',
-        iconClasses: 'text-ink-red-3',
-      })
+      toast.error(err.message || __('Failed to update MSA details.'))
     })
     .finally(() => {
       isUpdating.value = false

@@ -53,10 +53,9 @@
 import ContactModal from '@/components/Modals/ContactModal.vue'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import { ref } from 'vue'
-import { call } from 'frappe-ui'
+import { call, toast } from 'frappe-ui'
 import Link from '@/components/Controls/Link.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
-import { createToast } from '@/utils'
 
 const show = defineModel()
 const showNewContactModal = ref(false)
@@ -89,12 +88,7 @@ async function addContact() {
     show.value = false
     props.options.afterAddContact(contact)
   } catch (error) {
-    createToast({
-      title: __('Error'),
-      text: error,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(error)
   }
 }
 

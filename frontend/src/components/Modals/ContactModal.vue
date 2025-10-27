@@ -12,12 +12,11 @@
             <Button
               v-if="isManager() || detailMode"
               variant="ghost"
-              class="w-7"
               @click="detailMode ? (detailMode = false) : openQuickEntryModal()"
             >
               <EditIcon class="h-4 w-4" />
             </Button>
-            <Button variant="ghost" class="w-7" @click="show = false">
+            <Button variant="ghost" @click="show = false">
               <FeatherIcon name="x" class="h-4 w-4" />
             </Button>
           </div>

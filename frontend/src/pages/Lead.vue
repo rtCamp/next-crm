@@ -134,62 +134,61 @@
               <div class="flex gap-1.5">
                 <Tooltip v-if="callEnabled" :text="__('Make a call')">
                   <Button
-                    class="h-7 w-7"
                     @click="
                       () =>
                         lead.data.mobile_no
                           ? makeCall(lead.data.mobile_no)
-                          : errorMessage(__('No phone number set'))
+                          : toast.error(__('No phone number set'))
                     "
                   >
                     <PhoneIcon class="h-4 w-4" />
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Send an email')">
-                  <Button class="h-7 w-7">
+                  <Button>
                     <Email2Icon
                       class="h-4 w-4"
                       @click="
                         lead.data.email
                           ? openEmailBox()
-                          : errorMessage(__('No email set'))
+                          : toast.error(__('No email set'))
                       "
                     />
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Go to website')">
-                  <Button class="h-7 w-7">
+                  <Button>
                     <LinkIcon
                       class="h-4 w-4"
                       @click="
                         lead.data.website
                           ? openWebsite(lead.data.website)
-                          : errorMessage(__('No website set'))
+                          : toast.error(__('No website set'))
                       "
                     />
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Attach a file')">
-                  <Button class="h-7 w-7" @click="showFilesUploader = true">
+                  <Button @click="showFilesUploader = true">
                     <AttachmentIcon class="h-4 w-4" />
                   </Button>
                 </Tooltip>
                 <div v-if="followStatus == 1">
                   <Tooltip :text="__('Unfollow Document')">
-                    <Button class="h-7 w-7" @click="updateFollow">
+                    <Button @click="updateFollow">
                       <FeatherIcon name="eye" class="h-4 w-4" />
                     </Button>
                   </Tooltip>
                 </div>
                 <div v-else>
                   <Tooltip :text="__('Follow Document')">
-                    <Button class="h-7 w-7" @click="updateFollow">
+                    <Button @click="updateFollow">
                       <FeatherIcon name="eye-off" class="h-4 w-4" />
                     </Button>
                   </Tooltip>
                 </div>
                 <Tooltip :text="__('Delete Lead')">
-                  <Button theme="red" class="h-7 w-7" @click="deleteLead">
+                  <Button theme="red" @click="deleteLead">
                     <FeatherIcon name="trash-2" class="h-4 w-4" />
                   </Button>
                 </Tooltip>
@@ -234,7 +233,6 @@
                   >
                     <template #target="{ togglePopover }">
                       <Button
-                        class="h-7 px-3"
                         variant="ghost"
                         icon="plus"
                         @click="togglePopover()"
@@ -259,7 +257,6 @@
                   >
                     <template #target="{ togglePopover }">
                       <Button
-                        class="h-7 px-3"
                         variant="ghost"
                         icon="plus"
                         @click="togglePopover()"
@@ -272,7 +269,7 @@
                     ((!section.contacts && !section.addresses && i == 2) || i == 0) && isManager()
                   "
                   variant="ghost"
-                  class="w-7 mr-2"
+                  class="mr-2"
                   @click="showSidePanelModal = true"
                 >
                   <EditIcon class="h-4 w-4" />
@@ -640,10 +637,8 @@ import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import {
   openWebsite,
-  createToast,
   setupAssignees,
   setupCustomizations,
-  errorMessage,
   copyToClipboard,
 } from '@/utils'
 import { getView } from '@/utils/view'
@@ -664,6 +659,7 @@ import {
   Breadcrumbs,
   call,
   usePageMeta,
+  toast,
 } from 'frappe-ui'
 import { h, ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -700,7 +696,8 @@ const lead = createResource({
       $socket,
       router,
       updateField,
-      createToast,
+      toast,
+      createToast: toast.create,
       deleteDoc: deleteLead,
       resource: {
         lead,
@@ -743,20 +740,11 @@ function updateLead(fieldname, value, callback) {
     onSuccess: () => {
       lead.reload()
       reload.value = true
-      createToast({
-        title: __('Lead updated'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Lead updated'))
       callback?.()
     },
     onError: (err) => {
-      createToast({
-        title: __('Error updating lead'),
-        text: __(err.messages?.[0]),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Error updating lead: {0}', [err.messages?.[0]]))
     },
   })
 }
@@ -764,12 +752,7 @@ function updateLead(fieldname, value, callback) {
 function validateRequired(fieldname, value) {
   let meta = lead.data.fields_meta || {}
   if (meta[fieldname]?.reqd && !value) {
-    createToast({
-      title: __('Error Updating Lead'),
-      text: __('{0} is a required field', [meta[fieldname].label]),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Error Updating Lead: {0} is a required field', [meta[fieldname].label]))
     return true
   }
   return false
@@ -859,11 +842,7 @@ async function addContact(contact) {
   })
   if (d) {
     leadContacts.reload()
-    createToast({
-      title: __('Contact added'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact added'))
   }
 }
 
@@ -875,11 +854,7 @@ async function addAddress(address) {
   })
   if (d) {
     leadAddresses.reload()
-    createToast({
-      title: __('Address added'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address added'))
   }
 }
 
@@ -891,11 +866,7 @@ async function removeContact(contact) {
   })
   if (d) {
     leadContacts.reload()
-    createToast({
-      title: __('Contact removed'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact removed'))
   }
 }
 
@@ -909,11 +880,7 @@ async function setBillingShippingAddress(address_name, is_billing) {
     let changed = 'Billing'
     if (!is_billing)
       changed = 'Shipping'
-    createToast({
-      title: __(`${changed} address modified`),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__(`${changed} address modified`))
   }
 }
 
@@ -925,11 +892,7 @@ async function removeAddress(address) {
   })
   if (d) {
     leadAddresses.reload()
-    createToast({
-      title: __('Address removed'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address removed'))
   }
 }
 
@@ -1080,32 +1043,17 @@ const existingProspect = ref('')
 async function convertToOpportunity() {
 
   if (!existingProspectChecked.value && !lead.data.company_name) {
-    createToast({
-      title: __('Error'),
-      text: __('Please enter organisation name to create new Prospect'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Please enter organisation name to create new Prospect'))
     return
   }
 
   if (existingContactChecked.value && !existingContact.value) {
-    createToast({
-      title: __('Error'),
-      text: __('Please select an existing contact'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Please select an existing contact'))
     return
   }
 
   if (existingProspectChecked.value && !existingProspect.value) {
-    createToast({
-      title: __('Error'),
-      text: __('Please select an existing prospect'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Please select an existing prospect'))
     return
   }
 
@@ -1119,12 +1067,7 @@ async function convertToOpportunity() {
       existing_contact: existingContact.value,
     },
   ).catch((err) => {
-    createToast({
-      title: __('Error converting to Opportunity'),
-      text: __(err.messages?.[0]),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Error converting to Opportunity: {0}', [err.messages?.[0]]))
   })
 
   if (opportunity) {
@@ -1158,20 +1101,11 @@ async function updateFollow(event) {
   }).then((res) => {
     if(res || res === 1 && followStatus.value) {
       followStatus.value = !followStatus.value
-      createToast({
-        title: __('Follow status updated'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Follow status updated'))
       return
     }
-    createToast({
-      title: __('Error updating follow status'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
+    toast.error(__('Error updating follow status'))
     })
-
-  })
   return 0
 }
 

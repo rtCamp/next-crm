@@ -52,10 +52,9 @@
 import AddressModal from '@/components/Modals/AddressModal.vue'
 import AddressIcon from '@/components/Icons/AddressIcon.vue'
 import { ref } from 'vue'
-import { call } from 'frappe-ui'
+import { call, toast } from 'frappe-ui'
 import Link from '@/components/Controls/Link.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
-import { createToast } from '@/utils'
 
 const show = defineModel()
 const showNewAddressModal = ref(false)
@@ -88,12 +87,7 @@ async function addAddress() {
     show.value = false
     props.options.afterAddAddress(address)
   } catch (error) {
-    createToast({
-      title: __('Error'),
-      text: error,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(error)
   }
 }
 
