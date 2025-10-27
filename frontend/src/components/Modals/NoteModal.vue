@@ -90,11 +90,10 @@
 <script setup>
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import { capture } from '@/telemetry'
-import { TextEditor, call, DateTimePicker } from 'frappe-ui'
+import { TextEditor, call, DateTimePicker, toast } from 'frappe-ui'
 import { ref, computed, nextTick, watch, h, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { usersStore } from '@/stores/users'
-import { createToast } from '@/utils'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
 import NoteAttachments from '../Activities/NoteAttachments.vue'
 import { isEqual, sortBy } from 'lodash'
@@ -151,12 +150,7 @@ async function updateNote() {
   if (!hasChanged.value) return
 
   if (!_note.value.custom_title?.trim() && isRichTextEmpty(_note.value.note)) {
-    createToast({
-      title: __('Cannot save empty note'),
-      text: __('Please add a title or description before saving.'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Cannot save empty note. Please add a title or description before saving.'))
     return
   }
 
@@ -173,11 +167,7 @@ async function updateNote() {
         notes.value?.reload()
         emit('after', d)
       }
-      createToast({
-        title: __('Note updated successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Note updated successfully'))
     } else {
       let d = await call('next_crm.api.crm_note.create_note', {
         doctype: props.doctype,
@@ -192,20 +182,11 @@ async function updateNote() {
         notes.value?.reload()
         emit('after', d, true)
       }
-      createToast({
-        title: __('Note created successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Note created successfully'))
     }
     show.value = false
   } catch (error) {
-    createToast({
-      title: __(`Error ${_note.value.name ? 'updating' : 'creating'} note`),
-      text: error.message,
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__(`Error ${_note.value.name ? 'updating' : 'creating'} note`))
   }
 }
 

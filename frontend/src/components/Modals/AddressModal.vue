@@ -9,15 +9,10 @@
             </h3>
           </div>
           <div class="flex items-center gap-1">
-            <Button
-              v-if="isManager()"
-              variant="ghost"
-              class="w-7"
-              @click="openQuickEntryModal"
-            >
+            <Button v-if="isManager()" variant="ghost" @click="openQuickEntryModal">
               <EditIcon class="h-4 w-4" />
             </Button>
-            <Button variant="ghost" class="w-7" @click="show = false">
+            <Button variant="ghost" @click="show = false">
               <FeatherIcon name="x" class="h-4 w-4" />
             </Button>
           </div>
@@ -41,11 +36,7 @@
       </div>
     </template>
   </Dialog>
-  <QuickEntryModal
-    v-if="showQuickEntryModal"
-    v-model="showQuickEntryModal"
-    doctype="Address"
-  />
+  <QuickEntryModal v-if="showQuickEntryModal" v-model="showQuickEntryModal" doctype="Address" />
 </template>
 
 <script setup>
@@ -90,16 +81,13 @@ let _address = ref({
 })
 
 const dialogOptions = computed(() => {
-  let title = !editMode.value
-    ? __('New Address')
-    : __(_address.value.address_title)
+  let title = !editMode.value ? __('New Address') : __(_address.value.address_title)
   let size = 'xl'
   let actions = [
     {
       label: editMode.value ? __('Save') : __('Create'),
       variant: 'solid',
-      onClick: () =>
-        editMode.value ? updateAddress() : createAddress.submit(),
+      onClick: () => (editMode.value ? updateAddress() : createAddress.submit()),
     },
   ]
 

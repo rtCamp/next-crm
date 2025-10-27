@@ -9,7 +9,7 @@
             </h3>
           </div>
           <div class="flex items-center gap-1">
-            <Button variant="ghost" class="w-7" @click="show = false">
+            <Button variant="ghost" @click="show = false">
               <FeatherIcon name="x" class="h-4 w-4" />
             </Button>
           </div>

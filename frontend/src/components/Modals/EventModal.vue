@@ -46,7 +46,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <Dropdown :options="eventStatusOptions(updateEventStatus)">
-            <Button :label="_event.status" class="w-full justify-between">
+            <Button :label="_event.status" class="justify-between">
               <template #prefix>
                 <EventStatusIcon :status="_event.status" />
               </template>
@@ -155,10 +155,10 @@ import EventStatusIcon from '@/components/Icons/EventStatusIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import Link from '@/components/Controls/Link.vue'
 import MultiValueInput from '../Controls/MultiValueInput.vue'
-import { eventStatusOptions, createToast } from '@/utils'
+import { eventStatusOptions } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
-import { TextEditor, Dropdown, FormControl, Tooltip, call, TextInput, createResource } from 'frappe-ui'
+import { TextEditor, Dropdown, FormControl, Tooltip, call, TextInput, createResource, toast } from 'frappe-ui'
 import { ref, watch, nextTick, onMounted } from 'vue'
 
 function validate(value) {
@@ -223,12 +223,7 @@ function updateEventStatus(status) {
 
 async function updateEvent() {
   if (!_event.value.subject) {
-    createToast({
-      title: __('Error'),
-      text: __('Subject is mandatory'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Subject is mandatory'))
     return
   }
   if (!_event.value.allocated_to) {
@@ -237,12 +232,7 @@ async function updateEvent() {
   if (!_event.value.sync_with_google_calendar) {
     _event.value.google_calendar = null
   } else if (!_event.value.google_calendar) {
-    createToast({
-      title: __('Error'),
-      text: __('Select Google Calendar to which event should be synced'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Select Google Calendar to which event should be synced'))
     return
   }
   _event.value.assigned_by = getUser().name
@@ -268,11 +258,7 @@ async function updateEvent() {
       if (d.name) {
         events.value.reload()
       }
-      createToast({
-        title: __('Event updated successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Event updated successfully'))
     } else {
       let doc = {
         doctype: 'Event',
@@ -299,20 +285,11 @@ async function updateEvent() {
         events.value.reload()
         emit('after')
       }
-      createToast({
-        title: __('Event created successfully'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Event created successfully'))
     }
     show.value = false
   } catch (error) {
-    createToast({
-      title: __(`Error ${editMode.value ? 'updating' : 'adding'} Event`),
-      text: __(error.message),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__(`Error ${editMode.value ? 'updating' : 'adding'} Event`))
   }
 }
 

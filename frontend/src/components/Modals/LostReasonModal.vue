@@ -80,10 +80,8 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { call } from 'frappe-ui'
+import { call, toast } from 'frappe-ui'
 import TagInput from '@/components/TagInput.vue'
-import { createToast } from '@/utils'
-import { errorMessage } from '../../utils'
 
 const props = defineProps({
   opportunity: {
@@ -116,7 +114,7 @@ const getLostReasons = async () => {
     })
     tagsList.value = response?.map((reason) => reason.name)
   } catch (e) {
-    errorMessage(__('Error fetching lost reasons'))
+    toast.error(__('Error fetching lost reasons'))
     console.error('Error fetching lost reasons', e)
   } finally {
     isLoading.value = false
@@ -134,7 +132,7 @@ const getCompetitors = async () => {
     })
     competitorList.value = response?.map((reason) => reason.competitor_name)
   } catch (e) {
-    errorMessage(__('Error fetching competitors'))
+    toast.error(__('Error fetching competitors'))
     console.error('Error fetching competitors', e)
   } finally {
     isCompetitorLoading.value = false
@@ -155,13 +153,9 @@ const updateOpportunity = async () => {
     })
     props.opportunity.reload()
     emit('reload')
-    createToast({
-      title: __('Opportunity updated'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Opportunity updated'))
   } catch (error) {
-    errorMessage(__('Error updating opportunity'))
+    toast.error(__('Error updating opportunity'))
     console.error('Error updating opportunity:', error)
     throw error
   }

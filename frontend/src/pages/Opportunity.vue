@@ -64,49 +64,49 @@
           </Tooltip>
           <div class="flex gap-1.5">
             <Tooltip v-if="callEnabled" :text="__('Make a call')">
-              <Button class="h-7 w-7" @click="triggerCall">
+              <Button @click="triggerCall">
                 <PhoneIcon class="h-4 w-4" />
               </Button>
             </Tooltip>
             <Tooltip :text="__('Send an email')">
-              <Button class="h-7 w-7">
-                <Email2Icon class="h-4 w-4" @click="
+              <Button>
+                <Email2Icon class="h-4" @click="
                   opportunity.data.email
                     ? openEmailBox()
-                    : errorMessage(__('No email set'))
+                    : toast.error(__('No email set'))
                   " />
               </Button>
             </Tooltip>
             <Tooltip :text="__('Go to website')">
-              <Button class="h-7 w-7">
-                <LinkIcon class="h-4 w-4" @click="
+              <Button>
+                <LinkIcon @click="
                   opportunity.data.website
                     ? openWebsite(opportunity.data.website)
-                    : errorMessage(__('No website set'))
+                    : toast.error(__('No website set'))
                   " />
               </Button>
             </Tooltip>
             <Tooltip :text="__('Attach a file')">
-              <Button class="size-7" @click="showFilesUploader = true">
+              <Button @click="showFilesUploader = true">
                 <AttachmentIcon class="size-4" />
               </Button>
             </Tooltip>
             <div v-if="followStatus">
               <Tooltip :text="__('Unfollow Document')">
-                <Button class="h-7 w-7" @click="updateFollow">
+                <Button @click="updateFollow">
                     <FeatherIcon name="eye" class="h-4 w-4" />
                 </Button>
               </Tooltip>
             </div>
             <div v-else>
               <Tooltip :text="__('Follow Document')">
-                <Button class="h-7 w-7" @click="updateFollow">
+                <Button @click="updateFollow">
                     <FeatherIcon name="eye-off" class="h-4 w-4" />
                 </Button>
               </Tooltip>
             </div>
             <Tooltip :text="__('Delete Opportunity')">
-              <Button theme="red" class="h-7 w-7" @click="deleteOpportunity">
+              <Button theme="red" @click="deleteOpportunity">
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
               </Button>
             </Tooltip>
@@ -131,7 +131,7 @@
                   }
                     ">
                   <template #target="{ togglePopover }">
-                    <Button class="h-7 px-3" variant="ghost" icon="plus" @click="togglePopover()" />
+                    <Button variant="ghost" icon="plus" @click="togglePopover()" />
                   </template>
                   </Link>
                 </div>
@@ -145,13 +145,13 @@
                   }
                     ">
                   <template #target="{ togglePopover }">
-                    <Button class="h-7 px-3" variant="ghost" icon="plus" @click="togglePopover()" />
+                    <Button variant="ghost" icon="plus" @click="togglePopover()" />
                   </template>
                   </Link>
                 </div>
                 <Button v-else-if="
                   ((!section.contacts && !section.addresses && i == 2) || i == 0) && isManager()
-                " variant="ghost" class="w-7 mr-2" @click="showSidePanelModal = true">
+                " variant="ghost" class="mr-2" @click="showSidePanelModal = true">
                   <EditIcon class="h-4 w-4" />
                 </Button>
               </template>
@@ -383,10 +383,8 @@ import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import {
   openWebsite,
-  createToast,
   setupAssignees,
   setupCustomizations,
-  errorMessage,
   copyToClipboard,
 } from '@/utils'
 import { getView } from '@/utils/view'
@@ -403,6 +401,7 @@ import {
   Breadcrumbs,
   call,
   usePageMeta,
+  toast,
 } from 'frappe-ui'
 import { ref, computed, h, onMounted, onBeforeUnmount, watch, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -443,8 +442,9 @@ const opportunity = createResource({
       $dialog,
       $socket,
       router,
+      toast,
       updateField,
-      createToast,
+      createToast: toast.create,
       deleteDoc: deleteOpportunity,
       resource: {
         opportunity,
@@ -467,11 +467,7 @@ const customer = createResource({
 
 onMounted(() => {
   $socket.on('crm_customer_created', () => {
-    createToast({
-      title: __('Customer created successfully'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Customer created successfully'))
   })
 
   if (opportunity.data) {
@@ -525,23 +521,15 @@ function updateOpportunity(fieldname, value, callback) {
     onSuccess: (data) => {
       opportunity.reload()
       reload.value = true
-      createToast({
-        title: __('Opportunity updated'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Opportunity updated'))
       callback?.()
     },
     onError: (err) => {
-      createToast({
-        title: __('Error updating opportunity'),
-        text: __(err.messages?.[0]),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Error updating opportunity'), __(err.messages?.[0]))
     },
   })
 }
+
 const updateOpportunityFields = async (fields, callback) => {
   for (const [fieldname, value] of Object.entries(fields)) {
     if (validateRequired(fieldname, value)) return
@@ -559,21 +547,12 @@ const updateOpportunityFields = async (fields, callback) => {
     onSuccess: async (data) => {
       opportunity.reload()
       reload.value = true
-      createToast({
-        title: __('Opportunity updated'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Opportunity updated'))
       callback?.()
       await createProject(data)
     },
     onError: (err) => {
-      createToast({
-        title: __('Error updating opportunity'),
-        text: __(err.messages?.[0]),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Error updating opportunity', err.messages?.[0]))
     },
   })
 }
@@ -582,12 +561,7 @@ const updateOpportunityFields = async (fields, callback) => {
 function validateRequired(fieldname, value) {
   let meta = opportunity.data.fields_meta || {}
   if (meta[fieldname]?.reqd && !value) {
-    createToast({
-      title: __('Error Updating Opportunity'),
-      text: __('{0} is a required field', [meta[fieldname].label]),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Error Updating Opportunity'), __('{0} is a required field', [meta[fieldname].label]))
     return true
   }
   return false
@@ -784,11 +758,7 @@ async function addContact(contact) {
   })
   if (d) {
     opportunityContacts.reload()
-    createToast({
-      title: __('Contact added'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact added'))
   }
 }
 
@@ -800,11 +770,7 @@ async function addAddress(address) {
   })
   if (d) {
     opportunityAddresses.reload()
-    createToast({
-      title: __('Address added'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address added'))
   }
 }
 
@@ -816,11 +782,7 @@ async function removeContact(contact) {
   })
   if (d) {
     opportunityContacts.reload()
-    createToast({
-      title: __('Contact removed'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Contact removed'))
   }
 }
 
@@ -832,11 +794,7 @@ async function removeAddress(address) {
   })
   if (d) {
     opportunityAddresses.reload()
-    createToast({
-      title: __('Address removed'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Address removed'))
   }
 }
 
@@ -850,11 +808,7 @@ async function setBillingShippingAddress(address_name, is_billing) {
     let changed = 'Billing'
     if (!is_billing)
       changed = 'Shipping'
-    createToast({
-      title: __(`${changed} address modified`),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__(`${changed} address modified`))
   }
 }
 
@@ -866,11 +820,7 @@ async function setPrimaryContact(contact) {
   if (d) {
     opportunity.reload()
     opportunityContacts.reload()
-    createToast({
-      title: __('Primary contact set'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Primary contact set'))
   }
 }
 
@@ -908,12 +858,12 @@ function triggerCall() {
   let mobile_no = primaryContact.mobile_no || null
 
   if (!primaryContact) {
-    errorMessage(__('No primary contact set'))
+    toast.error(__('No primary contact set'))
     return
   }
 
   if (!mobile_no) {
-    errorMessage(__('No mobile number set'))
+    toast.error(__('No mobile number set'))
     return
   }
 
@@ -937,11 +887,7 @@ function updateField(name, value, callback) {
 
   if (isStatusField && value === "Won") {
     if (!opportunity.data.customer){
-      createToast({
-        title: __('Skipping MSA and Insurance due to missing customer'),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      });
+      toast.warning(__('Skipping MSA and Insurance due to missing customer'));
       showCreateProjectModal.value = true;
     } else {
       showMSAModal.value = true;
@@ -1002,20 +948,11 @@ const createProject = async (projectData) => {
     });
 
     await projectResource.submit(projectPayload);
-    createToast({
-      title: __('Project created successfully'),
-      text: __(`Created project named ${projectPayload.project_name}`),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+
+    toast.success(__('Project created successfully'), __(`Created project named ${projectPayload.project_name}`));
     showCreateProjectModal.value = false;
   } catch{
-    createToast({
-      title: __(projectResource?.error?.exc_type || 'Error creating project'),
-      text: __(projectResource?.error?.messages[0] || 'Something went wrong'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(projectResource?.error?.exc_type || __('Error creating project'), __(projectResource?.error?.messages[0] || 'Something went wrong'));
   }
 };
 
@@ -1104,19 +1041,10 @@ function updateFollow(event) {
   }).then((res) => {
     if(res || followStatus.value) {
       followStatus.value = !followStatus.value
-      createToast({
-        title: __('Follow status updated'),
-        icon: 'check',
-        iconClasses: 'text-ink-green-3',
-      })
+      toast.success(__('Follow status updated'))
       return
     }
-    createToast({
-      title: __('Error updating follow status'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
-
+    toast.error(__('Error updating follow status'))
   })
 }
 

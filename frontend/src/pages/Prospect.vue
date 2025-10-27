@@ -109,7 +109,6 @@
                 <Button
                   v-if="i == 0 && isManager()"
                   variant="ghost"
-                  class="w-7"
                   @click="showSidePanelModal = true"
                 >
                   <EditIcon class="h-4 w-4" />
@@ -248,7 +247,6 @@
     dateTooltipFormat,
     timeAgo,
     formatNumberIntoCurrency,
-    createToast,
   } from '@/utils'
   import {
     Tooltip,
@@ -260,6 +258,7 @@
     createDocumentResource,
     usePageMeta,
     createResource,
+    toast,
   } from 'frappe-ui'
   import CustomerModal from '@/components/Modals/CustomerModal.vue'
   import { h, computed, ref } from 'vue'
@@ -298,11 +297,7 @@
     await prospect.setValue.submit({
       [fieldname]: value,
     })
-    createToast({
-      title: __('Prospect updated'),
-      icon: 'check',
-      iconClasses: 'text-ink-green-3',
-    })
+    toast.success(__('Prospect updated'))
   }
   
   const breadcrumbs = computed(() => {
@@ -349,11 +344,7 @@
   
   function openWebsite() {
     if (!prospect.doc.website)
-      createToast({
-        title: __('Website not found'),
-        icon: 'x',
-        iconClasses: 'text-ink-red-4',
-      })
+      toast.error(__('Website not found'))
     else window.open(prospect.doc.website, '_blank')
   }
   
@@ -618,23 +609,13 @@ function addContactButtonCB() {
 }
 
 async function afterAddContact(contact) {
-  createToast({
-    title: __('Contact Linked'),
-    text: __(`Contact ${contact} linked`),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__(`Contact ${contact} linked`))
   contacts.value = await getContactsList()
 }
 
 
 async function afterAddAddress(address) {
-  createToast({
-    title: __('Address Linked'),
-    text: __(`Address ${address} linked`),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__(`Address ${address} linked`))
   addresses.value = await getAddressesList()
 }
 

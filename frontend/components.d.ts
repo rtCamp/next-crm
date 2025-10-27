@@ -146,7 +146,6 @@ declare module 'vue' {
     MultiValueInput: typeof import('./src/components/Controls/MultiValueInput.vue')['default']
     MuteIcon: typeof import('./src/components/Icons/MuteIcon.vue')['default']
     NCRMSettings: typeof import('./src/components/Settings/NCRMSettings.vue')['default']
-    NestedPopover: typeof import('./src/components/NestedPopover.vue')['default']
     NoteArea: typeof import('./src/components/Activities/NoteArea.vue')['default']
     NoteAttachments: typeof import('./src/components/Activities/NoteAttachments.vue')['default']
     NoteEditor: typeof import('./src/components/NoteEditor.vue')['default']

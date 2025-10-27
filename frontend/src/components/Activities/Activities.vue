@@ -46,10 +46,10 @@
         <div v-for="(comment, i) in activities">
           <div class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-2 px-3 sm:gap-4 sm:px-10">
             <div
-              class="relative flex justify-center after:absolute after:left-[50%] after:top-0 after:-z-10 after:border-l after:border-gray-200"
+              class="z-0 relative flex justify-center after:absolute after:left-[50%] after:top-0 after:-z-[1] after:border-l after:border-gray-200"
               :class="i != activities.length - 1 ? 'after:h-full' : 'after:h-4'"
             >
-              <div class="z-10 flex h-8 w-7 items-center justify-center bg-surface-white">
+              <div class="flex h-8 w-7 items-center justify-center bg-surface-white">
                 <CommentIcon class="text-ink-gray-8" />
               </div>
             </div>
@@ -67,10 +67,10 @@
         <div v-for="(call, i) in activities">
           <div class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-4 px-3 sm:px-10">
             <div
-              class="relative flex justify-center after:absolute after:left-[50%] after:top-0 after:-z-10 after:border-l after:border-gray-200"
+              class="z-0 relative flex justify-center after:absolute after:left-[50%] after:top-0 after:-z-[1] after:border-l after:border-gray-200"
               :class="i != activities.length - 1 ? 'after:h-full' : 'after:h-4'"
             >
-              <div class="z-10 flex h-8 w-7 items-center justify-center bg-surface-white text-ink-gray-8">
+              <div class="flex h-8 w-7 items-center justify-center bg-surface-white text-ink-gray-8">
                 <MissedCallIcon v-if="call.status == 'No Answer'" class="text-ink-red-4" />
                 <DeclinedCallIcon v-else-if="call.status == 'Busy'" />
                 <component v-else :is="call.type == 'Incoming' ? InboundCallIcon : OutboundCallIcon" />
@@ -99,11 +99,11 @@
       >
         <div
           v-if="['Activity', 'Emails'].includes(title)"
-          class="relative flex justify-center before:absolute before:left-[50%] before:top-0 before:-z-10 before:border-l before:border-gray-200"
+          class="z-0 relative flex justify-center before:absolute before:left-[50%] before:top-0 before:-z-[1] before:border-l before:border-gray-200"
           :class="[i != activities.length - 1 ? 'before:h-full' : 'before:h-4']"
         >
           <div
-            class="z-10 flex h-7 w-7 items-center justify-center bg-surface-white"
+            class="flex h-7 w-7 items-center justify-center bg-surface-white"
             :class="{
               'mt-2.5': ['communication'].includes(activity.activity_type),
               'bg-surface-white': ['added', 'removed', 'changed'].includes(activity.activity_type),

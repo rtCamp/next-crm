@@ -140,7 +140,6 @@
                 <Button
                   v-if="i == 0 && isManager()"
                   variant="ghost"
-                  class="w-7"
                   @click="showSidePanelModal = true"
                 >
                   <EditIcon class="h-4 w-4" />
@@ -276,7 +275,6 @@ import {
   dateTooltipFormat,
   timeAgo,
   formatNumberIntoCurrency,
-  createToast,
 } from '@/utils'
 import {
   Tooltip,
@@ -290,9 +288,11 @@ import {
   createDocumentResource,
   usePageMeta,
   createResource,
+  toast
 } from 'frappe-ui'
 import { h, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { toPairs } from 'lodash'
 
 const props = defineProps({
   customerId: {
@@ -322,11 +322,7 @@ async function updateField(fieldname, value) {
   await customer.setValue.submit({
     [fieldname]: value,
   })
-  createToast({
-    title: __('Customer updated'),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__('Customer updated'))
 }
 
 const breadcrumbs = computed(() => {
@@ -393,11 +389,7 @@ function website(url) {
 
 function openWebsite() {
   if (!customer.doc.website)
-    createToast({
-      title: __('Website not found'),
-      icon: 'x',
-      iconClasses: 'text-ink-red-4',
-    })
+    toast.error(__('Website not found'))
   else window.open(customer.doc.website, '_blank')
 }
 
@@ -657,23 +649,13 @@ function addContactButtonCB() {
 }
 
 async function afterAddContact(contact) {
-  createToast({
-    title: __('Contact Linked'),
-    text: __(`Contact ${contact} linked`),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__(`Contact ${contact} Linked`))
   contacts.value = await getContactsList()
 }
 
 
 async function afterAddAddress(address) {
-  createToast({
-    title: __('Address Linked'),
-    text: __(`Address ${address} linked`),
-    icon: 'check',
-    iconClasses: 'text-ink-green-3',
-  })
+  toast.success(__(`Address ${address} Linked`))
   addresses.value = await getAddressesList()
 }
 
