@@ -17,9 +17,9 @@
       </Button>
     </template>
   </Autocomplete>
-  <NestedPopover v-else>
-    <template #target="{ open }">
-      <Button v-if="sortValues.size > 1" :label="__('Sort')">
+  <Popover placement="bottom-end" v-else>
+    <template #target="{ isOpen, togglePopover }">
+      <Button v-if="sortValues.size > 1" :label="__('Sort')" @click="togglePopover">
         <template v-if="hideLabel">
           <SortIcon class="h-4" />
         </template>
@@ -46,12 +46,12 @@
           <AscendingIcon v-if="Array.from(sortValues)[0].direction == 'asc'" class="h-4" />
           <DesendingIcon v-else class="h-4" />
         </Button>
-        <Button :label="getSortLabel()" :class="sortValues.size ? 'rounded-l-none' : ''">
+        <Button :label="getSortLabel()" :class="sortValues.size ? 'rounded-l-none' : ''" @click.stop="togglePopover">
           <template v-if="!hideLabel && !sortValues?.size" #prefix>
             <SortIcon class="h-4" />
           </template>
           <template v-if="sortValues?.size" #suffix>
-            <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4 text-ink-gray-5" />
+            <FeatherIcon :name="isOpen ? 'chevron-up' : 'chevron-down'" class="h-4 text-ink-gray-5" />
           </template>
         </Button>
       </div>
@@ -127,18 +127,17 @@
         </div>
       </div>
     </template>
-  </NestedPopover>
+  </Popover>
 </template>
 
 <script setup>
 import AscendingIcon from '@/components/Icons/AscendingIcon.vue'
 import DesendingIcon from '@/components/Icons/DesendingIcon.vue'
-import NestedPopover from '@/components/NestedPopover.vue'
 import SortIcon from '@/components/Icons/SortIcon.vue'
 import DragIcon from '@/components/Icons/DragIcon.vue'
 import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
 import { useSortable } from '@vueuse/integrations/useSortable'
-import { createResource } from 'frappe-ui'
+import { createResource, Popover } from 'frappe-ui'
 import { computed, nextTick, onMounted } from 'vue'
 
 const props = defineProps({
