@@ -252,7 +252,9 @@ jobs:
         PR_URL: ${{ github.event.pull_request.html_url }}
       run: |
         if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-          echo "message=<p>For the latest pull request merge titled <b><a href='$PR_URL'> $PR_TITLE</a></b>, the E2E automation tests have been executed on the QE environment. Below is the summary:</p>" >> $GITHUB_ENV
+          # Sanitize PR_TITLE to prevent environment variable injection
+          SANITIZED_PR_TITLE="$(echo "$PR_TITLE" | tr -d '\n' | tr -d '\r')"
+          echo "message=<p>For the latest pull request merge titled <b><a href='$PR_URL'> $SANITIZED_PR_TITLE</a></b>, the E2E automation tests have been executed on the QE environment. Below is the summary:</p>" >> $GITHUB_ENV
         else
           echo "message=<p>This is to inform you that the scheduled E2E automation tests have been executed on the QE environment. Below is the summary:</p>" >> $GITHUB_ENV
         fi
