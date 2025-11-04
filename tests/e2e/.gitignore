@@ -1,0 +1,21 @@
+# Playwright reports
+playwright-report
+test-results
+results.json
+
+#Allure reports
+allure-report
+allure-report-for-count-extraction
+allure-results
+allure-history
+
+# Authentication files
+auth/**
+
+# Dynamically generated temp files
+data/manager/tasks-to-delete.json
+test-tc-ids.json
+json-files
+
+#history
+.history
