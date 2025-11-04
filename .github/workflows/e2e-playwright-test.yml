@@ -16,7 +16,9 @@ jobs:
 
   test:
     if: |
-      (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') || success()
+      github.event_name == 'workflow_dispatch' || 
+      github.event_name == 'schedule' || 
+      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')
     runs-on: self-hosted
     container:
       image: ubuntu:24.04
@@ -43,13 +45,13 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version-file: "frontend/.nvmrc"
+        node-version: "18"
 
     - name: Cache npm modules
       uses: actions/cache@v4
       with:
-        path: /github/home/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
 
@@ -68,9 +70,9 @@ jobs:
     - name: Sanitize branch name
       shell: bash
       run: |
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          # PR → use the source branch name
-          RAW_BRANCH="${{ github.head_ref }}"
+        if [ "${{ github.event_name }}" = "pull_request_review" ]; then
+          # PR Review → use the source branch name
+          RAW_BRANCH="${{ github.event.pull_request.head.ref }}"
         else
           # workflow_dispatch or schedule → use whatever ref we were on
           RAW_BRANCH="${GITHUB_REF#refs/heads/}"
@@ -118,8 +120,8 @@ jobs:
     # Install dependencies
     - name: Install dependencies
       run: |
-        npm ci
         cd tests/e2e/
+        npm ci
         npx playwright install --with-deps
 
     - name: Setup Java
@@ -251,10 +253,10 @@ jobs:
         PR_TITLE: ${{ github.event.pull_request.title }}
         PR_URL: ${{ github.event.pull_request.html_url }}
       run: |
-        if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+        if [ "${GITHUB_EVENT_NAME}" = "pull_request_review" ]; then
           # Sanitize PR_TITLE to prevent environment variable injection
           SANITIZED_PR_TITLE="$(echo "$PR_TITLE" | tr -d '\n' | tr -d '\r')"
-          echo "message=<p>For the latest pull request merge titled <b><a href='$PR_URL'> $SANITIZED_PR_TITLE</a></b>, the E2E automation tests have been executed on the QE environment. Below is the summary:</p>" >> $GITHUB_ENV
+          echo "message=<p>For the latest pull request titled <b><a href='$PR_URL'> $SANITIZED_PR_TITLE</a></b>, the E2E automation tests have been executed on the QE environment. Below is the summary:</p>" >> $GITHUB_ENV
         else
           echo "message=<p>This is to inform you that the scheduled E2E automation tests have been executed on the QE environment. Below is the summary:</p>" >> $GITHUB_ENV
         fi
@@ -266,7 +268,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.QA_WORKFLOW_EMAIL }}
         password: ${{ secrets.QA_WORKFLOW_EMAIL_PASSWORD }}
-        subject: Test Automation Report - Next PMS
+        subject: Test Automation Report - Next CRM
         html_body: |
           <html>
             <head>
