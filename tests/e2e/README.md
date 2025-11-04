@@ -100,6 +100,7 @@ npm ci
 ```
 
 This will install:
+
 - Playwright Test
 - Playwright browsers
 - Allure Playwright reporter
@@ -225,6 +226,7 @@ npm run allure:serve
 ```
 
 This will:
+
 1. Generate the Allure report from test results
 2. Start a local web server
 3. Open the report in your default browser
@@ -259,6 +261,7 @@ The framework includes a complete CI/CD pipeline (`.github/workflows/e2e-playwri
 ### Running Tests on CI
 
 Tests automatically run when:
+
 - A PR is approved
 - Daily at the scheduled time
 - Manually triggered from GitHub Actions
@@ -276,33 +279,36 @@ Tests automatically run when:
 ### 2. Stable Locators
 
 Prefer stable locators:
+
 ```javascript
 // Good - Data attributes
-page.locator('[data-testid="create-button"]')
+page.locator('[data-testid="create-button"]');
 
 // Good - Role-based
-page.getByRole('button', { name: 'Create' })
+page.getByRole("button", { name: "Create" });
 
 // Avoid - CSS classes (can change)
-page.locator('.btn-primary')
+page.locator(".btn-primary");
 ```
 
 ### 3. Explicit Waits
 
 Always use explicit waits:
+
 ```javascript
 // Wait for element to be visible
-await expect(page.locator('#element')).toBeVisible();
+await expect(page.locator("#element")).toBeVisible();
 
 // Wait for specific state
-await page.waitForLoadState('networkidle');
+await page.waitForLoadState("networkidle");
 ```
 
 ### 4. Error Handling
 
 Add meaningful error messages:
+
 ```javascript
-expect(result, 'Lead should be created successfully').toBe(true);
+expect(result, "Lead should be created successfully").toBe(true);
 ```
 
 ### 5. Code Reusability
@@ -336,4 +342,5 @@ expect(result, 'Lead should be created successfully').toBe(true);
 ## Support
 
 For questions or issues:
+
 - Contact the QA team
