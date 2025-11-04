@@ -55,7 +55,7 @@ export const apiRequest = async (endpoint, options = {}, role = "admin") => {
     const text = await response.text();
     await requestContext.dispose();
     throw new Error(
-      `API request failed for ${role} and endpoint ${endpoint}: ${response.status()} ${response.statusText()}\n${text}`
+      `API request failed for ${role} and endpoint ${endpoint}: ${response.status()} ${response.statusText()}\n${text}`,
     );
   }
 
@@ -93,8 +93,7 @@ export const filterApi = async (docType, filters, role = "admin") => {
       method: "POST",
       form: formPayload,
     },
-    role
+    role,
   );
 };
 // ------------------------------------------------------------------------------------------
-

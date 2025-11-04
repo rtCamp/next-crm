@@ -91,7 +91,7 @@ function collectTests(rootDir) {
           const isSkipped = ["skip", "fixme"].includes(kind) || inSkipDesc;
 
           results.push(
-            new TestNode(path.relative(process.cwd(), filePath), titleArg.loc.start.line, fullTitle, isOnly, isSkipped)
+            new TestNode(path.relative(process.cwd(), filePath), titleArg.loc.start.line, fullTitle, isOnly, isSkipped),
           );
         },
         exit(pathNode) {

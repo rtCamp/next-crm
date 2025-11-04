@@ -25,7 +25,6 @@ const globalTeardown = async () => {
     await deleteLeadForTestCases([tcId], path.join(__dirname, "../data/json-files"));
   }
   console.log("✅ Global teardown completed: test data cleaned up.");
-
 };
 
 export default globalTeardown;

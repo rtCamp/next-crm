@@ -10,7 +10,7 @@ const SHARED_JSON_DIR = path.resolve(__dirname, "data", "json-files");
 const test = base.extend({
   // Worker-scoped fixture: generate a unique storageState per role per worker
   authState: [
-    async ({ }, use, testInfo) => {
+    async ({}, use, testInfo) => {
       const role = testInfo.project.metadata.TEST_ROLE;
       if (!role) {
         throw new Error("`metadata.TEST_ROLE` must be set on the project");
@@ -38,7 +38,7 @@ const test = base.extend({
 
   // Fixed JSON directory - same for all workers
   jsonDir: [
-    async ({ }, use) => {
+    async ({}, use) => {
       //console.log(`📁 Using shared JSON directory: ${SHARED_JSON_DIR}`);
 
       // Verify directory exists (should be created in global setup)
@@ -48,7 +48,7 @@ const test = base.extend({
       } catch {
         console.error("❌ JSON directory missing - was global setup run?");
         throw new Error(
-          "JSON directory not found. Ensure global setup has run."
+          "JSON directory not found. Ensure global setup has run.",
         );
       }
 

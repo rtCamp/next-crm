@@ -1,11 +1,10 @@
 // @ts-check
 const { defineConfig, devices } = require("@playwright/test");
 import path from "path";
-import dotenv from 'dotenv';
-
+import dotenv from "dotenv";
 
 // Load environment variables from .env in this folder
-dotenv.config({ path: './.env' });
+dotenv.config({ path: "./.env" });
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -79,6 +78,5 @@ module.exports = defineConfig({
       use: { ...devices["Desktop Chrome"] },
       metadata: { TEST_ROLE: "admin" },
     },
-
   ],
 });

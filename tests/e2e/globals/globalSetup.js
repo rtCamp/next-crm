@@ -79,7 +79,6 @@ const globalSetup = async () => {
   for (const tcId of allTCIds) {
     console.log(`➡️ Processing ${tcId}`);
     await createLeadForTestCases([tcId], jsonDir);
-
   }
 
   console.log("✅ Data generation completed for all TC IDs! Global setup done.");
