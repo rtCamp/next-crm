@@ -69,10 +69,12 @@ jobs:
 
     - name: Sanitize branch name
       shell: bash
+      env:
+        UNTRUSTED_PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         if [ "${{ github.event_name }}" = "pull_request_review" ]; then
           # PR Review → use the source branch name
-          RAW_BRANCH="${{ github.event.pull_request.head.ref }}"
+          RAW_BRANCH="$UNTRUSTED_PR_HEAD_REF"
         else
           # workflow_dispatch or schedule → use whatever ref we were on
           RAW_BRANCH="${GITHUB_REF#refs/heads/}"
@@ -81,7 +83,6 @@ jobs:
         SAFE_BRANCH="${RAW_BRANCH//\//-}"
         echo "SANITIZED_REF=${SAFE_BRANCH}" >> $GITHUB_ENV
         echo "→ Restoring/uploading history under key: ${SAFE_BRANCH}"
-
     - name: Debug—print refs
       run: |
         echo "EVENT_NAME = ${{ github.event_name }}"
