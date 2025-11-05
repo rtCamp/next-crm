@@ -1,4 +1,6 @@
 name: Next-CRM Playwright Tests
+permissions:
+  contents: read
 
 # Controls when the workflow will run
 on:
