@@ -3,7 +3,6 @@ import { createJSONFile, populateJsonStubs } from "../utils/fileUtils";
 import path from "path";
 import fs from "fs";
 import { execSync } from "child_process";
-import { create } from "domain";
 import { createLeadForTestCases } from "../helpers/leadTabHelper";
 
 const globalSetup = async () => {
