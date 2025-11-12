@@ -98,7 +98,7 @@ export class LeadsPage {
   // ------------------------------------------------------------------------------------------
   /**
    * Verify the lead details in side bar
-   * * @param {Object} tcData  Test case data containing lead details
+   * @param {Object} tcData  Test case data containing lead details
    * @returns {boolean} true if all verifications are passed
    */
   async verifyLeadDetailsInSideBar(tcData) {
