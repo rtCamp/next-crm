@@ -152,7 +152,7 @@ tests/e2e/
 ├── README.md                    # This file
 ├── package.json                 # Node.js dependencies and scripts
 ├── playwright.config.js         # Playwright test configuration
-├── playwright.fixture.cjs       # Custom fixtures (auth, test data)
+├── playwright.fixture.js        # Custom fixtures (auth, test data)
 │
 ├── auth/                        # Authentication state files
 │   ├── admin-API.json           # API-only auth state
