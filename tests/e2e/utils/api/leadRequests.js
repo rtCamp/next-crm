@@ -1,6 +1,7 @@
 import { request } from "@playwright/test";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import config from "../../playwright.config";
 
 // Load config variables
@@ -11,6 +12,8 @@ const baseURL = config.use?.baseURL;
  * Helper function to ensure storage state is loaded for respective roles.
  */
 const loadAuthState = (role) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   const filePath = path.resolve(__dirname, `../../auth/${role}-API.json`);
   if (!fs.existsSync(filePath)) {
     throw new Error(`Auth state file for ${role} not found: ${filePath}`);
@@ -20,7 +23,7 @@ const loadAuthState = (role) => {
 // ------------------------------------------------------------------------------------------
 
 /**
- * Helper function to load build the API request
+ * Helper function to build the API request
  */
 export const apiRequest = async (endpoint, options = {}, role = "admin") => {
   const authFilePath = loadAuthState(role);

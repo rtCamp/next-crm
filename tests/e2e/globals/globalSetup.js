@@ -3,7 +3,11 @@ import { createJSONFile, populateJsonStubs } from "../utils/fileUtils";
 import path from "path";
 import fs from "fs";
 import { execSync } from "child_process";
+import { fileURLToPath } from "url";
 import { createLeadForTestCases } from "../helpers/leadTabHelper";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const globalSetup = async () => {
   console.log("🚀 Starting global setup...");

@@ -1,6 +1,7 @@
 {
   "name": "e2e",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "e2e:tests": "npx playwright test --config=tests/e2e/playwright.config.js",

@@ -1,7 +1,11 @@
-const { test: base, expect, devices } = require("@playwright/test");
-const path = require("path");
-const fs = require("fs").promises;
-const { storeStorageState } = require("./helpers/storageStateHelper");
+import { test as base, expect, devices } from "@playwright/test";
+import path from "path";
+import fs from "fs/promises";
+import { fileURLToPath } from "url";
+import { storeStorageState } from "./helpers/storageStateHelper.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Define the single shared JSON directory
 const SHARED_JSON_DIR = path.resolve(__dirname, "data", "json-files");
@@ -63,4 +67,4 @@ const test = base.extend({
   },
 });
 
-module.exports = { test, expect, devices };
+export { test, expect, devices };

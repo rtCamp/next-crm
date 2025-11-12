@@ -1,4 +1,4 @@
-import { test, expect } from "../../playwright.fixture.cjs";
+import { test, expect } from "../../playwright.fixture.js";
 import { LeadsPage } from "../../pageObjects/leadsPage.js";
 import * as allure from "allure-js-commons";
 import { readJSONFile } from "../../utils/fileUtils.js";
