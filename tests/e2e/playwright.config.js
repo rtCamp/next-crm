@@ -1,0 +1,86 @@
+// @ts-check
+import { defineConfig, devices } from "@playwright/test";
+import path from "path";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from .env in this folder
+dotenv.config({ path: "./.env" });
+
+/**
+ * @see https://playwright.dev/docs/test-configuration
+ */
+export default defineConfig({
+  /* Global setup file */
+  globalSetup: "./globals/globalSetup.js",
+
+  /* Global teardown file */
+  globalTeardown: "./globals/globalTeardown.js",
+
+  /* Directory with specs */
+  testDir: "./specs",
+
+  /* Test results directory */
+  outputDir: "test-results",
+
+  /* Run tests in files in parallel */
+  fullyParallel: true,
+
+  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  forbidOnly: !!process.env.CI,
+
+  /* Retry logic for failed tests */
+  retries: process.env.CI ? 2 : 0, // Retry twice on CI, no retries locally
+
+  /* Configure the number of workers for parallel execution */
+  workers: process.env.CI ? 7 : undefined, // Use 7 workers on CI, defaults to the number of CPU cores otherwise
+
+  // Limit the number of failures on CI to save resources
+  maxFailures: process.env.CI ? 5 : undefined, // Max failures on CI = 5, no limit locally
+
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  reporter: [
+    ["html", { open: "never", outputFolder: "playwright-report" }],
+    ["json", { outputFile: "results.json" }],
+    ["list"],
+    [
+      "allure-playwright",
+      {
+        resultsDir: "allure-results",
+        detail: true,
+      },
+    ],
+  ],
+
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  use: {
+    /* Base URL to use in actions like `await page.goto('/')`. */
+    baseURL: process.env.BASE_URL,
+
+    /* Collect trace */
+    trace: "retain-on-failure",
+
+    /* Capture screenshot */
+    screenshot: "only-on-failure",
+
+    /* Record video */
+    video: "retain-on-failure",
+
+    launchOptions: {
+      slowMo: 500, // Slow down tests by 500ms
+    },
+  },
+
+  /* Configure projects for specs */
+  projects: [
+    {
+      name: "admin-chromium",
+      testDir: "./specs/admin",
+      use: { ...devices["Desktop Chrome"] },
+      metadata: { TEST_ROLE: "admin" },
+    },
+  ],
+});
