@@ -51,9 +51,7 @@ const test = base.extend({
         //console.log("✅ JSON directory exists");
       } catch {
         console.error("❌ JSON directory missing - was global setup run?");
-        throw new Error(
-          "JSON directory not found. Ensure global setup has run.",
-        );
+        throw new Error("JSON directory not found. Ensure global setup has run.");
       }
 
       await use(SHARED_JSON_DIR);

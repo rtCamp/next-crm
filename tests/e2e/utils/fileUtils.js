@@ -146,7 +146,9 @@ export const writeDataToFile = async (filePath, data, maxRetries = 5) => {
           } catch (writeErr) {
             if (writeErr.code === "EEXIST") {
               // Another worker just created it, retry with lock
-              console.warn(`⚠️ File was created by another worker, retrying with lock (attempt ${attempt}/${maxRetries})`);
+              console.warn(
+                `⚠️ File was created by another worker, retrying with lock (attempt ${attempt}/${maxRetries})`,
+              );
               continue;
             }
             throw writeErr;
