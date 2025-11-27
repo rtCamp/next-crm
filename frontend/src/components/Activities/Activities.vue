@@ -161,7 +161,14 @@
             <div class="inline-flex items-center flex-wrap gap-1.5 text-ink-gray-8 font-medium">
               <span class="font-medium">{{ activity.owner_name }}</span>
               <span class="text-ink-gray-5">{{ __(activity.data.type) }}</span>
-              <a v-if="activity.data.file_url" :href="activity.data.file_url" target="_blank">
+              <a
+                  v-if="activity.data.file_url"
+                  :href="activity.data.file_url"
+                  target="_blank"
+                  :class="{ 'truncate': !isURL(activity.data.file_url) }"
+                  class="text-blue-600 hover:underline"
+                  :style="isURL(activity.data.file_url) ? 'word-break: break-all; white-space: normal;' : ''"
+                >
                 <span>{{ activity.data.file_name }}</span>
               </a>
               <span v-else>{{ activity.data.file_name }}</span>
@@ -251,8 +258,19 @@
                     <UserAvatar :user="activity.data.old_value" size="xs" />
                     {{ getUser(activity.data.old_value).full_name }}
                   </div>
-                  <div class="truncate" v-else>
-                    {{ activity.data.old_value }}
+                  <div v-else>
+                    <a 
+                      v-if="isURL(activity.data.old_value)" 
+                      :href="activity.data.old_value" 
+                      target="_blank" 
+                      class="text-blue-600 hover:underline"
+                      style="word-break: break-all; white-space: normal;" 
+                    >
+                      {{ activity.data.old_value }} 
+                    </a>
+                    <span v-else class="truncate">
+                      {{ activity.data.old_value }}
+                    </span>
                   </div>
                 </span>
                 <span v-if="activity.to">{{ __('to') }}</span>
@@ -261,9 +279,20 @@
                     <UserAvatar :user="activity.data.value" size="xs" />
                     {{ getUser(activity.data.value).full_name }}
                   </div>
-                  <div class="truncate" v-else>
+                  <div v-else>
+                  <a 
+                    v-if="isURL(activity.data.value)" 
+                    :href="activity.data.value" 
+                    target="_blank" 
+                    class="text-blue-600 hover:underline"
+                    style="word-break: break-all; white-space: normal;" 
+                  >
+                    {{ activity.data.value }} 
+                  </a>
+                  <span v-else class="truncate">
                     {{ activity.data.value }}
-                  </div>
+                  </span>
+                </div>
                 </span>
               </div>
 
@@ -401,6 +430,15 @@ const modalRef = ref(null)
 const showFilesUploader = ref(false)
 
 const title = computed(() => props.tabs?.[tabIndex.value]?.name || 'Activity')
+
+const urlRegex = /^(https?|ftp|sftp):\/\/[^\s$.?#].[^\s]*$/i; 
+
+function isURL(text) {
+    if (!text || typeof text !== 'string') {
+        return false;
+    }
+    return urlRegex.test(text.trim());
+}
 
 const changeTabTo = (tabName) => {
   const tabNames = props.tabs?.map((tab) => tab.name?.toLowerCase())
