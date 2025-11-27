@@ -162,13 +162,13 @@
               <span class="font-medium">{{ activity.owner_name }}</span>
               <span class="text-ink-gray-5">{{ __(activity.data.type) }}</span>
               <a
-                  v-if="activity.data.file_url"
-                  :href="activity.data.file_url"
-                  target="_blank"
-                  :class="{ 'truncate': !isURL(activity.data.file_url) }"
-                  class="text-blue-600 hover:underline"
-                  :style="isURL(activity.data.file_url) ? 'word-break: break-all; white-space: normal;' : ''"
-                >
+                v-if="activity.data.file_url"
+                :href="activity.data.file_url"
+                target="_blank"
+                :class="{ truncate: !isURL(activity.data.file_url) }"
+                class="text-blue-600 hover:underline"
+                :style="isURL(activity.data.file_url) ? 'word-break: break-all; white-space: normal;' : ''"
+              >
                 <span>{{ activity.data.file_name }}</span>
               </a>
               <span v-else>{{ activity.data.file_name }}</span>
@@ -259,14 +259,14 @@
                     {{ getUser(activity.data.old_value).full_name }}
                   </div>
                   <div v-else>
-                    <a 
-                      v-if="isURL(activity.data.old_value)" 
-                      :href="activity.data.old_value" 
-                      target="_blank" 
+                    <a
+                      v-if="isURL(activity.data.old_value)"
+                      :href="activity.data.old_value"
+                      target="_blank"
                       class="text-blue-600 hover:underline"
-                      style="word-break: break-all; white-space: normal;" 
+                      style="word-break: break-all; white-space: normal"
                     >
-                      {{ activity.data.old_value }} 
+                      {{ activity.data.old_value }}
                     </a>
                     <span v-else class="truncate">
                       {{ activity.data.old_value }}
@@ -280,19 +280,19 @@
                     {{ getUser(activity.data.value).full_name }}
                   </div>
                   <div v-else>
-                  <a 
-                    v-if="isURL(activity.data.value)" 
-                    :href="activity.data.value" 
-                    target="_blank" 
-                    class="text-blue-600 hover:underline"
-                    style="word-break: break-all; white-space: normal;" 
-                  >
-                    {{ activity.data.value }} 
-                  </a>
-                  <span v-else class="truncate">
-                    {{ activity.data.value }}
-                  </span>
-                </div>
+                    <a
+                      v-if="isURL(activity.data.value)"
+                      :href="activity.data.value"
+                      target="_blank"
+                      class="text-blue-600 hover:underline"
+                      style="word-break: break-all; white-space: normal"
+                    >
+                      {{ activity.data.value }}
+                    </a>
+                    <span v-else class="truncate">
+                      {{ activity.data.value }}
+                    </span>
+                  </div>
                 </span>
               </div>
 
@@ -431,13 +431,13 @@ const showFilesUploader = ref(false)
 
 const title = computed(() => props.tabs?.[tabIndex.value]?.name || 'Activity')
 
-const urlRegex = /^(https?|ftp|sftp):\/\/[^\s$.?#].[^\s]*$/i; 
+const urlRegex = /^(https?|ftp|sftp):\/\/[^\s$.?#].[^\s]*$/i
 
 function isURL(text) {
-    if (!text || typeof text !== 'string') {
-        return false;
-    }
-    return urlRegex.test(text.trim());
+  if (!text || typeof text !== 'string') {
+    return false
+  }
+  return urlRegex.test(text.trim())
 }
 
 const changeTabTo = (tabName) => {
