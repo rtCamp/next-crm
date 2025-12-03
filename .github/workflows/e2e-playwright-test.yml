@@ -94,6 +94,7 @@ jobs:
         echo "EVENT_NAME = ${{ github.event_name }}"
         echo "GITHUB_REF = $GITHUB_REF"
         echo "SANITIZED_REF = $SANITIZED_REF"
+        echo "WORKING_DIRECTORY = $(pwd)"
 
     - name: Create local allure-history/history folder
       run: mkdir -p allure-history/history
