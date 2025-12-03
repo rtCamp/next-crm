@@ -1,5 +1,5 @@
 <template>
-  <PopoverRoot v-model:open="isOpen" @update:open="onUpdateOpen">
+  <PopoverRoot v-model:open="isOpen">
     <PopoverAnchor asChild>
       <div ref="anchorRef" :class="['flex', $attrs.class]" @mouseover="onMouseover" @mouseleave="onMouseleave">
         <slot
@@ -115,10 +115,16 @@ export default {
         return this.isShowPropPassed ? this.show : this.internalOpen
       },
       set(value) {
+        const nextValue = Boolean(value)
+        const currentValue = this.isShowPropPassed ? this.show : this.internalOpen
+        const changed = currentValue !== nextValue
         if (!this.isShowPropPassed) {
-          this.internalOpen = value
+          this.internalOpen = nextValue
         }
-        this.$emit('update:show', value)
+        if (changed) {
+          this.$emit('update:show', nextValue)
+          this.$emit(nextValue ? 'open' : 'close')
+        }
       },
     },
     placementSide() {
@@ -157,14 +163,6 @@ export default {
     },
     close() {
       this.isOpen = false
-    },
-    onUpdateOpen(value) {
-      this.$emit('update:show', value)
-      if (value) {
-        this.$emit('open')
-      } else {
-        this.$emit('close')
-      }
     },
     onMouseover() {
       this.pointerOverTargetOrPopup = true

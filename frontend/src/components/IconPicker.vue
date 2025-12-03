@@ -15,7 +15,7 @@
           class="size-5 cursor-pointer rounded-full bg-surface-transparent text-xl"
           v-for="r in reactionEmojis"
           :key="r"
-          @click.stop="selectEmoji(r, togglePopover)"
+          @click.stop="handleEmojiSelect(r, togglePopover)"
         >
           <button>
             {{ r }}
@@ -43,7 +43,7 @@
                 class="h-8 w-8 rounded-md p-1 text-2xl hover:bg-surface-gray-2 focus:outline-none focus:ring focus:ring-blue-200"
                 v-for="_emoji in emojis"
                 :key="_emoji.description"
-                @click.stop="selectEmoji(_emoji.emoji, togglePopover)"
+                @click.stop="handleEmojiSelect(_emoji.emoji, togglePopover)"
                 :title="_emoji.description"
               >
                 {{ _emoji.emoji }}
@@ -66,7 +66,7 @@ const reaction = defineModel('reaction')
 
 const reactionEmojis = ref(['👍', '❤️', '😂', '😮', '😢', '🙏'])
 
-function selectEmoji(value, toggle) {
+function handleEmojiSelect(value, toggle) {
   emoji.value = value
   toggle()
 }
