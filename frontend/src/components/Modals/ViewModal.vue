@@ -18,12 +18,12 @@
       </div>
       <div class="flex gap-2">
         <IconPicker v-model="view.icon" v-slot="{ togglePopover }">
-          <Button
-            size="md"
-            class="flex size-8 text-2xl leading-none"
-            :label="view.icon"
+          <button
+            class="flex size-8 items-center justify-center rounded bg-surface-gray-2 text-2xl leading-none text-ink-gray-8 transition-colors hover:bg-surface-gray-3 active:bg-surface-gray-4 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
             @click="togglePopover"
-          />
+          >
+            {{ view.icon }}
+          </button>
         </IconPicker>
         <FormControl
           class="flex-1"
