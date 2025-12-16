@@ -691,7 +691,11 @@ def get_available_kanban_column_options(doctype, column_field):
         )
 
     if field_meta.fieldtype == "Select" and field_meta.options:
-        return [{"name": option} for option in field_meta.options.split("\n")]
+        return [
+            {"name": option}
+            for option in (opt.strip() for opt in field_meta.options.split("\n"))
+            if option
+        ]
 
     return []
 
@@ -715,15 +719,16 @@ def merge_kanban_columns_with_available_options(persisted_columns, available_col
 
     for column in persisted_columns:
         name = column.get("name")
-        if not name or (available_map and name not in available_map):
+        if not name or name not in available_map:
             continue
 
+        # Make a shallow copy to avoid mutating the input
+        column_copy = column.copy()
         template = available_map.get(name, {})
         for key in ("color", "position"):
-            if template.get(key) and not column.get(key):
-                column[key] = template.get(key)
-
-        merged_columns.append(column)
+            if template.get(key) and not column_copy.get(key):
+                column_copy[key] = template.get(key)
+        merged_columns.append(column_copy)
         seen_names.add(name)
 
     for option in available_columns:
