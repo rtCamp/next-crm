@@ -169,9 +169,9 @@
                 class="text-blue-600 hover:underline"
                 :style="isURL(activity.data.file_url) ? 'word-break: break-all; white-space: normal;' : ''"
               >
-                <span>{{ activity.data.file_name }}</span>
+                <span>{{ activity.data.file_url }}</span>
               </a>
-              <span v-else>{{ activity.data.file_name }}</span>
+              <span v-else>{{ activity.data.file_url }}</span>
               <FeatherIcon v-if="activity.data.is_private" name="lock" class="size-3" />
             </div>
             <div class="ml-auto whitespace-nowrap">
