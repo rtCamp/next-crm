@@ -1,4 +1,6 @@
 name: Generate Semantic Release
+permissions:
+  contents: read
 on:
   workflow_dispatch:
   push:
