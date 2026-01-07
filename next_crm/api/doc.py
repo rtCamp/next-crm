@@ -411,18 +411,18 @@ def get_data(
         if not rows:
             rows = default_rows
 
-        if not kanban_columns and column_field:
-            field_meta = frappe.get_meta(doctype).get_field(column_field)
-            if field_meta.fieldtype == "Link":
-                kanban_columns = frappe.get_all(
-                    field_meta.options,
-                    fields=["name"],
-                    order_by="modified asc",
-                )
-            elif field_meta.fieldtype == "Select":
-                kanban_columns = [
-                    {"name": option} for option in field_meta.options.split("\n")
-                ]
+        available_columns = []
+        if column_field:
+            available_columns = get_available_kanban_column_options(
+                doctype, column_field
+            )
+
+        if not kanban_columns:
+            kanban_columns = available_columns
+        elif available_columns:
+            kanban_columns = merge_kanban_columns_with_available_options(
+                kanban_columns, available_columns
+            )
 
         if not title_field:
             title_field = "name"
@@ -664,6 +664,96 @@ def get_records_based_on_order(doctype, rows, filters, page_length, order):
             records.append(record)
 
     return records
+
+
+def get_available_kanban_column_options(doctype, column_field):
+    if not column_field:
+        return []
+
+    field_meta = frappe.get_meta(doctype).get_field(column_field)
+    if not field_meta:
+        return []
+
+    if field_meta.fieldtype == "Link" and field_meta.options:
+        optional_fields = ["color", "position"]
+        column_fields = ["name"]
+        has_position = False
+
+        for field in optional_fields:
+            if frappe.db.has_column(field_meta.options, field):
+                column_fields.append(field)
+                if field == "position":
+                    has_position = True
+
+        order_by = "position asc" if has_position else "modified asc"
+        return frappe.get_all(
+            field_meta.options, fields=column_fields, order_by=order_by
+        )
+
+    if field_meta.fieldtype == "Select" and field_meta.options:
+        return [
+            {"name": option}
+            for option in (opt.strip() for opt in field_meta.options.split("\n"))
+            if option
+        ]
+
+    return []
+
+
+def merge_kanban_columns_with_available_options(persisted_columns, available_columns):
+    if not available_columns:
+        return persisted_columns
+
+    available_map = {
+        column.get("name"): column for column in available_columns if column.get("name")
+    }
+
+    persisted_index = {
+        column.get("name"): index
+        for index, column in enumerate(persisted_columns)
+        if column.get("name")
+    }
+
+    merged_columns = []
+    seen_names = set()
+
+    for column in persisted_columns:
+        name = column.get("name")
+        if not name or name not in available_map:
+            continue
+
+        # Make a shallow copy to avoid mutating the input
+        column_copy = column.copy()
+        template = available_map.get(name, {})
+        for key in ("color", "position"):
+            if template.get(key) and not column_copy.get(key):
+                column_copy[key] = template.get(key)
+        merged_columns.append(column_copy)
+        seen_names.add(name)
+
+    for option in available_columns:
+        name = option.get("name")
+        if not name or name in seen_names:
+            continue
+
+        new_column = {"name": name}
+        for key in ("color", "position"):
+            if option.get(key):
+                new_column[key] = option.get(key)
+
+        merged_columns.append(new_column)
+
+    def sort_key(column):
+        name = column.get("name")
+        option = available_map.get(name, {})
+        position = option.get("position")
+        if position is not None:
+            return (0, position)
+        return (1, persisted_index.get(name, len(persisted_index)))
+
+    merged_columns.sort(key=sort_key)
+
+    return merged_columns
 
 
 @frappe.whitelist()

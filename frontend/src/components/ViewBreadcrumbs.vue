@@ -9,19 +9,12 @@
     <span class="mx-0.5 text-base text-ink-gray-4" aria-hidden="true"> / </span>
     <Dropdown v-if="viewControls" :options="viewControls.viewsDropdownOptions">
       <template #default="{ open }">
-        <Button
-          variant="ghost"
-          class="text-lg font-medium text-nowrap"
-          :label="__(viewControls.currentView.label)"
-        >
+        <Button variant="ghost" class="text-lg font-medium text-nowrap" :label="__(viewControls.currentView.label)">
           <template #prefix>
             <Icon :icon="viewControls.currentView.icon" class="h-4" />
           </template>
           <template #suffix>
-            <FeatherIcon
-              :name="open ? 'chevron-up' : 'chevron-down'"
-              class="h-4 text-ink-gray-8"
-            />
+            <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4 text-ink-gray-8" />
           </template>
         </Button>
       </template>
@@ -38,38 +31,25 @@
               class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-7"
               aria-hidden="true"
             />
-            <component
-              class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-7"
-              v-else-if="item.icon"
-              :is="item.icon"
-            />
+            <component class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-7" v-else-if="item.icon" :is="item.icon" />
             <span class="whitespace-nowrap">
               {{ item.label }}
             </span>
           </div>
-          <div
-            v-if="item.name"
-            class="flex flex-row-reverse gap-2 items-center min-w-11"
-          >
+          <div v-if="item.name" class="flex flex-row-reverse gap-2 items-center min-w-11">
             <Dropdown
-              :class="active ? 'block' : 'hidden'"
+              :class="[
+                active ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+                'transition-opacity duration-100',
+              ]"
               placement="right-start"
               :options="viewControls.viewActions(item)"
             >
               <template #default="{ togglePopover }">
-                <Button
-                  variant="ghost"
-                  class="!size-5"
-                  icon="more-horizontal"
-                  @click.stop="togglePopover()"
-                />
+                <Button variant="ghost" class="!size-5" icon="more-horizontal" @click.stop="togglePopover()" />
               </template>
             </Dropdown>
-            <FeatherIcon
-              v-if="isCurrentView(item)"
-              name="check"
-              class="size-4 text-ink-gray-7"
-            />
+            <FeatherIcon v-if="isCurrentView(item)" name="check" class="size-4 text-ink-gray-7" />
           </div>
         </button>
       </template>

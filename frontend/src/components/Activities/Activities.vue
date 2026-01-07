@@ -161,10 +161,17 @@
             <div class="inline-flex items-center flex-wrap gap-1.5 text-ink-gray-8 font-medium">
               <span class="font-medium">{{ activity.owner_name }}</span>
               <span class="text-ink-gray-5">{{ __(activity.data.type) }}</span>
-              <a v-if="activity.data.file_url" :href="activity.data.file_url" target="_blank">
-                <span>{{ activity.data.file_name }}</span>
+              <a
+                v-if="activity.data.file_url"
+                :href="activity.data.file_url"
+                target="_blank"
+                :class="{ truncate: !isURL(activity.data.file_url) }"
+                class="text-blue-600 hover:underline"
+                :style="isURL(activity.data.file_url) ? 'word-break: break-all; white-space: normal;' : ''"
+              >
+                <span>{{ activity.data.file_url }}</span>
               </a>
-              <span v-else>{{ activity.data.file_name }}</span>
+              <span v-else>{{ activity.data.file_url }}</span>
               <FeatherIcon v-if="activity.data.is_private" name="lock" class="size-3" />
             </div>
             <div class="ml-auto whitespace-nowrap">
@@ -199,10 +206,26 @@
               <span class="font-medium text-ink-gray-8">
                 {{ activity.owner_name }}
               </span>
-              <span v-if="activity.type">{{ __(activity.type) }}</span>
-              <span v-if="activity.data.field_label" class="max-w-xs truncate font-medium text-ink-gray-8">
+              <a
+                v-if="activity.data.field_label && isURL(activity.data.old_value)"
+                :href="activity.data.old_value"
+                target="_blank"
+                class="max-w-xs truncate text-blue-600 hover:underline"
+              >
+                {{ __(activity.data.field_label) }}
+              </a>
+              <span v-else-if="activity.data.field_label" class="max-w-xs truncate text-ink-gray-5">
                 {{ __(activity.data.field_label) }}
               </span>
+              <a
+                v-if="activity.type && isURL(activity.data.value)"
+                :href="activity.data.value"
+                target="_blank"
+                class="text-blue-600 hover:underline"
+              >
+                {{ __(activity.type) }}
+              </a>
+              <span v-else-if="activity.type">{{ __(activity.type) }}</span>
               <span v-if="activity.value">{{ __(activity.value) }}</span>
               <span v-if="activity.data.old_value" class="max-w-xs font-medium text-ink-gray-8">
                 <div class="flex items-center gap-1" v-if="activity.options == 'User'">
@@ -210,17 +233,25 @@
                   {{ getUser(activity.data.old_value).full_name }}
                 </div>
                 <div class="truncate" v-else>
-                  {{ activity.data.old_value }}
+                  <span v-if="!isURL(activity.data.old_value)">
+                    {{ activity.data.old_value }}
+                  </span>
                 </div>
               </span>
-              <span v-if="activity.to">{{ __('to') }}</span>
+              <span v-if="activity.to">
+                <span v-if="!isURL(activity.data.value)">
+                  {{ __('to') }}
+                </span>
+              </span>
               <span v-if="activity.data.value" class="max-w-xs font-medium text-ink-gray-8">
                 <div class="flex items-center gap-1" v-if="activity.options == 'User'">
                   <UserAvatar :user="activity.data.value" size="xs" />
                   {{ getUser(activity.data.value).full_name }}
                 </div>
                 <div class="truncate" v-else>
-                  {{ activity.data.value }}
+                  <span v-if="!isURL(activity.data.value)">
+                    {{ activity.data.value }}
+                  </span>
                 </div>
               </span>
             </div>
@@ -239,11 +270,28 @@
               class="flex items-start justify-stretch gap-2 py-1.5 text-base"
             >
               <div class="inline-flex flex-wrap gap-1 text-ink-gray-5">
-                <span v-if="activity.data.field_label" class="max-w-xs truncate text-ink-gray-5">
+                <a
+                  v-if="activity.data.field_label && isURL(activity.data.old_value)"
+                  :href="activity.data.old_value"
+                  target="_blank"
+                  class="max-w-xs truncate text-blue-600 hover:underline"
+                  :style="{ 'word-break': 'break-all', 'white-space': 'normal' }"
+                >
+                  {{ __(activity.data.field_label) }}
+                </a>
+                <span v-else-if="activity.data.field_label" class="max-w-xs truncate text-ink-gray-5">
                   {{ __(activity.data.field_label) }}
                 </span>
                 <FeatherIcon name="arrow-right" class="mx-1 h-4 w-4 text-ink-gray-5" />
-                <span v-if="activity.type">
+                <a
+                  v-if="activity.type && isURL(activity.data.value)"
+                  :href="activity.data.value"
+                  target="_blank"
+                  class="text-blue-600 hover:underline"
+                >
+                  {{ startCase(__(activity.type)) }}
+                </a>
+                <span v-else-if="activity.type">
                   {{ startCase(__(activity.type)) }}
                 </span>
                 <span v-if="activity.data.old_value" class="max-w-xs font-medium text-ink-gray-8">
@@ -252,17 +300,25 @@
                     {{ getUser(activity.data.old_value).full_name }}
                   </div>
                   <div class="truncate" v-else>
-                    {{ activity.data.old_value }}
+                    <span v-if="!isURL(activity.data.old_value)">
+                      {{ activity.data.old_value }}
+                    </span>
                   </div>
                 </span>
-                <span v-if="activity.to">{{ __('to') }}</span>
+                <span v-if="activity.to">
+                  <span v-if="!isURL(activity.data.value)">
+                    {{ __('to') }}
+                  </span>
+                </span>
                 <span v-if="activity.data.value" class="max-w-xs font-medium text-ink-gray-8">
                   <div class="flex items-center gap-1" v-if="activity.options == 'User'">
                     <UserAvatar :user="activity.data.value" size="xs" />
                     {{ getUser(activity.data.value).full_name }}
                   </div>
                   <div class="truncate" v-else>
-                    {{ activity.data.value }}
+                    <span v-if="!isURL(activity.data.value)">
+                      {{ activity.data.value }}
+                    </span>
                   </div>
                 </span>
               </div>
@@ -401,6 +457,14 @@ const modalRef = ref(null)
 const showFilesUploader = ref(false)
 
 const title = computed(() => props.tabs?.[tabIndex.value]?.name || 'Activity')
+
+const urlRegex = /^(https?|ftp|sftp):\/\/[^\s$.?#].[^\s]*$/i
+function isURL(text) {
+  if (!text || typeof text !== 'string') {
+    return false
+  }
+  return urlRegex.test(text.trim())
+}
 
 const changeTabTo = (tabName) => {
   const tabNames = props.tabs?.map((tab) => tab.name?.toLowerCase())

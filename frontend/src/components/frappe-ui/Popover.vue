@@ -1,54 +1,64 @@
 <template>
-  <div ref="reference">
-    <div
-      ref="target"
-      :class="['flex', $attrs.class]"
-      @click="updatePosition"
-      @focusin="updatePosition"
-      @keydown="updatePosition"
-      @mouseover="onMouseover"
-      @mouseleave="onMouseleave"
-    >
-      <slot name="target" v-bind="{ togglePopover, updatePosition, open, close, isOpen }" />
-    </div>
-    <teleport to="#frappeui-popper-root">
-      <div
-        ref="popover"
-        class="relative z-[100]"
-        :class="[popoverContainerClass, popoverClass]"
-        :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
+  <PopoverRoot v-model:open="isOpen">
+    <PopoverAnchor asChild>
+      <div ref="anchorRef" :class="['flex', $attrs.class]" @mouseover="onMouseover" @mouseleave="onMouseleave">
+        <slot
+          name="target"
+          v-bind="{
+            togglePopover,
+            updatePosition,
+            open,
+            close,
+            isOpen,
+          }"
+        />
+      </div>
+    </PopoverAnchor>
+    <PopoverPortal>
+      <PopoverContent
+        :side="placementSide"
+        :align="placementAlign"
+        :style="{
+          minWidth: matchTargetWidth ? 'var(--reka-popover-trigger-width)' : undefined,
+        }"
+        :class="['PopoverContent', { 'has-transition': hasTransition }]"
         @mouseover="pointerOverTargetOrPopup = true"
         @mouseleave="onMouseleave"
+        @interact-outside="onInteractOutside"
       >
-        <transition v-bind="popupTransition">
-          <div v-show="isOpen">
-            <slot name="body" v-bind="{ togglePopover, updatePosition, open, close, isOpen }">
-              <div class="rounded-lg border border-gray-100 bg-surface-white shadow-xl">
-                <slot
-                  name="body-main"
-                  v-bind="{
-                    togglePopover,
-                    updatePosition,
-                    open,
-                    close,
-                    isOpen,
-                  }"
-                />
-              </div>
-            </slot>
-          </div>
-        </transition>
-      </div>
-    </teleport>
-  </div>
+        <div class="relative" :class="['body-container', popoverClass]">
+          <slot name="body" v-bind="{ togglePopover, updatePosition, open, close, isOpen }">
+            <div class="rounded-lg border bg-surface-modal shadow-xl">
+              <slot
+                name="body-main"
+                v-bind="{
+                  togglePopover,
+                  updatePosition,
+                  open,
+                  close,
+                  isOpen,
+                }"
+              />
+            </div>
+          </slot>
+        </div>
+      </PopoverContent>
+    </PopoverPortal>
+  </PopoverRoot>
 </template>
 
 <script>
-import { createPopper } from '@popperjs/core'
+import { PopoverAnchor, PopoverContent, PopoverPortal, PopoverRoot } from 'reka-ui'
 
 export default {
   name: 'Popover',
   inheritAttrs: false,
+  components: {
+    PopoverAnchor,
+    PopoverContent,
+    PopoverPortal,
+    PopoverRoot,
+  },
   props: {
     show: {
       default: undefined,
@@ -63,147 +73,77 @@ export default {
     },
     leaveDelay: {
       type: Number,
-      default: 0,
+      default: 0.5,
     },
     placement: {
       type: String,
       default: 'bottom-start',
     },
-    popoverClass: [String, Object, Array],
+    popoverClass: {
+      type: [String, Object, Array],
+      default: '',
+    },
     transition: {
-      default: null,
+      type: String,
+      default: null, // 'default' or null
     },
     hideOnBlur: {
+      type: Boolean,
       default: true,
+    },
+    matchTargetWidth: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['open', 'close', 'update:show'],
   expose: ['open', 'close'],
   data() {
     return {
-      popoverContainerClass: 'body-container',
-      showPopup: false,
-      targetWidth: null,
+      internalOpen: false,
       pointerOverTargetOrPopup: false,
+      hoverTimer: null,
+      leaveTimer: null,
     }
-  },
-  watch: {
-    show(val) {
-      if (val) {
-        this.open()
-      } else {
-        this.close()
-      }
-    },
-  },
-  created() {
-    if (typeof window === 'undefined') return
-    if (!document.getElementById('frappeui-popper-root')) {
-      const root = document.createElement('div')
-      root.id = 'frappeui-popper-root'
-      document.body.appendChild(root)
-    }
-  },
-  mounted() {
-    this.listener = (e) => {
-      const clickedElement = e.target
-      const reference = this.$refs.reference
-      const popoverBody = this.$refs.popover
-      const insideClick =
-        clickedElement === reference ||
-        clickedElement === popoverBody ||
-        reference?.contains(clickedElement) ||
-        popoverBody?.contains(clickedElement)
-      if (insideClick) {
-        return
-      }
-
-      const root = document.getElementById('frappeui-popper-root')
-      const insidePopoverRoot = root.contains(clickedElement)
-      if (!insidePopoverRoot) {
-        return this.close()
-      }
-
-      const bodyClass = `.${this.popoverContainerClass}`
-      const clickedElementBody = clickedElement?.closest(bodyClass)
-      const currentPopoverBody = reference?.closest(bodyClass)
-      const isSiblingClicked = clickedElementBody && currentPopoverBody && clickedElementBody === currentPopoverBody
-
-      if (isSiblingClicked) {
-        this.close()
-      }
-    }
-    if (this.hideOnBlur) {
-      document.addEventListener('click', this.listener)
-      document.addEventListener('mousedown', this.listener)
-    }
-    this.$nextTick(() => {
-      this.targetWidth = this.$refs['target'].clientWidth
-    })
-  },
-  beforeDestroy() {
-    this.popper && this.popper.destroy()
-    document.removeEventListener('click', this.listener)
-    document.removeEventListener('mousedown', this.listener)
   },
   computed: {
-    showPropPassed() {
-      return this.show != null
+    isShowPropPassed() {
+      return this.show !== undefined
     },
     isOpen: {
       get() {
-        if (this.showPropPassed) {
-          return this.show
-        }
-        return this.showPopup
+        return this.isShowPropPassed ? this.show : this.internalOpen
       },
-      set(val) {
-        val = Boolean(val)
-        if (this.showPropPassed) {
-          this.$emit('update:show', val)
-        } else {
-          this.showPopup = val
+      set(value) {
+        const nextValue = Boolean(value)
+        const currentValue = this.isShowPropPassed ? this.show : this.internalOpen
+        const changed = currentValue !== nextValue
+        if (!this.isShowPropPassed) {
+          this.internalOpen = nextValue
         }
-        if (val === false) {
-          this.$emit('close')
-        } else if (val === true) {
-          this.$emit('open')
+        if (changed) {
+          this.$emit('update:show', nextValue)
+          this.$emit(nextValue ? 'open' : 'close')
         }
       },
     },
-    popupTransition() {
-      let templates = {
-        default: {
-          enterActiveClass: 'transition duration-150 ease-out',
-          enterFromClass: 'translate-y-1 opacity-0',
-          enterToClass: 'translate-y-0 opacity-100',
-          leaveActiveClass: 'transition duration-150 ease-in',
-          leaveFromClass: 'translate-y-0 opacity-100',
-          leaveToClass: 'translate-y-1 opacity-0',
-        },
-      }
-      if (typeof this.transition === 'string') {
-        return templates[this.transition]
-      }
-      return this.transition
+    placementSide() {
+      const [side] = this.placement.split('-')
+      return side
+    },
+    placementAlign() {
+      const [, align] = this.placement.split('-')
+      if (!align) return 'center'
+      return align
+    },
+    hasTransition() {
+      return this.transition === 'default'
     },
   },
   methods: {
-    setupPopper() {
-      if (!this.popper) {
-        this.popper = createPopper(this.$refs.reference, this.$refs.popover, {
-          placement: this.placement,
-        })
-      } else {
-        this.updatePosition()
-      }
-    },
-    updatePosition() {
-      this.popper && this.popper.update()
-    },
     togglePopover(flag) {
       if (flag instanceof Event) {
-        flag = null
+        flag = undefined
       }
       if (flag == null) {
         flag = !this.isOpen
@@ -215,9 +155,11 @@ export default {
         this.close()
       }
     },
+    updatePosition() {
+      // Positioning is handled internally by reka-ui
+    },
     open() {
       this.isOpen = true
-      this.$nextTick(() => this.setupPopper())
     },
     close() {
       this.isOpen = false
@@ -243,7 +185,7 @@ export default {
         }
       }
     },
-    onMouseleave(e) {
+    onMouseleave() {
       this.pointerOverTargetOrPopup = false
       if (this.hoverTimer) {
         clearTimeout(this.hoverTimer)
@@ -262,13 +204,31 @@ export default {
             },
             Number(this.leaveDelay) * 1000,
           )
-        } else {
-          if (!this.pointerOverTargetOrPopup) {
-            this.close()
-          }
+        } else if (!this.pointerOverTargetOrPopup) {
+          this.close()
         }
       }
     },
+    onInteractOutside(event) {
+      if (!this.hideOnBlur) {
+        event.preventDefault()
+        return
+      }
+
+      const target = event.target
+      const anchor = this.$refs.anchorRef
+      if (anchor && (anchor.contains(target) || anchor === target)) {
+        event.preventDefault()
+      }
+    },
+  },
+  beforeUnmount() {
+    if (this.hoverTimer) {
+      clearTimeout(this.hoverTimer)
+    }
+    if (this.leaveTimer) {
+      clearTimeout(this.leaveTimer)
+    }
   },
 }
 </script>
