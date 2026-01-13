@@ -222,13 +222,11 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
     
     # Batch fetch all attachments for all notes at once
     note_names = [n.name for n in all_notes]
-    all_attachments = []
-    if note_names:
-        all_attachments = frappe.get_all(
-            "NCRM Attachments",
-            filters={"parent": ["in", note_names], "parenttype": "CRM Note"},
-            fields=["parent", "filename"],
-        )
+    all_attachments = frappe.get_all(
+        "NCRM Attachments",
+        filters={"parent": ["in", note_names], "parenttype": "CRM Note"},
+        fields=["parent", "filename"],
+    )
     
     # Group attachments by parent note
     attachments_by_note = defaultdict(list)
