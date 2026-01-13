@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.desk.doctype.notification_log.notification_log import (
@@ -207,15 +209,16 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
         order_by="creation asc",
     )
     
+    # Early return if no notes to copy
     if not all_notes:
         return
     
     # Separate parent notes from child notes
     parent_notes = [n for n in all_notes if not n.custom_parent_note]
-    child_notes_by_parent = {}
+    child_notes_by_parent = defaultdict(list)
     for n in all_notes:
         if n.custom_parent_note:
-            child_notes_by_parent.setdefault(n.custom_parent_note, []).append(n)
+            child_notes_by_parent[n.custom_parent_note].append(n)
     
     # Batch fetch all attachments for all notes at once
     note_names = [n.name for n in all_notes]
@@ -226,9 +229,9 @@ def copy_crm_notes_to_opportunity(lead, opportunity):
     )
     
     # Group attachments by parent note
-    attachments_by_note = {}
+    attachments_by_note = defaultdict(list)
     for att in all_attachments:
-        attachments_by_note.setdefault(att.parent, []).append(att.filename)
+        attachments_by_note[att.parent].append(att.filename)
     
     # Process parent notes with pre-fetched data
     for note in parent_notes:
