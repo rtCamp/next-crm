@@ -694,9 +694,9 @@ def delete_attachment(filename, doctype=None, docname=None):
         )
 
         if attachment_refs:
-            # Delete the attachment references directly from child table
-            for ref in attachment_refs:
-                frappe.db.delete("NCRM Attachments", {"name": ref["name"]})
+            # Delete the attachment references directly from child table using batch operation
+            attachment_ids = [ref["name"] for ref in attachment_refs]
+            frappe.db.delete("NCRM Attachments", {"name": ("in", attachment_ids)})
             deleted = True
 
     try:
