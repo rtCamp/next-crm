@@ -563,12 +563,12 @@ def get_linked_todos(name):
     if not todos:
         return []
 
-    # Collect all linked event names
-    event_names = [
+    # Collect all unique linked event names
+    event_names = list({
         todo["custom_linked_event"]
         for todo in todos
         if todo.get("custom_linked_event")
-    ]
+    })
 
     # Batch fetch events
     events_map = {}
@@ -638,7 +638,7 @@ def get_linked_events(name):
         return []
 
     # Batch fetch all event participants
-    event_names = [event.name for event in events]
+    event_names = list({event.name for event in events})
     participants_map = {}
     if event_names:
         all_participants = frappe.db.get_all(
