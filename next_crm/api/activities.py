@@ -405,7 +405,18 @@ def get_attachments(doctype, name):
 
 
 def get_attachments_batch(doctype, names):
-    """Batch fetch attachments for multiple documents"""
+    """Batch fetch attachments for multiple documents.
+
+    Args:
+        doctype (str): The DocType to which attachments are linked (e.g., "Comment", "Communication")
+        names (list): List of document names to fetch attachments for
+
+    Returns:
+        dict: Dictionary mapping document names to their attachments.
+              Each value is a list of attachment dicts with fields: name, file_name,
+              file_type, file_url, file_size, is_private, creation, owner.
+              Returns empty dict if names list is empty.
+    """
     if not names:
         return {}
 
@@ -432,11 +443,9 @@ def get_attachments_batch(doctype, names):
     result = {}
     for att in attachments:
         key = att["attached_to_name"]
-        if key not in result:
-            result[key] = []
         # Remove attached_to_name from the attachment dict since it's redundant
         att_copy = {k: v for k, v in att.items() if k != "attached_to_name"}
-        result[key].append(att_copy)
+        result.setdefault(key, []).append(att_copy)
 
     return result
 
