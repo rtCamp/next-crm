@@ -700,11 +700,11 @@ def delete_attachment(filename, doctype=None, docname=None):
                 pluck="name",
             )
 
-            for note_name in notes_to_update:
-                # Delete the attachment row directly
+            if notes_to_update:
+                # Delete all matching attachment rows in a single operation
                 frappe.db.delete(
                     "NCRM Attachments",
-                    {"parent": note_name, "filename": filename}
+                    {"parent": ["in", notes_to_update], "filename": filename}
                 )
                 deleted = True
 
