@@ -166,6 +166,7 @@ def delete_note(note_name):
         raise frappe.ValidationError(_("Note not found."))
 
     note_names_to_delete = [note_name]
+    child_notes = []
 
     parent_note = note.custom_parent_note
     if not parent_note:
@@ -188,13 +189,19 @@ def delete_note(note_name):
     # Bulk delete notifications
     frappe.db.delete("CRM Notification", {"notification_type_doc": ["in", note_names_to_delete]})
 
-    # Delete notes (using delete_doc to ensure proper hooks are called)
-    for note_name_to_del in note_names_to_delete:
-        frappe.delete_doc("CRM Note", note_name_to_del, ignore_permissions=True)
+    # Delete child notes first (using delete_doc to ensure proper hooks are called)
+    for child_note_name in child_notes:
+        frappe.delete_doc("CRM Note", child_note_name)
 
-    # Bulk delete files
-    if all_attachments:
-        frappe.db.delete("File", {"name": ["in", all_attachments]})
+    # Delete the parent note
+    note.delete()
+
+    # Delete files (loop needed to properly handle file cleanup and missing files)
+    for filename in all_attachments:
+        try:
+            frappe.delete_doc("File", filename)
+        except frappe.DoesNotExistError:
+            pass
 
     return True
 
